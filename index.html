@@ -1,0 +1,747 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Store All Barbados — Management Dashboard</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@500;600;700;800&family=Source+Sans+3:wght@400;500;600;700&display=swap" rel="stylesheet">
+<style>
+:root{
+  /* Cave Shepherd-inspired language: clean corporate blues, bright aqua trim, white retail-card surfaces */
+  --navy:#004b8d; --navy2:#003965; --ink:#1d2733; --paper:#f6fbfd; --paper2:#e7f0f5;
+  --accent:#00a9c7; --accent2:#7fd3df; --teal:#008b9b; --line:#d5e3ea;
+  --good:#2f7d5b; --warn:#b88620; --bad:#b5453a; --muted:#667784;
+  --card:#ffffff;
+}
+*{box-sizing:border-box;margin:0;padding:0}
+body{font-family:'Source Sans 3',Arial,sans-serif;background:var(--paper);color:var(--ink);
+  background-image:radial-gradient(circle at 14% 6%,rgba(0,169,199,.08),transparent 34%),radial-gradient(circle at 92% 0%,rgba(0,75,141,.07),transparent 34%);
+  -webkit-font-smoothing:antialiased;line-height:1.5}
+.wrap{max-width:1180px;margin:0 auto;padding:0 28px}
+
+/* ---- header ---- */
+header{background:linear-gradient(135deg,var(--navy2) 0%,var(--navy) 58%,#006fae 100%);color:#fff;padding:34px 0 74px;position:relative;overflow:hidden}
+header::before{content:"";position:absolute;left:0;right:0;top:0;height:5px;background:linear-gradient(90deg,var(--accent),#ffffff66,var(--accent2))}
+header::after{content:"";position:absolute;inset:0;background-image:linear-gradient(135deg,transparent 62%,rgba(127,211,223,.18) 100%);pointer-events:none}
+.eyebrow{font-family:'Montserrat';text-transform:uppercase;letter-spacing:.24em;font-size:11px;color:#aee9f0;font-weight:700}
+header h1{font-family:'Montserrat';font-weight:800;font-size:39px;line-height:1.04;letter-spacing:-.025em;margin:8px 0 5px}
+header h1 em{font-style:normal;font-weight:500;color:#dff8fb}
+.sub{font-size:15px;color:#d6e8f2;max-width:650px}
+.metabar{display:flex;flex-wrap:wrap;gap:26px;margin-top:22px;padding-top:18px;border-top:1px solid rgba(255,255,255,.18)}
+.metabar div{font-size:13px;color:#c8dbe7}
+.metabar b{display:block;font-family:'Montserrat';font-size:16px;color:#fff;font-weight:700;margin-top:2px}
+.tabbar{display:flex;gap:6px;margin-top:24px;flex-wrap:wrap;position:relative;z-index:4}
+.tab{font-family:'Montserrat';font-weight:700;letter-spacing:.02em;font-size:13px;color:#c8dbe7;
+  background:rgba(255,255,255,.08);border:1px solid rgba(255,255,255,.16);border-radius:9px 9px 0 0;
+  padding:11px 20px 13px;cursor:pointer;transition:all .15s;margin-bottom:-1px}
+.tab:hover{color:#fff;background:rgba(255,255,255,.14)}
+.tab.active{color:var(--navy2);background:var(--paper);border-color:var(--paper);font-weight:800}
+.tab .loc-sub{display:block;font-size:11px;font-weight:500;opacity:.78;letter-spacing:.01em;margin-top:1px}
+.tab.active .loc-sub{opacity:.62}
+/* month switcher */
+.mswitch{display:inline-flex;gap:4px;margin-left:14px;vertical-align:middle}
+.mbtn{font-family:'Montserrat';font-weight:700;font-size:11px;padding:4px 12px;border-radius:7px;cursor:pointer;border:1px solid var(--line);background:var(--card);color:var(--muted);transition:all .15s}
+.mbtn.active{background:var(--navy);color:#fff;border-color:var(--navy)}
+.mbtn:hover:not(.active){border-color:var(--accent);color:var(--navy)}
+
+/* ---- section ---- */
+section{padding:40px 0 8px}
+.sec-head{display:flex;align-items:baseline;gap:14px;margin-bottom:20px}
+.sec-num{font-family:'Montserrat';font-weight:800;font-size:12px;color:var(--accent);letter-spacing:.08em;border:1px solid var(--accent);border-radius:50%;width:30px;height:30px;display:grid;place-items:center;flex:none;background:#fff}
+.sec-head h2{font-family:'Montserrat';font-weight:800;font-size:24px;letter-spacing:-.02em;color:var(--navy2)}
+.sec-head p{font-size:13.5px;color:var(--muted);margin-left:auto;max-width:430px;text-align:right}
+
+/* ---- hero stat row ---- */
+.hero{display:grid;grid-template-columns:repeat(4,1fr);gap:16px;margin-top:-44px;position:relative;z-index:3}
+.stat{background:var(--card);border:1px solid var(--line);border-radius:12px;padding:18px 18px 16px;box-shadow:0 10px 30px -20px rgba(0,57,101,.45)}
+.stat .k{font-family:'Montserrat';text-transform:uppercase;letter-spacing:.11em;font-size:10.5px;color:var(--muted);font-weight:800}
+.stat .v{font-family:'Montserrat';font-weight:800;font-size:36px;line-height:1;margin:9px 0 3px;letter-spacing:-.035em;color:var(--navy2)}
+.stat .v small{font-size:17px;color:var(--muted);font-weight:600}
+.stat .d{font-size:12.5px;color:var(--muted)}
+.stat .d b{color:var(--good)}
+.stat.alt .v{color:var(--accent)}
+
+/* ---- cards ---- */
+.grid{display:grid;gap:16px}
+.g2{grid-template-columns:1fr 1fr}
+.g3{grid-template-columns:1.2fr 1fr 1fr}
+.card{background:var(--card);border:1px solid var(--line);border-radius:12px;padding:22px;box-shadow:0 8px 24px -24px rgba(0,57,101,.45)}
+.card h3{font-family:'Montserrat';text-transform:uppercase;letter-spacing:.1em;font-size:11.5px;color:var(--navy);font-weight:800;margin-bottom:14px;display:flex;align-items:center;gap:8px}
+.card h3 .dot{width:7px;height:7px;border-radius:50%;background:var(--accent)}
+
+/* big number inside card */
+.bignum{font-family:'Montserrat';font-weight:800;font-size:32px;letter-spacing:-.035em;line-height:1;color:var(--navy2)}
+.bignum small{font-size:14px;color:var(--muted);font-weight:600}
+.cap{font-size:12.5px;color:var(--muted);margin-top:5px}
+
+/* bars */
+.bar-row{display:grid;grid-template-columns:120px 1fr auto;align-items:center;gap:12px;margin:9px 0;font-size:13px}
+.bar-row .lab{color:var(--ink);font-weight:600}
+.track{height:9px;background:var(--paper2);border-radius:6px;overflow:hidden}
+.fill{height:100%;border-radius:6px;background:linear-gradient(90deg,var(--navy),#2d8ec5)}
+.fill.teal{background:linear-gradient(90deg,var(--teal),var(--accent2))}
+.fill.navy{background:linear-gradient(90deg,var(--navy2),#377bb3)}
+.bar-row .num{font-variant-numeric:tabular-nums;color:var(--muted);font-weight:700;min-width:38px;text-align:right}
+
+/* split donut legend */
+.donut-wrap{display:flex;align-items:center;gap:22px}
+.donut-wrap canvas{max-width:150px;max-height:150px}
+.legend{flex:1}
+.legend .li{display:flex;align-items:center;gap:9px;padding:5px 0;font-size:13px;border-bottom:1px dashed var(--line)}
+.legend .li:last-child{border:0}
+.legend .sw{width:11px;height:11px;border-radius:3px;flex:none}
+.legend .li .r{margin-left:auto;font-variant-numeric:tabular-nums;font-weight:700}
+
+table{width:100%;border-collapse:collapse;font-size:13px}
+th,td{text-align:left;padding:8px 6px;border-bottom:1px solid var(--line)}
+th{font-family:'Montserrat';text-transform:uppercase;letter-spacing:.07em;font-size:10px;color:var(--muted);font-weight:800}
+td{font-variant-numeric:tabular-nums}
+td.r,th.r{text-align:right}
+.pill{display:inline-block;padding:2px 9px;border-radius:20px;font-size:10.5px;font-weight:800;font-family:'Montserrat';letter-spacing:.03em}
+.pill.full{background:#e4f4ec;color:var(--good)}
+.pill.near{background:#fff5d6;color:var(--warn)}
+
+/* insight callout */
+.insight{background:var(--navy);color:#fff;border-radius:12px;padding:22px 24px;position:relative;overflow:hidden}
+.insight::before{content:"";position:absolute;left:0;top:0;bottom:0;width:4px;background:var(--accent)}
+.insight h4{font-family:'Montserrat';font-style:normal;font-weight:700;font-size:18px;color:#dff8fb;margin-bottom:8px}
+.insight p{font-size:13.5px;color:#d6e8f2;margin-bottom:7px}
+.insight p:last-child{margin-bottom:0}
+.insight b{color:#fff;font-weight:800}
+
+/* trend stub */
+.stub{border:1.5px dashed var(--line);border-radius:12px;padding:26px;text-align:center;color:var(--muted);background:repeating-linear-gradient(45deg,transparent,transparent 11px,rgba(213,227,234,.28) 11px,rgba(213,227,234,.28) 22px)}
+.stub .ic{font-family:'Montserrat';font-size:30px;color:var(--line)}
+.stub h3{justify-content:center;color:var(--muted)}
+.stub p{font-size:13px;max-width:520px;margin:6px auto 0}
+
+.note{font-size:12px;color:var(--muted);margin-top:9px;font-style:italic}
+.flag{display:inline-flex;align-items:center;gap:6px;background:#e8f7fa;color:#006578;border-radius:7px;padding:4px 10px;font-size:11.5px;font-weight:700;margin-top:10px}
+
+
+/* ---- portfolio overview and site drilldown controls ---- */
+.portfolio-overview{padding:0 0 10px;margin-top:-44px;position:relative;z-index:3}
+.portfolio-overview .portfolio-hero{margin-top:0}
+.portfolio-head{margin-top:28px}
+.portfolio-support{align-items:stretch}
+.portfolio-table td:first-child{font-weight:700;color:var(--navy2)}
+.portfolio-table td.r{font-weight:700}
+.site-tabs-section{padding:34px 0 18px}
+.site-tabs-section .tabbar{margin-top:0;gap:8px}
+.site-tabs-section .tab{border-radius:12px;background:var(--card);border:1px solid var(--line);color:var(--navy2);margin-bottom:0;box-shadow:0 8px 22px -24px rgba(0,57,101,.45)}
+.site-tabs-section .tab:hover{border-color:var(--accent);background:#fafdff;color:var(--navy)}
+.site-tabs-section .tab.active{background:var(--navy);border-color:var(--navy);color:#fff}
+.site-tabs-section .tab.active .loc-sub{color:#dff8fb;opacity:.85}
+.site-meta{display:flex;flex-wrap:wrap;gap:24px;margin-top:14px;background:var(--card);border:1px solid var(--line);border-radius:12px;padding:14px 16px;box-shadow:0 8px 24px -26px rgba(0,57,101,.45)}
+.site-meta div{font-size:12.5px;color:var(--muted)}
+.site-meta b{display:block;font-family:'Montserrat';font-size:15px;color:var(--navy2);font-weight:800;margin-top:2px}
+.site-hero{margin-top:0}
+@media(max-width:900px){.portfolio-overview{margin-top:-34px}.site-meta{gap:14px}.portfolio-table{font-size:12px}}
+
+footer{margin-top:46px;padding:26px 0 40px;border-top:1px solid var(--line);font-size:12px;color:var(--muted)}
+footer b{color:var(--ink)}
+
+@media(max-width:900px){.hero{grid-template-columns:1fr 1fr}.g2,.g3{grid-template-columns:1fr}.sec-head p{display:none}}
+.mono{font-variant-numeric:tabular-nums}
+.chg{font-family:'Montserrat';font-weight:800;font-size:10.5px;letter-spacing:.02em;padding:1px 7px;border-radius:20px;margin-left:7px;vertical-align:middle}
+.chg.up{background:#e4f4ec;color:var(--good)}
+.chg.down{background:#f6e2df;color:var(--bad)}
+.chg.flat{background:var(--paper2);color:var(--muted)}
+.mom-grid{display:grid;grid-template-columns:repeat(4,1fr);gap:16px}
+.mom-stat{background:var(--card);border:1px solid var(--line);border-radius:12px;padding:18px;box-shadow:0 8px 24px -24px rgba(0,57,101,.45)}
+.mom-stat .k{font-family:'Montserrat';text-transform:uppercase;letter-spacing:.1em;font-size:10.5px;color:var(--muted);font-weight:800}
+.mom-stat .v{font-family:'Montserrat';font-weight:800;font-size:29px;line-height:1;margin:8px 0 4px;letter-spacing:-.035em;color:var(--navy2)}
+.mom-stat .d{font-size:12px;color:var(--muted)}
+.compare-tbl td.r{font-variant-numeric:tabular-nums;font-weight:700}
+</style>
+</head>
+<body>
+
+<header>
+  <div class="wrap">
+    <div class="eyebrow">Store All Barbados &middot; Performance Reporting</div>
+    <h1>Store All Barbados — <em>Operations Dashboard</em></h1>
+    <div class="sub">Per-location performance across the portfolio: occupancy, customer mix, tenure, catchment and payment health. Select a location below.</div>
+    <div class="metabar">
+      <div>Portfolio period<b id="portfolioHeaderPeriod">June 2026</b></div>
+      <div>Total units<b id="portfolioHeaderUnits">985</b></div>
+      <div>Sites covered<b>Central · South · Lears</b></div>
+      <div>Data source<b>SiteLink rent roll + rental activity</b></div>
+    </div>
+  </div>
+</header>
+
+<div class="wrap">
+
+  <!-- PORTFOLIO OVERVIEW -->
+  <section class="portfolio-overview">
+    <div class="hero portfolio-hero" id="portfolioHero"></div>
+
+    <div class="sec-head portfolio-head"><div class="sec-num">00</div><h2>Portfolio Summary</h2>
+      <p>All three sites shown together using the latest available snapshot for each site.</p></div>
+
+    <div class="grid g2 portfolio-support">
+      <div class="card">
+        <h3><span class="dot"></span>Portfolio by site</h3>
+        <table class="portfolio-table">
+          <thead><tr><th>Site</th><th class="r">Occ.</th><th class="r">Rent</th><th class="r">Tenure</th><th class="r">Corp.</th></tr></thead>
+          <tbody id="portfolioSiteRows"></tbody>
+        </table>
+        <div class="note">Rent, occupancy and tenure are taken from each site’s latest available monthly snapshot.</div>
+      </div>
+      <div class="insight" id="portfolioRead"></div>
+    </div>
+  </section>
+
+  <!-- SITE DRILLDOWN TABS -->
+  <section class="site-tabs-section">
+    <div class="sec-head"><div class="sec-num">↳</div><h2>Site Detail</h2>
+      <p>Choose a site to drill into occupancy, tenure, customer split, geography, payments and pricing.</p></div>
+    <div class="tabbar" id="tabbar"></div>
+    <div class="site-meta">
+      <div>Selected period<b id="m-period">June 2026</b><span class="mswitch" id="mswitch"></span></div>
+      <div>Selected site units<b id="m-units">461</b></div>
+      <div>Snapshot basis<b id="m-basis">As of 1 June 2026</b></div>
+    </div>
+  </section>
+
+  <!-- SITE HERO STATS -->
+  <div class="hero site-hero" id="hero"></div>
+
+  <!-- 1. OCCUPANCY -->
+  <section>
+    <div class="sec-head"><div class="sec-num">01</div><h2>Occupancy &amp; Utilisation</h2>
+      <p>Physical fill versus revenue captured, and how each unit type is performing.</p></div>
+    <div class="grid g3">
+      <div class="card">
+        <h3><span class="dot"></span>Occupancy by unit type</h3>
+        <div id="typebars"></div>
+        <div class="note" id="typeNote"></div>
+      </div>
+      <div class="card">
+        <h3><span class="dot"></span>Physical vs economic</h3>
+        <div class="bignum" id="phys"></div><div class="cap">Physical occupancy — units filled</div>
+        <div style="height:14px"></div>
+        <div class="bignum" id="econ"></div><div class="cap">Economic occupancy — rent vs gross potential</div>
+        <div class="note">Near-identical figures mean almost no discounting; rent collected is close to full list price.</div>
+      </div>
+      <div class="card">
+        <h3><span class="dot"></span>Monthly movement</h3>
+        <table>
+          <tr><td>Move-ins</td><td class="r mono" id="mi"></td></tr>
+          <tr><td>Move-outs</td><td class="r mono" id="mo"></td></tr>
+          <tr><td>Net absorption</td><td class="r mono" id="net"></td></tr>
+        </table>
+        <div class="note">At ~99% occupancy, a small negative net is churn at the ceiling, not falling demand.</div>
+      </div>
+    </div>
+  </section>
+
+  <!-- 2. TENURE -->
+  <section>
+    <div class="sec-head"><div class="sec-num">02</div><h2>Tenure &amp; Length of Stay</h2>
+      <p>Derived from move-in dates on the snapshot — no history required.</p></div>
+    <div class="grid g3">
+      <div class="card">
+        <h3><span class="dot"></span>Average length of stay</h3>
+        <div class="bignum" id="losmean"></div><div class="cap">Mean tenure across occupied units</div>
+        <div style="height:14px"></div>
+        <div class="bignum" id="losmed"></div><div class="cap">Median tenure (less skewed by long-stayers)</div>
+      </div>
+      <div class="card" style="grid-column:span 2">
+        <h3><span class="dot"></span>Tenure distribution</h3>
+        <div id="losbars"></div>
+        <div class="note">Heavily skewed to long stays — the earliest active tenancy dates to 2008.</div>
+      </div>
+    </div>
+  </section>
+
+  <!-- 3. SEGMENT -->
+  <section>
+    <div class="sec-head"><div class="sec-num">03</div><h2>Customer Segmentation</h2>
+      <p>Corporate versus individual across units, revenue, size and tenure.</p></div>
+    <div class="grid g2">
+      <div class="card">
+        <h3><span class="dot"></span>Units &amp; revenue split</h3>
+        <div class="donut-wrap">
+          <svg id="segDonut" viewBox="0 0 42 42" width="150" height="150"></svg>
+          <div class="legend" id="segLegend"></div>
+        </div>
+      </div>
+      <div class="card">
+        <h3><span class="dot"></span>How the segments differ</h3>
+        <table>
+          <thead><tr><th>Metric</th><th class="r">Individual</th><th class="r">Corporate</th></tr></thead>
+          <tbody id="segTable"></tbody>
+        </table>
+        <div class="note">Corporate tenants take larger units and stay longer — as expected. Revenue concentration is low: top 10 accounts are only <span id="conc"></span> of rent.</div>
+      </div>
+    </div>
+  </section>
+
+  <!-- 4. GEOGRAPHY -->
+  <section>
+    <div class="sec-head"><div class="sec-num">04</div><h2>Where the Individuals Are</h2>
+      <p>Home-parish catchment for individual tenants — the key input to any future siting.</p></div>
+    <div class="grid g2">
+      <div class="card">
+        <h3><span class="dot"></span>Individual tenants by parish</h3>
+        <div id="geobars"></div>
+      </div>
+      <div class="insight">
+        <h4>Catchment is local</h4>
+        <p>The <span id="corridorNames">St. Michael / Christ Church / St. James</span> corridor accounts for <b id="corridor"></b> of individual tenants — fitting the facility's location.</p>
+        <p><b id="overseaspct"></b> are overseas — likely diaspora or second-home owners storing belongings on-island. A distinctive demand stream worth tracking separately.</p>
+        <p class="note" style="color:#9aa6bd">Parish names arrive as free text and were normalised for this view; standardising them at sign-up would make this automatic.</p>
+      </div>
+    </div>
+  </section>
+
+  <!-- 5. PAYMENTS -->
+  <section>
+    <div class="sec-head"><div class="sec-num">05</div><h2>Payment Health</h2>
+      <p>"How many don't pay" — balances carried versus genuine delinquency.</p></div>
+    <div class="grid g3">
+      <div class="card">
+        <h3><span class="dot"></span>Accounts carrying a balance</h3>
+        <div class="bignum" id="balunits"></div>
+        <div class="cap">units with a rent balance &middot; <span id="baltot"></span> total</div>
+        <div class="note">Most are current-cycle billing rather than true arrears — see aging.</div>
+      </div>
+      <div class="card">
+        <h3><span class="dot"></span>Aging — genuine delinquency</h3>
+        <div id="agebars"></div>
+        <div class="note" id="ageNote"></div>
+      </div>
+      <div class="card">
+        <h3><span class="dot"></span>Auto-pay adoption</h3>
+        <div class="bignum" id="autopay"></div><div class="cap">of accounts on auto-pay</div>
+        <div class="flag">Lever &middot; raising this directly reduces carried balances</div>
+      </div>
+    </div>
+  </section>
+
+  <!-- 6. FINANCIAL -->
+  <section>
+    <div class="sec-head"><div class="sec-num">06</div><h2>Financial &amp; Pricing</h2>
+      <p>Blended performance per square foot and per unit.</p></div>
+    <div class="grid g3" id="finrow"></div>
+  </section>
+
+  <!-- 7. STRATEGIC READ -->
+  <section>
+    <div class="sec-head"><div class="sec-num">07</div><h2>Strategic Read</h2>
+      <p>What this snapshot implies against the expansion framework.</p></div>
+    <div class="insight" id="stratRead" style="background:var(--navy2)"></div>
+  </section>
+
+  <!-- MONTH OVER MONTH -->
+  <section id="momSection">
+    <div class="sec-head"><div class="sec-num">08</div><h2>Month over Month</h2>
+      <p>Change since the previous snapshot — the metrics that need a series.</p></div>
+    <div id="momBody"></div>
+  </section>
+
+  <footer class="wrap" style="padding-left:0;padding-right:0">
+    <b>Store All Barbados — Management Dashboard.</b> Generated from SiteLink rent roll and rental-activity exports. Store All Central: two snapshots (May &amp; June 2026). Store All South: June 2026 (occupancy from May activity). Store All Lears: June 2026. Customer churn is measured by tenant change on units rented in both periods. Figures are operational indicators, not audited financials.
+  </footer>
+</div>
+
+<script>
+/* ===== DATA: locations → months. Add a location or a month and the UI extends. ===== */
+const LOCATIONS = {
+  central: {
+    name:"Store All Central", sub:"The Pine, St. Michael",
+    months:{
+      "2026-05":{
+        label:"May 2026", basis:"As of 1 May 2026",
+        totalUnits:461, occupied:457, vacant:4, physOcc:99.1, econOcc:98.5,
+        grossPot:120421, occRent:118570, totalArea:28628, occArea:28555,
+        revpaf:4.14, revOccSqft:4.15, avgRentUnit:259.45, movedIn:8, movedOut:10, net:-2,
+        byType:[{t:"Drive-Up Storage",units:189,occ:189,pct:100.0},{t:"Indoor Storage",units:199,occ:196,pct:98.5},{t:"Climate Controlled",units:56,occ:56,pct:100.0},{t:"Mailbox",units:16,occ:15,pct:93.8},{t:"Mobile Storage",units:1,occ:1,pct:100.0}],
+        losMean:52.1, losMedian:38.7, losBands:{"<3 mo":21,"3–12 mo":72,"1–2 yr":67,"2–5 yr":131,"5 yr+":168},
+        corpUnits:107, indivUnits:352, corpPct:23.3, corpRent:33643, indivRent:85277, corpRentPct:28.3,
+        corpArea:83, indivArea:56, corpLos:64.0, indivLos:48.5, top10:4.5,
+        geoIndiv:{"St. Michael":85,"Christ Church":66,"St. James":48,"St. Thomas":22,"St. Philip":19,"St. George":16,"Other Barbados":10,"Overseas":68,"Unknown":18}, indivN:352,
+        balUnits:110, balPct:24.0, balTotal:40558, aging:{"Current / ahead":447,"1–30 days":8,"31–60 days":0,"61–90 days":3,"90+ days":1}, autopayPct:35.3
+      },
+      "2026-06":{
+        label:"June 2026", basis:"As of 1 June 2026",
+        totalUnits:461, occupied:457, vacant:4, physOcc:99.1, econOcc:98.4,
+        grossPot:120421, occRent:118528, totalArea:28628, occArea:28555,
+        revpaf:4.14, revOccSqft:4.15, avgRentUnit:259.36, movedIn:1, movedOut:0, net:1,
+        byType:[{t:"Drive-Up Storage",units:189,occ:189,pct:100.0},{t:"Indoor Storage",units:199,occ:196,pct:98.5},{t:"Climate Controlled",units:56,occ:56,pct:100.0},{t:"Mailbox",units:16,occ:16,pct:100.0},{t:"Mobile Storage",units:1,occ:1,pct:100.0}],
+        losMean:52.8, losMedian:39.6, losBands:{"<3 mo":22,"3–12 mo":68,"1–2 yr":69,"2–5 yr":126,"5 yr+":172},
+        corpUnits:106, indivUnits:351, corpPct:23.2, corpRent:33417, indivRent:85111, corpRentPct:28.2,
+        corpArea:83, indivArea:56, corpLos:65.6, indivLos:49.0, top10:4.5,
+        geoIndiv:{"St. Michael":82,"Christ Church":63,"St. James":48,"St. Thomas":21,"St. Philip":19,"St. George":16,"Other Barbados":11,"Overseas":69,"Unknown":22}, indivN:351,
+        balUnits:112, balPct:24.5, balTotal:41266, aging:{"Current / ahead":435,"1–30 days":0,"31–60 days":10,"61–90 days":8,"90+ days":4}, autopayPct:35.2,
+        mom:{ prev:"May 2026", tenantTurnover:9, retentionPct:100.0, netUnits:1 }
+      }
+    }
+  },
+  south: {
+    name:"Store All South", sub:"Gibbons, Christ Church",
+    months:{
+      "2026-06":{
+        label:"June 2026", basis:"Rent roll 1 Jun · activity May",
+        totalUnits:265, occupied:259, vacant:6, physOcc:97.7, econOcc:95.4,
+        grossPot:69607, occRent:66380, totalArea:17165, occArea:16688,
+        revpaf:3.87, revOccSqft:3.98, avgRentUnit:256.29, movedIn:7, movedOut:7, net:0,
+        byType:[{t:"Drive-Up Storage",units:188,occ:183,pct:97.3},{t:"Indoor Storage",units:75,occ:74,pct:98.7},{t:"Box Storage",units:2,occ:2,pct:100.0}],
+        losMean:38.0, losMedian:25.2, losBands:{"<3 mo":22,"3–12 mo":48,"1–2 yr":58,"2–5 yr":92,"5 yr+":42},
+        corpUnits:59, indivUnits:203, corpPct:22.5, corpRent:18390, indivRent:48542, corpRentPct:27.5,
+        corpArea:89, indivArea:57, corpLos:40.1, indivLos:37.4, top10:8.0,
+        geoIndiv:{"Christ Church":84,"St. Michael":31,"St. Philip":16,"St. James":15,"St. George":3,"St. Thomas":3,"Other Barbados":7,"Overseas":39,"Unknown":5}, indivN:203,
+        balUnits:72, balPct:27.5, balTotal:24150, aging:{"Current / ahead":245,"1–30 days":0,"31–60 days":10,"61–90 days":5,"90+ days":2}, autopayPct:30.5
+      }
+    }
+  },
+  lears: {
+    name:"Store All Lears", sub:"Dayrells Commercial Park, Lears",
+    months:{
+      "2026-06":{
+        "label": "June 2026",
+        "basis": "Rent roll 1 Jun · activity June",
+        "totalUnits": 259,
+        "occupied": 246,
+        "vacant": 13,
+        "physOcc": 95.0,
+        "econOcc": 93.1,
+        "grossPot": 89446,
+        "occRent": 83298,
+        "totalArea": 25528,
+        "occArea": 24248,
+        "revpaf": 3.26,
+        "revOccSqft": 3.44,
+        "avgRentUnit": 338.61,
+        "movedIn": 4,
+        "movedOut": 0,
+        "net": 4,
+        "byType": [
+                {
+                        "t": "5x8",
+                        "units": 49,
+                        "occ": 49,
+                        "pct": 100.0
+                },
+                {
+                        "t": "8x8",
+                        "units": 8,
+                        "occ": 8,
+                        "pct": 100.0
+                },
+                {
+                        "t": "8x10",
+                        "units": 4,
+                        "occ": 4,
+                        "pct": 100.0
+                },
+                {
+                        "t": "10x8",
+                        "units": 113,
+                        "occ": 103,
+                        "pct": 91.2
+                },
+                {
+                        "t": "8x16",
+                        "units": 2,
+                        "occ": 2,
+                        "pct": 100.0
+                },
+                {
+                        "t": "20x8",
+                        "units": 72,
+                        "occ": 69,
+                        "pct": 95.8
+                },
+                {
+                        "t": "40x8",
+                        "units": 6,
+                        "occ": 6,
+                        "pct": 100.0
+                }
+        ],
+        "losMean": 19.0,
+        "losMedian": 15.3,
+        "losBands": {
+                "<3 mo": 41,
+                "3–12 mo": 60,
+                "1–2 yr": 72,
+                "2–5 yr": 69,
+                "5 yr+": 0
+        },
+        "corpUnits": 83,
+        "indivUnits": 163,
+        "corpPct": 33.7,
+        "corpRent": 31945,
+        "indivRent": 51353,
+        "corpRentPct": 38.3,
+        "corpArea": 123,
+        "indivArea": 86,
+        "corpLos": 22.2,
+        "indivLos": 16.9,
+        "top10": 12.7,
+        "geoIndiv": {
+                "St. Michael": 35,
+                "Christ Church": 17,
+                "St. James": 34,
+                "St. Thomas": 14,
+                "St. Philip": 10,
+                "St. George": 15,
+                "Other Barbados": 12,
+                "Overseas": 18,
+                "Unknown": 8
+        },
+        "indivN": 163,
+        "balUnits": 59,
+        "balPct": 22.8,
+        "balTotal": 32742,
+        "aging": {
+                "Current / ahead": 234,
+                "1–30 days": 0,
+                "31–60 days": 6,
+                "61–90 days": 2,
+                "90+ days": 4
+        },
+        "autopayPct": 26.0
+}
+    }
+  }
+};
+
+const bbd = n => "$"+Math.round(n).toLocaleString();
+const bbdk = n => "$"+(n/1000).toFixed(0)+"k";
+const delta = (cur,prev,unit="",dp=1) => {
+  if(prev==null||prev===undefined) return "";
+  const d = cur-prev; if(Math.abs(d)<0.05) return `<span class="chg flat">no change</span>`;
+  const up = d>0; return `<span class="chg ${up?'up':'down'}">${up?"▲":"▼"} ${Math.abs(d).toFixed(dp)}${unit}</span>`;
+};
+
+let STATE = { loc:"central", month:null };
+
+function latestSnapshot(L){
+  const keys = Object.keys(L.months).sort();
+  const key = keys[keys.length-1];
+  return { key, data:L.months[key] };
+}
+
+function portfolioSummary(){
+  const sites = Object.entries(LOCATIONS).map(([key,L]) => {
+    const snap = latestSnapshot(L);
+    return { key, name:L.name.replace('Store All ',''), fullName:L.name, sub:L.sub, month:snap.key, data:snap.data };
+  });
+  const sum = (field) => sites.reduce((t,s)=>t+(s.data[field]||0),0);
+  const totalUnits = sum('totalUnits'), occupied = sum('occupied'), vacant = sum('vacant');
+  const grossPot = sum('grossPot'), occRent = sum('occRent'), totalArea = sum('totalArea'), occArea = sum('occArea');
+  const corpUnits = sum('corpUnits'), indivUnits = sum('indivUnits'), corpRent = sum('corpRent'), indivRent = sum('indivRent');
+  const movedIn = sum('movedIn'), movedOut = sum('movedOut');
+  const weightedMeanTenure = sites.reduce((t,s)=>t+s.data.losMean*s.data.occupied,0)/occupied;
+  const weightedMedianTenure = sites.reduce((t,s)=>t+s.data.losMedian*s.data.occupied,0)/occupied;
+  const periods = [...new Set(sites.map(s=>s.data.label))].join(' / ');
+  return {
+    sites, periods, totalUnits, occupied, vacant, grossPot, occRent, totalArea, occArea,
+    physOcc: occupied/totalUnits*100, econOcc: occRent/grossPot*100,
+    revpaf: occRent/totalArea, revOccSqft: occRent/occArea, avgRentUnit: occRent/occupied,
+    corpUnits, indivUnits, corpRent, indivRent, movedIn, movedOut,
+    corpPct: corpUnits/(corpUnits+indivUnits)*100, corpRentPct: corpRent/(corpRent+indivRent)*100,
+    weightedMeanTenure, weightedMedianTenure
+  };
+}
+
+function renderPortfolio(){
+  const P = portfolioSummary();
+  document.getElementById('portfolioHeaderPeriod').textContent = P.periods;
+  document.getElementById('portfolioHeaderUnits').textContent = P.totalUnits.toLocaleString();
+
+  document.getElementById('portfolioHero').innerHTML = `
+    <div class="stat"><div class="k">Portfolio occupancy</div><div class="v">${P.physOcc.toFixed(1)}<small>%</small></div><div class="d">${P.occupied} of ${P.totalUnits} units filled across 3 sites</div></div>
+    <div class="stat"><div class="k">Monthly rent roll</div><div class="v" style="font-size:31px">${bbdk(P.occRent)}</div><div class="d">${P.econOcc.toFixed(1)}% of ${bbdk(P.grossPot)} gross potential</div></div>
+    <div class="stat alt"><div class="k">Avg tenure</div><div class="v">${(P.weightedMeanTenure/12).toFixed(1)}<small>yr</small></div><div class="d">weighted avg · site-median blend ${(P.weightedMedianTenure/12).toFixed(1)} yr</div></div>
+    <div class="stat"><div class="k">Customer split</div><div class="v">${P.corpPct.toFixed(0)}<small>%</small></div><div class="d">corporate units · ${P.corpRentPct.toFixed(0)}% of revenue</div></div>`;
+
+  document.getElementById('portfolioSiteRows').innerHTML = P.sites.map(s => {
+    const d = s.data;
+    return `<tr><td>${s.name}</td><td class="r">${d.physOcc.toFixed(1)}%</td><td class="r">${bbdk(d.occRent)}</td><td class="r">${(d.losMedian/12).toFixed(1)} yr</td><td class="r">${d.corpPct.toFixed(0)}%</td></tr>`;
+  }).join('');
+
+  const topRent = [...P.sites].sort((a,b)=>b.data.occRent-a.data.occRent)[0];
+  const youngest = [...P.sites].sort((a,b)=>a.data.losMedian-b.data.losMedian)[0];
+  const mostFull = [...P.sites].sort((a,b)=>b.data.physOcc-a.data.physOcc)[0];
+  document.getElementById('portfolioRead').innerHTML = `
+    <h4>Portfolio read</h4>
+    <p>The portfolio is effectively full at <b>${P.physOcc.toFixed(1)}% physical occupancy</b>, with <b>${bbd(P.occRent)}/mo</b> in current rent roll and <b>${P.econOcc.toFixed(1)}%</b> economic occupancy.</p>
+    <p><b>${mostFull.name}</b> is the most capacity-constrained site; <b>${topRent.name}</b> contributes the largest rent roll; <b>${youngest.name}</b> has the youngest tenant base and the clearest room to mature.</p>
+    <p>The split is still mostly individual-led: <b>${P.indivUnits}</b> individual units versus <b>${P.corpUnits}</b> corporate units, while corporate customers contribute a higher share of rent than units.</p>`;
+}
+
+function render(){
+  const L = LOCATIONS[STATE.loc];
+  const mkeys = Object.keys(L.months).sort();
+  if(!STATE.month || !L.months[STATE.month]) STATE.month = mkeys[mkeys.length-1];
+  const CUR = L.months[STATE.month];
+  const mi = mkeys.indexOf(STATE.month);
+  const PREV = (mi>0) ? L.months[mkeys[mi-1]] : null;
+
+  renderPortfolio();
+
+  /* tabs */
+  document.getElementById('tabbar').innerHTML = Object.entries(LOCATIONS).map(([k,v])=>
+    `<button class="tab ${k===STATE.loc?'active':''}" onclick="setLoc('${k}')">${v.name}<span class="loc-sub">${v.sub}</span></button>`).join('');
+
+  /* metabar */
+  document.getElementById('m-period').textContent = CUR.label;
+  document.getElementById('m-units').textContent = CUR.totalUnits;
+  document.getElementById('m-basis').textContent = CUR.basis;
+  document.getElementById('mswitch').innerHTML = mkeys.length>1 ? mkeys.map(mk=>
+    `<button class="mbtn ${mk===STATE.month?'active':''}" onclick="setMonth('${mk}')">${L.months[mk].label.split(' ')[0]}</button>`).join('') : '';
+
+  /* hero */
+  document.getElementById('hero').innerHTML = `
+    <div class="stat"><div class="k">Physical occupancy</div><div class="v">${CUR.physOcc}<small>%</small></div><div class="d">${CUR.occupied} of ${CUR.totalUnits} units filled</div></div>
+    <div class="stat"><div class="k">Monthly rent roll</div><div class="v" style="font-size:31px">${bbdk(CUR.occRent)}</div><div class="d">${(CUR.econOcc).toFixed(0)}% of gross potential</div></div>
+    <div class="stat alt"><div class="k">Median tenure</div><div class="v">${(CUR.losMedian/12).toFixed(1)}<small>yr</small></div><div class="d">mean ${(CUR.losMean/12).toFixed(1)} yr</div></div>
+    <div class="stat"><div class="k">Corporate share</div><div class="v">${CUR.corpPct.toFixed(0)}<small>%</small></div><div class="d">of units &middot; ${CUR.corpRentPct.toFixed(0)}% of revenue</div></div>`;
+
+  /* occupancy */
+  document.getElementById('phys').innerHTML = CUR.physOcc+'<small>%</small>';
+  document.getElementById('econ').innerHTML = CUR.econOcc+'<small>%</small>';
+  document.getElementById('mi').textContent = CUR.movedIn;
+  document.getElementById('mo').textContent = CUR.movedOut;
+  document.getElementById('net').innerHTML = (CUR.net>=0?'+':'')+CUR.net;
+  document.getElementById('typebars').innerHTML = CUR.byType.map(r=>{
+    const pill = r.pct>=99.9?'<span class="pill full">full</span>':'<span class="pill near">'+r.pct.toFixed(0)+'%</span>';
+    return `<div class="bar-row"><span class="lab">${r.t.replace(' Storage','')}</span><div class="track"><div class="fill teal" style="width:${r.pct}%"></div></div><span class="num">${pill}</span></div>`;
+  }).join('');
+  const vacancyDrivers = CUR.byType.filter(r => (r.units-r.occ)>0).sort((a,b)=>(b.units-b.occ)-(a.units-a.occ));
+  document.getElementById('typeNote').textContent = vacancyDrivers.length
+    ? 'Vacancy is concentrated in ' + vacancyDrivers.slice(0,2).map(r => `${r.t.replace(' Storage','')} (${r.units-r.occ})`).join(' and ') + '.'
+    : 'All displayed unit groups are full.';
+
+  /* tenure */
+  document.getElementById('losmean').innerHTML = CUR.losMean.toFixed(0)+'<small> mo &middot; '+(CUR.losMean/12).toFixed(1)+' yr</small>';
+  document.getElementById('losmed').innerHTML = CUR.losMedian.toFixed(0)+'<small> mo &middot; '+(CUR.losMedian/12).toFixed(1)+' yr</small>';
+  const losMax = Math.max(...Object.values(CUR.losBands));
+  document.getElementById('losbars').innerHTML = Object.entries(CUR.losBands).map(([k,v])=>
+    `<div class="bar-row"><span class="lab">${k}</span><div class="track"><div class="fill" style="width:${100*v/losMax}%"></div></div><span class="num">${v}</span></div>`).join('');
+
+  /* segment donut */
+  const segTotal = CUR.indivUnits + CUR.corpUnits;
+  const indivFrac = CUR.indivUnits/segTotal*100;
+  document.getElementById('segDonut').innerHTML = `
+    <circle cx="21" cy="21" r="15.9155" fill="none" stroke="#e7f0f5" stroke-width="6"></circle>
+    <circle cx="21" cy="21" r="15.9155" fill="none" stroke="#00a9c7" stroke-width="6" stroke-dasharray="${indivFrac} ${100-indivFrac}" stroke-dashoffset="25"></circle>
+    <circle cx="21" cy="21" r="15.9155" fill="none" stroke="#004b8d" stroke-width="6" stroke-dasharray="${100-indivFrac} ${indivFrac}" stroke-dashoffset="${25 - indivFrac}"></circle>
+    <text x="21" y="20.5" text-anchor="middle" font-size="6.5" font-family="Montserrat" font-weight="600" fill="#003965">${segTotal}</text>
+    <text x="21" y="25.5" text-anchor="middle" font-size="2.6" font-family="Source Sans 3" fill="#667784" letter-spacing="0.1">RENTED</text>`;
+  document.getElementById('segLegend').innerHTML = `
+    <div class="li"><span class="sw" style="background:#00a9c7"></span>Individual<span class="r">${CUR.indivUnits} units &middot; ${(100-CUR.corpPct).toFixed(0)}%</span></div>
+    <div class="li"><span class="sw" style="background:#004b8d"></span>Corporate<span class="r">${CUR.corpUnits} units &middot; ${CUR.corpPct.toFixed(0)}%</span></div>
+    <div class="li"><span class="sw" style="background:#00a9c7;opacity:.4"></span>Individual rent<span class="r">${bbdk(CUR.indivRent)}</span></div>
+    <div class="li"><span class="sw" style="background:#004b8d;opacity:.4"></span>Corporate rent<span class="r">${bbdk(CUR.corpRent)}</span></div>`;
+  document.getElementById('segTable').innerHTML = `
+    <tr><td>Units</td><td class="r mono">${CUR.indivUnits}</td><td class="r mono">${CUR.corpUnits}</td></tr>
+    <tr><td>Avg unit size</td><td class="r mono">${CUR.indivArea} sf</td><td class="r mono">${CUR.corpArea} sf</td></tr>
+    <tr><td>Avg tenure</td><td class="r mono">${(CUR.indivLos/12).toFixed(1)} yr</td><td class="r mono">${(CUR.corpLos/12).toFixed(1)} yr</td></tr>
+    <tr><td>Monthly rent</td><td class="r mono">${bbdk(CUR.indivRent)}</td><td class="r mono">${bbdk(CUR.corpRent)}</td></tr>`;
+  document.getElementById('conc').textContent = CUR.top10.toFixed(1)+'%';
+
+  /* geography */
+  const geoSorted = Object.entries(CUR.geoIndiv).sort((a,b)=>b[1]-a[1]);
+  const geoMax = Math.max(...geoSorted.map(g=>g[1]));
+  document.getElementById('geobars').innerHTML = geoSorted.map(([k,v])=>{
+    const isO=k==='Overseas',isU=k==='Unknown';
+    const sty = `width:${100*v/geoMax}%;${isU?'opacity:.45;':''}`;
+    return `<div class="bar-row"><span class="lab">${k}</span><div class="track"><div class="${isO?'fill':'fill teal'}" style="${sty}"></div></div><span class="num">${v}</span></div>`;
+  }).join('');
+  const home = STATE.loc==='south' ? ['Christ Church','St. Philip','St. James'] : ['St. Michael','Christ Church','St. James'];
+  const corridor = home.reduce((s,p)=>s+(CUR.geoIndiv[p]||0),0);
+  document.getElementById('corridor').textContent = Math.round(100*corridor/CUR.indivN)+'%';
+  document.getElementById('corridorNames').textContent = home.join(' / ');
+  document.getElementById('overseaspct').textContent = Math.round(100*(CUR.geoIndiv["Overseas"]||0)/CUR.indivN)+'% (' + (CUR.geoIndiv["Overseas"]||0) + ' tenants)';
+
+  /* payments */
+  document.getElementById('balunits').innerHTML = CUR.balUnits+'<small> / '+CUR.totalUnits+'</small>';
+  document.getElementById('baltot').textContent = bbd(CUR.balTotal);
+  const ageMax = Math.max(...Object.values(CUR.aging));
+  document.getElementById('agebars').innerHTML = Object.entries(CUR.aging).map(([k,v])=>{
+    const late = k.includes('90+')||k.includes('61');
+    return `<div class="bar-row"><span class="lab">${k}</span><div class="track"><div class="fill" style="width:${ageMax?100*v/ageMax:0}%;${late?'background:linear-gradient(90deg,#b5453a,#cf6a5f)':k.includes('Current')?'background:linear-gradient(90deg,#3f7d52,#62a074)':''}"></div></div><span class="num">${v}</span></div>`;
+  }).join('');
+  const late60 = CUR.aging['61–90 days']+CUR.aging['90+ days'];
+  document.getElementById('ageNote').textContent = (CUR.aging['31–60 days']+late60)+' accounts meaningfully late (60+ days: '+late60+').';
+  document.getElementById('autopay').innerHTML = CUR.autopayPct.toFixed(0)+'<small>%</small>';
+
+  /* financial */
+  document.getElementById('finrow').innerHTML = `
+    <div class="card"><h3><span class="dot"></span>RevPAF</h3><div class="bignum">$${CUR.revpaf.toFixed(2)}<small> /sf</small></div><div class="cap">Revenue per available sq ft — the blended performance metric</div></div>
+    <div class="card"><h3><span class="dot"></span>Revenue / occupied sq ft</h3><div class="bignum">$${CUR.revOccSqft.toFixed(2)}<small> /sf</small></div><div class="cap">Pricing power, stripping out occupancy</div></div>
+    <div class="card"><h3><span class="dot"></span>Avg rent / occupied unit</h3><div class="bignum">$${CUR.avgRentUnit.toFixed(0)}</div><div class="cap">Across ${CUR.occupied} occupied units &middot; ${bbd(CUR.occRent)}/mo total</div></div>`;
+
+  /* strategic read */
+  document.getElementById('stratRead').innerHTML = strategicRead(STATE.loc, CUR);
+
+  /* month over month */
+  renderMoM(L, CUR, PREV, mkeys);
+}
+
+function strategicRead(loc, CUR){
+  if(loc==='central') return `
+    <h4>A full facility with pricing headroom</h4>
+    <p>At <b>99% physical</b> and <b>98% economic</b> occupancy sustained, Store All Central sits well above the 90% threshold the framework sets for evaluating added capacity. The binding constraint is space, not demand.</p>
+    <p>Very long tenure (median <b>${(CUR.losMedian/12).toFixed(1)} years</b>) in a near-full facility is the classic setup for testing <b>rate increases</b> — the cheapest lever available.</p>
+    <p>Beneath the flat surface: vacancies <b>re-let the same month</b> (strong demand), while arrears are <b>aging into worse buckets</b> — the one trend to watch.</p>`;
+  if(loc==='south') return `
+    <h4>Healthy, younger, and not yet at the ceiling</h4>
+    <p>Store All South runs at <b>98% physical / 95% economic</b> occupancy — full by most standards, but with a wider physical-to-economic gap than Central, pointing to slightly more discounting or arrears drag.</p>
+    <p>The tenant base is <b>younger</b> (median tenure ${(CUR.losMedian/12).toFixed(1)} yr vs Central's 3.3) and more <b>locally rooted</b> — Christ Church alone is over 40% of individuals, fitting the Gibbons south-coast catchment.</p>
+    <p>Revenue is more concentrated (top 10 = <b>${CUR.top10.toFixed(0)}%</b> vs Central's 4.5%) and auto-pay is lower at <b>${CUR.autopayPct.toFixed(0)}%</b> — a clear collections lever.</p>`;
+  return `
+    <h4>A newer site with room to tighten utilisation</h4>
+    <p>Store All Lears is at <b>${CUR.physOcc.toFixed(0)}% physical / ${CUR.econOcc.toFixed(0)}% economic</b> occupancy. That is healthy, but the gap to Central and South means there is still room to fill and improve revenue capture.</p>
+    <p>The tenant base is <b>younger</b> (median ${(CUR.losMedian/12).toFixed(1)} yr) with no 5+ year cohort yet, so the site is still maturing rather than behaving like a long-tenure legacy facility.</p>
+    <p>Vacancy is mainly in the larger volume groups, while corporate users contribute <b>${CUR.corpRentPct.toFixed(0)}%</b> of rent from <b>${CUR.corpPct.toFixed(0)}%</b> of units — useful for targeted provider/business outreach.</p>`;
+}
+
+function renderMoM(L, CUR, PREV, mkeys){
+  const momBody = document.getElementById('momBody');
+  if(PREV && CUR.mom){
+    const m = CUR.mom;
+    momBody.innerHTML = `
+      <div class="mom-grid">
+        <div class="mom-stat"><div class="k">Customer churn</div><div class="v" style="color:var(--good)">${(m.tenantTurnover/PREV.occupied*100).toFixed(1)}<small style="font-size:16px;color:var(--muted)">%</small></div><div class="d">${m.tenantTurnover} tenants left & were replaced</div></div>
+        <div class="mom-stat"><div class="k">Unit retention</div><div class="v">${m.retentionPct.toFixed(0)}<small style="font-size:16px;color:var(--muted)">%</small></div><div class="d">every ${m.prev} unit still rented</div></div>
+        <div class="mom-stat"><div class="k">Net absorption</div><div class="v">${m.netUnits>=0?'+':''}${m.netUnits}<small style="font-size:16px;color:var(--muted)"> unit</small></div><div class="d">vacancies re-let same month</div></div>
+        <div class="mom-stat"><div class="k">Rent roll change</div><div class="v" style="font-size:24px">${bbd(CUR.occRent-PREV.occRent)}</div><div class="d">${CUR.label} vs ${m.prev}</div></div>
+      </div>
+      <div style="height:16px"></div>
+      <div class="grid g2">
+        <div class="card"><h3><span class="dot"></span>Key metrics vs ${m.prev}</h3>
+          <table class="compare-tbl"><thead><tr><th>Metric</th><th class="r">${m.prev}</th><th class="r">${CUR.label}</th><th class="r">Change</th></tr></thead><tbody>
+            <tr><td>Physical occupancy</td><td class="r">${PREV.physOcc}%</td><td class="r">${CUR.physOcc}%</td><td class="r">${delta(CUR.physOcc,PREV.physOcc,'pp')}</td></tr>
+            <tr><td>Economic occupancy</td><td class="r">${PREV.econOcc}%</td><td class="r">${CUR.econOcc}%</td><td class="r">${delta(CUR.econOcc,PREV.econOcc,'pp')}</td></tr>
+            <tr><td>Median tenure (yr)</td><td class="r">${(PREV.losMedian/12).toFixed(1)}</td><td class="r">${(CUR.losMedian/12).toFixed(1)}</td><td class="r">${delta(CUR.losMedian/12,PREV.losMedian/12,'yr')}</td></tr>
+            <tr><td>Corporate share</td><td class="r">${PREV.corpPct.toFixed(0)}%</td><td class="r">${CUR.corpPct.toFixed(0)}%</td><td class="r">${delta(CUR.corpPct,PREV.corpPct,'pp',0)}</td></tr>
+            <tr><td>Accounts 60+ days late</td><td class="r">${PREV.aging['61–90 days']+PREV.aging['90+ days']}</td><td class="r">${CUR.aging['61–90 days']+CUR.aging['90+ days']}</td><td class="r">${delta(CUR.aging['61–90 days']+CUR.aging['90+ days'],PREV.aging['61–90 days']+PREV.aging['90+ days'],'',0)}</td></tr>
+            <tr><td>Auto-pay adoption</td><td class="r">${PREV.autopayPct.toFixed(0)}%</td><td class="r">${CUR.autopayPct.toFixed(0)}%</td><td class="r">${delta(CUR.autopayPct,PREV.autopayPct,'pp',0)}</td></tr>
+          </tbody></table>
+        </div>
+        <div class="insight" style="background:var(--navy2)"><h4>Two signals beneath a flat surface</h4>
+          <p>Headline occupancy barely moved, but <b>${m.tenantTurnover} units</b> changed tenant in-month — real customer churn of <b>${(m.tenantTurnover/PREV.occupied*100).toFixed(1)}%</b> invisible at the unit level because vacancies <b>re-let the same month</b>. A strong demand signal.</p>
+          <p>Arrears are <b>aging into worse buckets</b>: accounts 60+ days late rose from <b>${PREV.aging['61–90 days']+PREV.aging['90+ days']}</b> to <b>${CUR.aging['61–90 days']+CUR.aging['90+ days']}</b>, with total balance roughly flat. Existing debt getting older, not growing.</p>
+        </div>
+      </div>`;
+  } else {
+    momBody.innerHTML = `<div class="stub"><div class="ic">↗</div><h3 style="margin-top:6px">Trend &amp; churn — awaiting a second snapshot</h3>
+      <p>Only one monthly snapshot exists for ${L.name} so far. Churn, retention and absorption trend populate automatically once the next rent roll is added — exactly as they did for Store All Central.</p></div>`;
+  }
+}
+
+function setLoc(k){ STATE.loc=k; STATE.month=null; render(); document.querySelector('.site-tabs-section').scrollIntoView({behavior:'smooth',block:'start'}); }
+function setMonth(mk){ STATE.month=mk; render(); }
+render();
+</script>
+</body>
+</html>
