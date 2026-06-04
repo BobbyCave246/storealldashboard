@@ -155,6 +155,16 @@ footer b{color:var(--ink)}
 .mom-stat .v{font-family:'Montserrat';font-weight:800;font-size:29px;line-height:1;margin:8px 0 4px;letter-spacing:-.035em;color:var(--navy2)}
 .mom-stat .d{font-size:12px;color:var(--muted)}
 .compare-tbl td.r{font-variant-numeric:tabular-nums;font-weight:700}
+/* gender split bar */
+.genderbar{display:flex;height:34px;border-radius:8px;overflow:hidden;border:1px solid var(--line);margin-bottom:14px}
+.genderbar .seg{display:flex;align-items:center;justify-content:center;font-family:'Montserrat';font-weight:800;font-size:12px;color:#fff;letter-spacing:.03em}
+.genderbar .seg.f{background:linear-gradient(90deg,var(--navy),var(--accent))}
+.genderbar .seg.m{background:linear-gradient(90deg,var(--teal),var(--accent2))}
+.genderlegend{display:flex;gap:20px;font-size:13px}
+.genderlegend .gi{display:flex;align-items:center;gap:8px;font-weight:600;color:var(--ink)}
+.genderlegend .sw{width:11px;height:11px;border-radius:3px;flex:none}
+.genderlegend .gi b{font-family:'Montserrat';color:var(--navy2)}
+.fill.amber{background:linear-gradient(90deg,var(--warn),#e0b35e)}
 </style>
 </head>
 <body>
@@ -299,9 +309,39 @@ footer b{color:var(--ink)}
     </div>
   </section>
 
-  <!-- 5. PAYMENTS -->
+  <!-- 5. DEMOGRAPHICS -->
   <section>
-    <div class="sec-head"><div class="sec-num">05</div><h2>Payment Health</h2>
+    <div class="sec-head"><div class="sec-num">05</div><h2>Customer Demographics</h2>
+      <p>Age profile and gender split of tenants, from date-of-birth on file.</p></div>
+    <div class="grid g3">
+      <div class="card">
+        <h3><span class="dot"></span>Age at a glance</h3>
+        <div class="bignum" id="ageMedian"></div><div class="cap">Median tenant age</div>
+        <div style="height:14px"></div>
+        <div class="bignum" id="ageMean"></div><div class="cap">Mean age &middot; range <span id="ageRange"></span></div>
+        <div class="note" id="ageCoverage"></div>
+      </div>
+      <div class="card" style="grid-column:span 2">
+        <h3><span class="dot"></span>Age distribution</h3>
+        <div id="agebands"></div>
+        <div class="note" id="ageNote2"></div>
+      </div>
+    </div>
+    <div style="height:16px"></div>
+    <div class="grid g2">
+      <div class="card">
+        <h3><span class="dot"></span>Gender split</h3>
+        <div id="genderbar" class="genderbar"></div>
+        <div id="genderlegend" class="genderlegend"></div>
+        <div class="note">From the gender field on each rented account.</div>
+      </div>
+      <div class="insight" id="demoInsight" style="background:var(--navy2)"></div>
+    </div>
+  </section>
+
+  <!-- 6. PAYMENTS -->
+  <section>
+    <div class="sec-head"><div class="sec-num">06</div><h2>Payment Health</h2>
       <p>"How many don't pay" — balances carried versus genuine delinquency.</p></div>
     <div class="grid g3">
       <div class="card">
@@ -325,21 +365,21 @@ footer b{color:var(--ink)}
 
   <!-- 6. FINANCIAL -->
   <section>
-    <div class="sec-head"><div class="sec-num">06</div><h2>Financial &amp; Pricing</h2>
+    <div class="sec-head"><div class="sec-num">07</div><h2>Financial &amp; Pricing</h2>
       <p>Blended performance per square foot and per unit.</p></div>
     <div class="grid g3" id="finrow"></div>
   </section>
 
   <!-- 7. STRATEGIC READ -->
   <section>
-    <div class="sec-head"><div class="sec-num">07</div><h2>Strategic Read</h2>
+    <div class="sec-head"><div class="sec-num">08</div><h2>Strategic Read</h2>
       <p>What this snapshot implies against the expansion framework.</p></div>
     <div class="insight" id="stratRead" style="background:var(--navy2)"></div>
   </section>
 
   <!-- MONTH OVER MONTH -->
   <section id="momSection">
-    <div class="sec-head"><div class="sec-num">08</div><h2>Month over Month</h2>
+    <div class="sec-head"><div class="sec-num">09</div><h2>Month over Month</h2>
       <p>Change since the previous snapshot — the metrics that need a series.</p></div>
     <div id="momBody"></div>
   </section>
@@ -365,7 +405,8 @@ const LOCATIONS = {
         corpUnits:107, indivUnits:352, corpPct:23.3, corpRent:33643, indivRent:85277, corpRentPct:28.3,
         corpArea:83, indivArea:56, corpLos:64.0, indivLos:48.5, top10:4.5,
         geoIndiv:{"St. Michael":85,"Christ Church":66,"St. James":48,"St. Thomas":22,"St. Philip":19,"St. George":16,"Other Barbados":10,"Overseas":68,"Unknown":18}, indivN:352,
-        balUnits:110, balPct:24.0, balTotal:40558, aging:{"Current / ahead":447,"1–30 days":8,"31–60 days":0,"61–90 days":3,"90+ days":1}, autopayPct:35.3
+        balUnits:110, balPct:24.0, balTotal:40558, aging:{"Current / ahead":447,"1–30 days":8,"31–60 days":0,"61–90 days":3,"90+ days":1}, autopayPct:35.3,
+        age:{valid:278,pct:61,mean:48,median:51,min:20,max:87,bands:{"<25":43,"25–34":42,"35–44":26,"45–54":51,"55–64":65,"65+":51},female:263,male:183}
       },
       "2026-06":{
         label:"June 2026", basis:"As of 1 June 2026",
@@ -378,6 +419,7 @@ const LOCATIONS = {
         corpArea:83, indivArea:56, corpLos:65.6, indivLos:49.0, top10:4.5,
         geoIndiv:{"St. Michael":82,"Christ Church":63,"St. James":48,"St. Thomas":21,"St. Philip":19,"St. George":16,"Other Barbados":11,"Overseas":69,"Unknown":22}, indivN:351,
         balUnits:112, balPct:24.5, balTotal:41266, aging:{"Current / ahead":435,"1–30 days":0,"31–60 days":10,"61–90 days":8,"90+ days":4}, autopayPct:35.2,
+        age:{valid:284,pct:62,mean:48,median:52,min:19,max:87,bands:{"<25":44,"25–34":43,"35–44":26,"45–54":52,"55–64":67,"65+":52},female:261,male:185},
         mom:{ prev:"May 2026", tenantTurnover:9, retentionPct:100.0, netUnits:1 }
       }
     }
@@ -395,7 +437,8 @@ const LOCATIONS = {
         corpUnits:59, indivUnits:203, corpPct:22.5, corpRent:18390, indivRent:48542, corpRentPct:27.5,
         corpArea:89, indivArea:57, corpLos:40.1, indivLos:37.4, top10:8.0,
         geoIndiv:{"Christ Church":84,"St. Michael":31,"St. Philip":16,"St. James":15,"St. George":3,"St. Thomas":3,"Other Barbados":7,"Overseas":39,"Unknown":5}, indivN:203,
-        balUnits:72, balPct:27.5, balTotal:24150, aging:{"Current / ahead":245,"1–30 days":0,"31–60 days":10,"61–90 days":5,"90+ days":2}, autopayPct:30.5
+        balUnits:72, balPct:27.5, balTotal:24150, aging:{"Current / ahead":245,"1–30 days":0,"31–60 days":10,"61–90 days":5,"90+ days":2}, autopayPct:30.5,
+        age:{valid:236,pct:90,mean:54,median:55,min:19,max:94,bands:{"<25":9,"25–34":13,"35–44":39,"45–54":58,"55–64":79,"65+":38},female:146,male:112}
       }
     }
   },
@@ -506,7 +549,8 @@ const LOCATIONS = {
                 "61–90 days": 2,
                 "90+ days": 4
         },
-        "autopayPct": 26.0
+        "autopayPct": 26.0,
+        "age": {"valid":119,"pct":48,"mean":33,"median":23,"min":20,"max":77,"bands":{"<25":71,"25–34":9,"35–44":12,"45–54":9,"55–64":11,"65+":7},"female":136,"male":98}
 }
     }
   }
@@ -662,6 +706,9 @@ function render(){
   document.getElementById('corridorNames').textContent = home.join(' / ');
   document.getElementById('overseaspct').textContent = Math.round(100*(CUR.geoIndiv["Overseas"]||0)/CUR.indivN)+'% (' + (CUR.geoIndiv["Overseas"]||0) + ' tenants)';
 
+  /* demographics */
+  renderDemographics(CUR);
+
   /* payments */
   document.getElementById('balunits').innerHTML = CUR.balUnits+'<small> / '+CUR.totalUnits+'</small>';
   document.getElementById('baltot').textContent = bbd(CUR.balTotal);
@@ -685,6 +732,49 @@ function render(){
 
   /* month over month */
   renderMoM(L, CUR, PREV, mkeys);
+}
+
+function renderDemographics(CUR){
+  const a = CUR.age;
+  if(!a){ return; }
+  document.getElementById('ageMedian').innerHTML = a.median+'<small> yrs</small>';
+  document.getElementById('ageMean').innerHTML = a.mean+'<small> yrs</small>';
+  document.getElementById('ageRange').textContent = a.min+'–'+a.max;
+  document.getElementById('ageCoverage').textContent = 'Based on '+a.valid+' tenants with date of birth on file ('+a.pct+'% of accounts).';
+  const bandMax = Math.max(...Object.values(a.bands));
+  const modal = Object.entries(a.bands).sort((x,y)=>y[1]-x[1])[0][0];
+  document.getElementById('agebands').innerHTML = Object.entries(a.bands).map(([k,v])=>{
+    const isMode = k===modal;
+    return `<div class="bar-row"><span class="lab">${k}</span><div class="track"><div class="${isMode?'fill amber':'fill teal'}" style="width:${bandMax?100*v/bandMax:0}%"></div></div><span class="num">${v}</span></div>`;
+  }).join('');
+  const young = (a.bands['<25']||0)+(a.bands['25–34']||0);
+  document.getElementById('ageNote2').textContent = `Largest band: ${modal}. Under 35s account for ${Math.round(100*young/a.valid)}% of tenants with DOB on file.`;
+  // gender
+  const gtot = a.female + a.male;
+  const fpct = gtot? a.female/gtot*100 : 0;
+  document.getElementById('genderbar').innerHTML = `
+    <div class="seg f" style="width:${fpct}%">${fpct>12?Math.round(fpct)+'%':''}</div>
+    <div class="seg m" style="width:${100-fpct}%">${(100-fpct)>12?Math.round(100-fpct)+'%':''}</div>`;
+  document.getElementById('genderlegend').innerHTML = `
+    <div class="gi"><span class="sw" style="background:var(--navy)"></span>Female &middot; <b>${a.female}</b></div>
+    <div class="gi"><span class="sw" style="background:var(--teal)"></span>Male &middot; <b>${a.male}</b></div>`;
+  document.getElementById('demoInsight').innerHTML = demoInsight(STATE.loc, a, young);
+}
+
+function demoInsight(loc, a, young){
+  const youngPct = Math.round(100*young/a.valid);
+  if(loc==='lears') return `
+    <h4>A markedly younger customer base</h4>
+    <p>Lears skews dramatically young: a <b>median age of ${a.median}</b> against ${'50s'} at the older sites, with under-35s making up <b>${youngPct}%</b> of tenants on file. This lines up with Lears being the newest facility, the shortest-tenure base, and the larger-format product.</p>
+    <p>It points to a different demand driver — likely younger households and small businesses in transition rather than long-settled storers. Worth confirming as DOB coverage improves (currently <b>${a.pct}%</b>).</p>`;
+  if(loc==='south') return `
+    <h4>The most settled, mature base</h4>
+    <p>South's tenants are the <b>oldest in the portfolio</b> (median ${a.median}), concentrated in the 45–64 bands. Combined with the highest DOB coverage (<b>${a.pct}%</b>) and longest local roots, this reads as a stable, established south-coast customer base.</p>
+    <p>Older, settled tenants tend to churn less — consistent with the steady occupancy — but are also less likely to be won by digital-first marketing.</p>`;
+  return `
+    <h4>A broad, middle-aged spread</h4>
+    <p>Central's tenants span the full range (${a.min}–${a.max}), with the largest groups in the 45–64 bands and a healthy under-35 tail (<b>${youngPct}%</b>). It's the most demographically balanced of the three sites.</p>
+    <p>DOB is on file for <b>${a.pct}%</b> of accounts; capturing it at sign-up across the board would sharpen this picture and the catchment view alongside it.</p>`;
 }
 
 function strategicRead(loc, CUR){
