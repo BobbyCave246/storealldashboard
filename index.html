@@ -9,37 +9,47 @@
 <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@500;600;700;800&family=Source+Sans+3:wght@400;500;600;700&display=swap" rel="stylesheet">
 <style>
 :root{
-  /* Cave Shepherd-inspired language: clean corporate blues, bright aqua trim, white retail-card surfaces */
-  --navy:#004b8d; --navy2:#003965; --ink:#1d2733; --paper:#f6fbfd; --paper2:#e7f0f5;
-  --accent:#00a9c7; --accent2:#7fd3df; --teal:#008b9b; --line:#d5e3ea;
-  --good:#2f7d5b; --warn:#b88620; --bad:#b5453a; --muted:#667784;
+  /* Store All brand language: primary red, black/charcoal dark UI, white surfaces, light-grey support */
+  --navy:#222222; --navy2:#111111; --ink:#111111; --paper:#ffffff; --paper2:#f2f2f2;
+  --accent:#E30613; --accent2:#f6a3a3; --teal:#b00010; --line:#e4e4e4;
+  --good:#2f7d5b; --warn:#b88620; --bad:#c20510; --muted:#6b6b6b;
   --card:#ffffff;
 }
 *{box-sizing:border-box;margin:0;padding:0}
 body{font-family:'Source Sans 3',Arial,sans-serif;background:var(--paper);color:var(--ink);
-  background-image:radial-gradient(circle at 14% 6%,rgba(0,169,199,.08),transparent 34%),radial-gradient(circle at 92% 0%,rgba(0,75,141,.07),transparent 34%);
+  background-image:radial-gradient(circle at 14% 6%,rgba(227,6,19,.05),transparent 34%),radial-gradient(circle at 92% 0%,rgba(17,17,17,.05),transparent 34%);
   -webkit-font-smoothing:antialiased;line-height:1.5}
 .wrap{max-width:1180px;margin:0 auto;padding:0 28px}
 
 /* ---- header ---- */
-header{background:linear-gradient(135deg,var(--navy2) 0%,var(--navy) 58%,#006fae 100%);color:#fff;padding:34px 0 74px;position:relative;overflow:hidden}
+header{background:linear-gradient(135deg,#111111 0%,#1c1c1c 55%,#2c2c2c 100%);color:#fff;padding:34px 0 0;position:relative;overflow:hidden}
 header::before{content:"";position:absolute;left:0;right:0;top:0;height:5px;background:linear-gradient(90deg,var(--accent),#ffffff66,var(--accent2))}
-header::after{content:"";position:absolute;inset:0;background-image:linear-gradient(135deg,transparent 62%,rgba(127,211,223,.18) 100%);pointer-events:none}
-.eyebrow{font-family:'Montserrat';text-transform:uppercase;letter-spacing:.24em;font-size:11px;color:#aee9f0;font-weight:700}
+header::after{content:"";position:absolute;inset:0;background-image:linear-gradient(135deg,transparent 60%,rgba(227,6,19,.16) 100%);pointer-events:none}
+.eyebrow{font-family:'Montserrat';text-transform:uppercase;letter-spacing:.24em;font-size:11px;color:#f6a3a3;font-weight:700}
 header h1{font-family:'Montserrat';font-weight:800;font-size:39px;line-height:1.04;letter-spacing:-.025em;margin:8px 0 5px}
-header h1 em{font-style:normal;font-weight:500;color:#dff8fb}
-.sub{font-size:15px;color:#d6e8f2;max-width:650px}
+header h1 em{font-style:normal;font-weight:500;color:#f0f0f0}
+.sub{font-size:15px;color:#d8d8d8;max-width:650px}
 .metabar{display:flex;flex-wrap:wrap;gap:26px;margin-top:22px;padding-top:18px;border-top:1px solid rgba(255,255,255,.18)}
-.metabar div{font-size:13px;color:#c8dbe7}
+.metabar div{font-size:13px;color:#cfcfcf}
 .metabar b{display:block;font-family:'Montserrat';font-size:16px;color:#fff;font-weight:700;margin-top:2px}
 .tabbar{display:flex;gap:6px;margin-top:24px;flex-wrap:wrap;position:relative;z-index:4}
-.tab{font-family:'Montserrat';font-weight:700;letter-spacing:.02em;font-size:13px;color:#c8dbe7;
+.tab{font-family:'Montserrat';font-weight:700;letter-spacing:.02em;font-size:13px;color:#cfcfcf;
   background:rgba(255,255,255,.08);border:1px solid rgba(255,255,255,.16);border-radius:9px 9px 0 0;
   padding:11px 20px 13px;cursor:pointer;transition:all .15s;margin-bottom:-1px}
 .tab:hover{color:#fff;background:rgba(255,255,255,.14)}
 .tab.active{color:var(--navy2);background:var(--paper);border-color:var(--paper);font-weight:800}
 .tab .loc-sub{display:block;font-size:11px;font-weight:500;opacity:.78;letter-spacing:.01em;margin-top:1px}
 .tab.active .loc-sub{opacity:.62}
+/* ---- section nav (docked to header bottom) ---- */
+.section-nav{margin-top:26px;border-bottom:1px solid rgba(255,255,255,.16)}
+.section-nav .tab{font-size:12.5px;padding:10px 16px 12px}
+.section-nav .tab.scope-sep{margin-left:14px;position:relative}
+.section-nav .tab.scope-sep::before{content:"";position:absolute;left:-8px;top:50%;transform:translateY(-50%);height:18px;width:1px;background:rgba(255,255,255,.22)}
+/* ---- panels ---- */
+.panel{display:none}
+.panel.active{display:block}
+#siteBand{display:none}
+#siteBand.show{display:block}
 /* month switcher */
 .mswitch{display:inline-flex;gap:4px;margin-left:14px;vertical-align:middle}
 .mbtn{font-family:'Montserrat';font-weight:700;font-size:11px;padding:4px 12px;border-radius:7px;cursor:pointer;border:1px solid var(--line);background:var(--card);color:var(--muted);transition:all .15s}
@@ -49,13 +59,13 @@ header h1 em{font-style:normal;font-weight:500;color:#dff8fb}
 /* ---- section ---- */
 section{padding:40px 0 8px}
 .sec-head{display:flex;align-items:center;gap:14px;margin-bottom:20px}
-.sec-num{font-family:'Montserrat';font-weight:800;font-size:12px;color:var(--accent);letter-spacing:.04em;border:1.5px solid var(--accent);border-radius:50%;min-width:32px;height:32px;padding:0 6px;display:grid;place-items:center;flex:none;background:#fff;box-shadow:0 4px 12px -8px rgba(0,169,199,.6)}
+.sec-num{font-family:'Montserrat';font-weight:800;font-size:12px;color:var(--accent);letter-spacing:.04em;border:1.5px solid var(--accent);border-radius:50%;min-width:32px;height:32px;padding:0 6px;display:grid;place-items:center;flex:none;background:#fff;box-shadow:0 4px 12px -8px rgba(227,6,19,.45)}
 .sec-head h2{font-family:'Montserrat';font-weight:800;font-size:24px;letter-spacing:-.02em;color:var(--navy2);line-height:1.1}
 .sec-head p{font-size:13.5px;color:var(--muted);margin-left:auto;max-width:430px;text-align:right;line-height:1.45}
 
 /* ---- hero stat row ---- */
-.hero{display:grid;grid-template-columns:repeat(4,1fr);gap:16px;margin-top:-44px;position:relative;z-index:3}
-.stat{background:var(--card);border:1px solid var(--line);border-radius:12px;padding:18px 18px 16px;box-shadow:0 10px 30px -20px rgba(0,57,101,.45)}
+.hero{display:grid;grid-template-columns:repeat(4,1fr);gap:16px;margin-top:0;position:relative;z-index:3}
+.stat{background:var(--card);border:1px solid var(--line);border-radius:12px;padding:18px 18px 16px;box-shadow:0 10px 30px -20px rgba(0,0,0,.30)}
 .stat .k{font-family:'Montserrat';text-transform:uppercase;letter-spacing:.11em;font-size:10.5px;color:var(--muted);font-weight:800}
 .stat .v{font-family:'Montserrat';font-weight:800;font-size:36px;line-height:1;margin:9px 0 3px;letter-spacing:-.035em;color:var(--navy2)}
 .stat .v small{font-size:17px;color:var(--muted);font-weight:600}
@@ -67,7 +77,7 @@ section{padding:40px 0 8px}
 .grid{display:grid;gap:16px}
 .g2{grid-template-columns:1fr 1fr}
 .g3{grid-template-columns:1.2fr 1fr 1fr}
-.card{background:var(--card);border:1px solid var(--line);border-radius:12px;padding:22px;box-shadow:0 8px 24px -24px rgba(0,57,101,.45)}
+.card{background:var(--card);border:1px solid var(--line);border-radius:12px;padding:22px;box-shadow:0 8px 24px -24px rgba(0,0,0,.30)}
 .card h3{font-family:'Montserrat';text-transform:uppercase;letter-spacing:.1em;font-size:11.5px;color:var(--navy);font-weight:800;margin-bottom:14px;display:flex;align-items:center;gap:8px}
 .card h3 .dot{width:7px;height:7px;border-radius:50%;background:var(--accent)}
 
@@ -80,9 +90,9 @@ section{padding:40px 0 8px}
 .bar-row{display:grid;grid-template-columns:120px 1fr auto;align-items:center;gap:12px;margin:9px 0;font-size:13px}
 .bar-row .lab{color:var(--ink);font-weight:600}
 .track{height:9px;background:var(--paper2);border-radius:6px;overflow:hidden}
-.fill{height:100%;border-radius:6px;background:linear-gradient(90deg,var(--navy),#2d8ec5)}
+.fill{height:100%;border-radius:6px;background:linear-gradient(90deg,var(--accent),var(--teal))}
 .fill.teal{background:linear-gradient(90deg,var(--teal),var(--accent2))}
-.fill.navy{background:linear-gradient(90deg,var(--navy2),#377bb3)}
+.fill.navy{background:linear-gradient(90deg,var(--navy2),#555555)}
 .bar-row .num{font-variant-numeric:tabular-nums;color:var(--muted);font-weight:700;min-width:38px;text-align:right}
 
 /* split donut legend */
@@ -106,8 +116,8 @@ td.r,th.r{text-align:right}
 /* insight callout */
 .insight{background:var(--navy);color:#fff;border-radius:12px;padding:22px 24px;position:relative;overflow:hidden}
 .insight::before{content:"";position:absolute;left:0;top:0;bottom:0;width:4px;background:var(--accent)}
-.insight h4{font-family:'Montserrat';font-style:normal;font-weight:700;font-size:18px;color:#dff8fb;margin-bottom:8px}
-.insight p{font-size:13.5px;color:#d6e8f2;margin-bottom:7px}
+.insight h4{font-family:'Montserrat';font-style:normal;font-weight:700;font-size:18px;color:#ffd9d9;margin-bottom:8px}
+.insight p{font-size:13.5px;color:#e0e0e0;margin-bottom:7px}
 .insight p:last-child{margin-bottom:0}
 .insight b{color:#fff;font-weight:800}
 
@@ -118,27 +128,27 @@ td.r,th.r{text-align:right}
 .stub p{font-size:13px;max-width:520px;margin:6px auto 0}
 
 .note{font-size:12px;color:var(--muted);margin-top:9px;font-style:italic}
-.flag{display:inline-flex;align-items:center;gap:6px;background:#e8f7fa;color:#006578;border-radius:7px;padding:4px 10px;font-size:11.5px;font-weight:700;margin-top:10px}
+.flag{display:inline-flex;align-items:center;gap:6px;background:#fdeaea;color:#b00010;border-radius:7px;padding:4px 10px;font-size:11.5px;font-weight:700;margin-top:10px}
 
 
 /* ---- portfolio overview and site drilldown controls ---- */
-.portfolio-overview{padding:0 0 10px;margin-top:-44px;position:relative;z-index:3}
+.portfolio-overview{padding:0 0 10px;margin-top:0;position:relative;z-index:3}
 .portfolio-overview .portfolio-hero{margin-top:0}
 .portfolio-head{margin-top:28px}
 .portfolio-support{align-items:stretch}
 .portfolio-table td:first-child{font-weight:700;color:var(--navy2)}
 .portfolio-table td.r{font-weight:700}
-.site-tabs-section{padding:34px 0 18px}
+.site-tabs-section{padding:8px 0 18px}
 .site-tabs-section .tabbar{margin-top:0;gap:8px}
-.site-tabs-section .tab{border-radius:12px;background:var(--card);border:1px solid var(--line);color:var(--navy2);margin-bottom:0;box-shadow:0 8px 22px -24px rgba(0,57,101,.45)}
-.site-tabs-section .tab:hover{border-color:var(--accent);background:#fafdff;color:var(--navy)}
-.site-tabs-section .tab.active{background:var(--navy);border-color:var(--navy);color:#fff}
-.site-tabs-section .tab.active .loc-sub{color:#dff8fb;opacity:.85}
-.site-meta{display:flex;flex-wrap:wrap;gap:24px;margin-top:14px;background:var(--card);border:1px solid var(--line);border-radius:12px;padding:14px 16px;box-shadow:0 8px 24px -26px rgba(0,57,101,.45)}
+.site-tabs-section .tab{border-radius:12px;background:var(--card);border:1px solid var(--line);color:var(--navy2);margin-bottom:0;box-shadow:0 8px 22px -24px rgba(0,0,0,.30)}
+.site-tabs-section .tab:hover{border-color:var(--accent);background:#fff5f5;color:var(--accent)}
+.site-tabs-section .tab.active{background:var(--accent);border-color:var(--accent);color:#fff}
+.site-tabs-section .tab.active .loc-sub{color:#ffe3e3;opacity:.9}
+.site-meta{display:flex;flex-wrap:wrap;gap:24px;margin-top:14px;background:var(--card);border:1px solid var(--line);border-radius:12px;padding:14px 16px;box-shadow:0 8px 24px -26px rgba(0,0,0,.30)}
 .site-meta div{font-size:12.5px;color:var(--muted)}
 .site-meta b{display:block;font-family:'Montserrat';font-size:15px;color:var(--navy2);font-weight:800;margin-top:2px}
 .site-hero{margin-top:0}
-@media(max-width:900px){.portfolio-overview{margin-top:-34px}.site-meta{gap:14px}.portfolio-table{font-size:12px}}
+@media(max-width:900px){.site-meta{gap:14px}.portfolio-table{font-size:12px}}
 
 footer{margin-top:46px;padding:26px 0 40px;border-top:1px solid var(--line);font-size:12px;color:var(--muted)}
 footer b{color:var(--ink)}
@@ -150,7 +160,7 @@ footer b{color:var(--ink)}
 .chg.down{background:#f6e2df;color:var(--bad)}
 .chg.flat{background:var(--paper2);color:var(--muted)}
 .mom-grid{display:grid;grid-template-columns:repeat(4,1fr);gap:16px}
-.mom-stat{background:var(--card);border:1px solid var(--line);border-radius:12px;padding:18px;box-shadow:0 8px 24px -24px rgba(0,57,101,.45)}
+.mom-stat{background:var(--card);border:1px solid var(--line);border-radius:12px;padding:18px;box-shadow:0 8px 24px -24px rgba(0,0,0,.30)}
 .mom-stat .k{font-family:'Montserrat';text-transform:uppercase;letter-spacing:.1em;font-size:10.5px;color:var(--muted);font-weight:800}
 .mom-stat .v{font-family:'Montserrat';font-weight:800;font-size:29px;line-height:1;margin:8px 0 4px;letter-spacing:-.035em;color:var(--navy2)}
 .mom-stat .d{font-size:12px;color:var(--muted)}
@@ -158,8 +168,8 @@ footer b{color:var(--ink)}
 /* gender split bar */
 .genderbar{display:flex;height:34px;border-radius:8px;overflow:hidden;border:1px solid var(--line);margin-bottom:14px}
 .genderbar .seg{display:flex;align-items:center;justify-content:center;font-family:'Montserrat';font-weight:800;font-size:12px;color:#fff;letter-spacing:.03em}
-.genderbar .seg.f{background:linear-gradient(90deg,var(--navy),var(--accent))}
-.genderbar .seg.m{background:linear-gradient(90deg,var(--teal),var(--accent2))}
+.genderbar .seg.f{background:linear-gradient(90deg,var(--accent),var(--teal))}
+.genderbar .seg.m{background:linear-gradient(90deg,#222222,#555555)}
 .genderlegend{display:flex;gap:20px;font-size:13px}
 .genderlegend .gi{display:flex;align-items:center;gap:8px;font-weight:600;color:var(--ink)}
 .genderlegend .sw{width:11px;height:11px;border-radius:3px;flex:none}
@@ -191,7 +201,7 @@ details.action-plan summary span.badge{margin-left:auto;background:var(--accent)
 .pri.p3{background:var(--paper2);color:var(--muted)}
 .action-item h5{font-family:'Montserrat';font-weight:800;font-size:13px;color:var(--navy2);margin-bottom:4px}
 .action-item p{font-size:13px;color:var(--muted);line-height:1.5}
-.action-item .atag{display:inline-flex;align-items:center;gap:5px;background:#e8f7fa;color:#006578;border-radius:6px;padding:3px 9px;font-size:11px;font-weight:700;margin-top:8px;margin-right:6px}
+.action-item .atag{display:inline-flex;align-items:center;gap:5px;background:#fdeaea;color:#b00010;border-radius:6px;padding:3px 9px;font-size:11px;font-weight:700;margin-top:8px;margin-right:6px}
 
 /* ---- 6-month payment trends ---- */
 .trend-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:18px;margin-top:4px}
@@ -200,13 +210,13 @@ details.action-plan summary span.badge{margin-left:auto;background:var(--accent)
 .trend-site-name small{font-weight:600;font-size:11px;color:var(--muted)}
 .trend-bars{display:flex;align-items:flex-end;gap:7px;height:104px;padding-top:18px}
 .trend-bar{flex:1;border-radius:5px 5px 0 0;position:relative;min-height:3px;background:linear-gradient(180deg,var(--accent),var(--teal));transition:height .3s}
-.trend-bar.port{background:linear-gradient(180deg,#2d8ec5,var(--navy))}
+.trend-bar.port{background:linear-gradient(180deg,var(--accent),var(--navy))}
 .trend-bar .tval{position:absolute;top:-17px;left:50%;transform:translateX(-50%);font-family:'Montserrat';font-weight:800;font-size:9.5px;color:var(--navy2);white-space:nowrap}
 .trend-bar .tmon{position:absolute;bottom:-17px;left:50%;transform:translateX(-50%);font-size:9px;color:var(--muted);font-weight:600}
 .trend-foot{display:flex;align-items:center;gap:8px;margin-top:24px;font-size:12px;color:var(--muted);font-weight:600}
 .trend-foot b{color:var(--navy2);font-family:'Montserrat'}
 .collect-row{display:flex;align-items:flex-end;gap:10px;height:90px;padding-top:16px;margin-top:4px}
-.collect-bar{flex:1;border-radius:5px 5px 0 0;background:linear-gradient(180deg,#7fd3df,var(--teal));position:relative;min-height:3px}
+.collect-bar{flex:1;border-radius:5px 5px 0 0;background:linear-gradient(180deg,var(--accent2),var(--teal));position:relative;min-height:3px}
 .collect-bar .cval{position:absolute;top:-16px;left:50%;transform:translateX(-50%);font-family:'Montserrat';font-weight:700;font-size:9.5px;color:var(--navy2);white-space:nowrap}
 .collect-bar .cmon{position:absolute;bottom:-16px;left:50%;transform:translateX(-50%);font-size:9px;color:var(--muted);font-weight:600}
 
@@ -214,7 +224,7 @@ details.action-plan summary span.badge{margin-left:auto;background:var(--accent)
 .sec-num{transition:all .18s}
 details.section-toggle>summary{border-radius:12px;transition:background .15s}
 details.section-toggle>summary:hover{background:var(--paper2)}
-details.section-toggle>summary:hover .sec-num{background:var(--accent);color:#fff;box-shadow:0 4px 12px -4px rgba(0,169,199,.5)}
+details.section-toggle>summary:hover .sec-num{background:var(--accent);color:#fff;box-shadow:0 4px 12px -4px rgba(227,6,19,.4)}
 details.section-toggle[open]>summary .sec-num{background:var(--accent);color:#fff}
 </style>
 </head>
@@ -231,12 +241,14 @@ details.section-toggle[open]>summary .sec-num{background:var(--accent);color:#ff
       <div>Sites covered<b>Central · South · Lears</b></div>
       <div>Data source<b>SiteLink rent roll + rental activity</b></div>
     </div>
+    <nav class="section-nav tabbar" id="sectionNav"></nav>
   </div>
 </header>
 
 <div class="wrap">
 
-  <!-- PORTFOLIO OVERVIEW -->
+  <!-- PANEL: OVERVIEW -->
+  <div class="panel" data-section="overview">
   <section class="portfolio-overview">
     <div class="hero portfolio-hero" id="portfolioHero"></div>
 
@@ -254,35 +266,33 @@ details.section-toggle[open]>summary .sec-num{background:var(--accent);color:#ff
       </div>
       <div class="insight" id="portfolioRead"></div>
     </div>
-
-    <!-- PORTFOLIO PAYMENT HEALTH -->
-    <details class="section-toggle" style="margin-top:36px">
-      <summary style="list-style:none;cursor:pointer;display:flex;align-items:center;gap:12px;padding:4px 0;user-select:none">
-        <div class="sec-head" style="margin:0;flex:1;pointer-events:none">
-          <div class="sec-num" style="transition:transform .2s">00b</div>
-          <h2>Portfolio Payment Health</h2>
-          <p style="display:block">6-month trends, aggregated method mix &amp; autopay action plan — click to expand.</p>
-        </div>
-      </summary>
-      <div style="margin-top:16px" id="portfolioPayments"></div>
-    </details>
   </section>
+  </div>
 
-  <!-- SITE DRILLDOWN TABS -->
-  <section class="site-tabs-section">
-    <div class="sec-head"><div class="sec-num">↳</div><h2>Site Detail</h2>
-      <p>Choose a site to drill into occupancy, tenure, customer split, geography, payments and pricing.</p></div>
-    <div class="tabbar" id="tabbar"></div>
-    <div class="site-meta">
-      <div>Selected period<b id="m-period">June 2026</b><span class="mswitch" id="mswitch"></span></div>
-      <div>Selected site units<b id="m-units">461</b></div>
-      <div>Snapshot basis<b id="m-basis">As of 1 June 2026</b></div>
-    </div>
+  <!-- PANEL: PORTFOLIO PAYMENTS -->
+  <div class="panel" data-section="portfolio-payments">
+  <section>
+    <div class="sec-head"><div class="sec-num">$</div><h2>Portfolio Payment Health</h2>
+      <p>6-month trends, aggregated method mix &amp; autopay action plan across all three sites.</p></div>
+    <div id="portfolioPayments"></div>
   </section>
+  </div>
 
-  <!-- SITE HERO STATS -->
-  <div class="hero site-hero" id="hero"></div>
+  <!-- SITE CONTEXT BAND (shown only for per-site sections) -->
+  <div id="siteBand">
+    <section class="site-tabs-section">
+      <div class="tabbar" id="tabbar"></div>
+      <div class="site-meta">
+        <div>Selected period<b id="m-period">June 2026</b><span class="mswitch" id="mswitch"></span></div>
+        <div>Selected site units<b id="m-units">461</b></div>
+        <div>Snapshot basis<b id="m-basis">As of 1 June 2026</b></div>
+      </div>
+    </section>
+    <div class="hero site-hero" id="hero"></div>
+  </div>
 
+  <!-- PANEL: OCCUPANCY -->
+  <div class="panel" data-section="occupancy">
   <!-- 1. OCCUPANCY -->
   <section>
     <div class="sec-head"><div class="sec-num">01</div><h2>Occupancy &amp; Utilisation</h2>
@@ -311,7 +321,10 @@ details.section-toggle[open]>summary .sec-num{background:var(--accent);color:#ff
       </div>
     </div>
   </section>
+  </div>
 
+  <!-- PANEL: TENURE -->
+  <div class="panel" data-section="tenure">
   <!-- 2. TENURE -->
   <section>
     <div class="sec-head"><div class="sec-num">02</div><h2>Tenure &amp; Length of Stay</h2>
@@ -330,7 +343,10 @@ details.section-toggle[open]>summary .sec-num{background:var(--accent);color:#ff
       </div>
     </div>
   </section>
+  </div>
 
+  <!-- PANEL: SEGMENTATION -->
+  <div class="panel" data-section="segmentation">
   <!-- 3. SEGMENT -->
   <section>
     <div class="sec-head"><div class="sec-num">03</div><h2>Customer Segmentation</h2>
@@ -353,7 +369,10 @@ details.section-toggle[open]>summary .sec-num{background:var(--accent);color:#ff
       </div>
     </div>
   </section>
+  </div>
 
+  <!-- PANEL: GEOGRAPHY -->
+  <div class="panel" data-section="geography">
   <!-- 4. GEOGRAPHY -->
   <section>
     <div class="sec-head"><div class="sec-num">04</div><h2>Where the Individuals Are</h2>
@@ -367,11 +386,14 @@ details.section-toggle[open]>summary .sec-num{background:var(--accent);color:#ff
         <h4>Catchment is local</h4>
         <p>The <span id="corridorNames">St. Michael / Christ Church / St. James</span> corridor accounts for <b id="corridor"></b> of individual tenants — fitting the facility's location.</p>
         <p><b id="overseaspct"></b> are overseas — likely diaspora or second-home owners storing belongings on-island. A distinctive demand stream worth tracking separately.</p>
-        <p class="note" style="color:#9aa6bd">Parish names arrive as free text and were normalised for this view; standardising them at sign-up would make this automatic.</p>
+        <p class="note" style="color:#8a8a8a">Parish names arrive as free text and were normalised for this view; standardising them at sign-up would make this automatic.</p>
       </div>
     </div>
   </section>
+  </div>
 
+  <!-- PANEL: DEMOGRAPHICS -->
+  <div class="panel" data-section="demographics">
   <!-- 5. DEMOGRAPHICS -->
   <section>
     <div class="sec-head"><div class="sec-num">05</div><h2>Customer Demographics</h2>
@@ -401,7 +423,10 @@ details.section-toggle[open]>summary .sec-num{background:var(--accent);color:#ff
       <div class="insight" id="demoInsight" style="background:var(--navy2)"></div>
     </div>
   </section>
+  </div>
 
+  <!-- PANEL: PAYMENTS -->
+  <div class="panel" data-section="payments">
   <!-- 6. PAYMENTS -->
   <section>
     <div class="sec-head"><div class="sec-num">06</div><h2>Payment Health</h2>
@@ -427,27 +452,37 @@ details.section-toggle[open]>summary .sec-num{background:var(--accent);color:#ff
     <div id="pmSpacer" style="height:16px;display:none"></div>
     <div class="grid g2" id="pmSection"></div>
   </section>
+  </div>
 
-  <!-- 6. FINANCIAL -->
+  <!-- PANEL: FINANCIAL -->
+  <div class="panel" data-section="financial">
+  <!-- 7. FINANCIAL -->
   <section>
     <div class="sec-head"><div class="sec-num">07</div><h2>Financial &amp; Pricing</h2>
       <p>Blended performance per square foot and per unit.</p></div>
     <div class="grid g3" id="finrow"></div>
   </section>
+  </div>
 
-  <!-- 7. STRATEGIC READ -->
+  <!-- PANEL: STRATEGIC -->
+  <div class="panel" data-section="strategic">
+  <!-- 8. STRATEGIC READ -->
   <section>
     <div class="sec-head"><div class="sec-num">08</div><h2>Strategic Read</h2>
       <p>What this snapshot implies against the expansion framework.</p></div>
     <div class="insight" id="stratRead" style="background:var(--navy2)"></div>
   </section>
+  </div>
 
-  <!-- MONTH OVER MONTH -->
+  <!-- PANEL: MONTH OVER MONTH -->
+  <div class="panel" data-section="mom">
+  <!-- 9. MONTH OVER MONTH -->
   <section id="momSection">
     <div class="sec-head"><div class="sec-num">09</div><h2>Month over Month</h2>
       <p>Change since the previous snapshot — the metrics that need a series.</p></div>
     <div id="momBody"></div>
   </section>
+  </div>
 
   <footer class="wrap" style="padding-left:0;padding-right:0">
     <b>Store All Barbados — Management Dashboard.</b> Generated from SiteLink rent roll and rental-activity exports. Store All Central: two snapshots (May &amp; June 2026). Store All South: June 2026 (occupancy from May activity). Store All Lears: June 2026. Customer churn is measured by tenant change on units rented in both periods. Figures are operational indicators, not audited financials.
@@ -691,7 +726,22 @@ const delta = (cur,prev,unit="",dp=1) => {
   const up = d>0; return `<span class="chg ${up?'up':'down'}">${up?"▲":"▼"} ${Math.abs(d).toFixed(dp)}${unit}</span>`;
 };
 
-let STATE = { loc:"central", month:null };
+/* ===== Section navigation. scope:'portfolio' hides the site bar; 'site' shows it. ===== */
+const SECTIONS = [
+  {id:'overview',           label:'Overview',          scope:'portfolio'},
+  {id:'portfolio-payments', label:'Portfolio Payments',scope:'portfolio'},
+  {id:'occupancy',          label:'Occupancy',         scope:'site'},
+  {id:'tenure',             label:'Tenure',            scope:'site'},
+  {id:'segmentation',       label:'Segmentation',      scope:'site'},
+  {id:'geography',          label:'Geography',         scope:'site'},
+  {id:'demographics',       label:'Demographics',      scope:'site'},
+  {id:'payments',           label:'Payments',          scope:'site'},
+  {id:'financial',          label:'Financial',         scope:'site'},
+  {id:'strategic',          label:'Strategic',         scope:'site'},
+  {id:'mom',                label:'Month over Month',  scope:'site'}
+];
+
+let STATE = { loc:"central", month:null, section:"overview" };
 
 function latestSnapshot(L){
   const keys = Object.keys(L.months).sort();
@@ -755,7 +805,7 @@ function renderPaymentTrend(){
   if(!T) return '';
   const months = T.months;
   const n = months.length;
-  const siteColors = { "Central":"linear-gradient(180deg,var(--accent),var(--teal))", "South":"linear-gradient(180deg,#7fd3df,var(--teal))", "Lears":"linear-gradient(180deg,#5bb8d6,var(--navy))" };
+  const siteColors = { "Central":"linear-gradient(180deg,var(--accent),var(--teal))", "South":"linear-gradient(180deg,#444444,#222222)", "Lears":"linear-gradient(180deg,#9a9a9a,#6b6b6b)" };
 
   // per-site autopay % trajectory
   const apCeil = 40; // % axis ceiling so 22–34% differences are visible
@@ -809,10 +859,10 @@ function renderPortfolioPayments(){
 
   // Aggregate latest snapshot paymentMethods across all sites
   const typeGrad = {
-    autopay:'background:linear-gradient(90deg,var(--good),#62a074)',
-    online: 'background:linear-gradient(90deg,var(--navy),#2d8ec5)',
-    card:   'background:linear-gradient(90deg,var(--warn),#e0b35e)',
-    manual: 'background:linear-gradient(90deg,var(--muted),#99aab5)'
+    autopay:'background:linear-gradient(90deg,var(--accent),var(--teal))',
+    online: 'background:linear-gradient(90deg,#222222,#444444)',
+    card:   'background:linear-gradient(90deg,#7a7a7a,#9a9a9a)',
+    manual: 'background:linear-gradient(90deg,#b5b5b5,#cfcfcf)'
   };
   const typeLabel = {autopay:'Autopay',online:'Online / bank',card:'Manual card',manual:'Cash / cheque'};
 
@@ -880,7 +930,7 @@ function renderPortfolioPayments(){
           <tbody>${aggArr.map(m=>`
             <tr>
               <td style="font-weight:600">${m.label}</td>
-              <td><span class="pill ${m.type==='autopay'?'full':m.type==='online'?'near':''}" style="${m.type==='card'?'background:#fff3e0;color:#7a5000':m.type==='manual'?'background:var(--paper2);color:var(--muted)':''}">${typeLabel[m.type]||m.type}</span></td>
+              <td><span class="pill ${m.type==='autopay'?'full':m.type==='online'?'near':''}" style="${m.type==='card'?'background:#ededed;color:#444444':m.type==='manual'?'background:var(--paper2);color:var(--muted)':''}">${typeLabel[m.type]||m.type}</span></td>
               <td class="r mono">${m.units}</td>
               <td class="r mono">${pct(m.units)}%</td>
               <td class="r mono">${bbd(m.amount)}</td>
@@ -960,6 +1010,12 @@ function render(){
 
   renderPortfolio();
 
+  /* section nav (docked to header) */
+  document.getElementById('sectionNav').innerHTML = SECTIONS.map((s,i)=>{
+    const sep = (i>0 && s.scope==='site' && SECTIONS[i-1].scope!=='site') ? ' scope-sep' : '';
+    return `<button class="tab${s.id===STATE.section?' active':''}${sep}" onclick="setSection('${s.id}')">${s.label}</button>`;
+  }).join('');
+
   /* tabs */
   document.getElementById('tabbar').innerHTML = Object.entries(LOCATIONS).map(([k,v])=>
     `<button class="tab ${k===STATE.loc?'active':''}" onclick="setLoc('${k}')">${v.name}<span class="loc-sub">${v.sub}</span></button>`).join('');
@@ -1004,16 +1060,16 @@ function render(){
   const segTotal = CUR.indivUnits + CUR.corpUnits;
   const indivFrac = CUR.indivUnits/segTotal*100;
   document.getElementById('segDonut').innerHTML = `
-    <circle cx="21" cy="21" r="15.9155" fill="none" stroke="#e7f0f5" stroke-width="6"></circle>
-    <circle cx="21" cy="21" r="15.9155" fill="none" stroke="#00a9c7" stroke-width="6" stroke-dasharray="${indivFrac} ${100-indivFrac}" stroke-dashoffset="25"></circle>
-    <circle cx="21" cy="21" r="15.9155" fill="none" stroke="#004b8d" stroke-width="6" stroke-dasharray="${100-indivFrac} ${indivFrac}" stroke-dashoffset="${25 - indivFrac}"></circle>
-    <text x="21" y="20.5" text-anchor="middle" font-size="6.5" font-family="Montserrat" font-weight="600" fill="#003965">${segTotal}</text>
-    <text x="21" y="25.5" text-anchor="middle" font-size="2.6" font-family="Source Sans 3" fill="#667784" letter-spacing="0.1">RENTED</text>`;
+    <circle cx="21" cy="21" r="15.9155" fill="none" stroke="#f2f2f2" stroke-width="6"></circle>
+    <circle cx="21" cy="21" r="15.9155" fill="none" stroke="#E30613" stroke-width="6" stroke-dasharray="${indivFrac} ${100-indivFrac}" stroke-dashoffset="25"></circle>
+    <circle cx="21" cy="21" r="15.9155" fill="none" stroke="#222222" stroke-width="6" stroke-dasharray="${100-indivFrac} ${indivFrac}" stroke-dashoffset="${25 - indivFrac}"></circle>
+    <text x="21" y="20.5" text-anchor="middle" font-size="6.5" font-family="Montserrat" font-weight="600" fill="#111111">${segTotal}</text>
+    <text x="21" y="25.5" text-anchor="middle" font-size="2.6" font-family="Source Sans 3" fill="#6b6b6b" letter-spacing="0.1">RENTED</text>`;
   document.getElementById('segLegend').innerHTML = `
-    <div class="li"><span class="sw" style="background:#00a9c7"></span>Individual<span class="r">${CUR.indivUnits} units &middot; ${(100-CUR.corpPct).toFixed(0)}%</span></div>
-    <div class="li"><span class="sw" style="background:#004b8d"></span>Corporate<span class="r">${CUR.corpUnits} units &middot; ${CUR.corpPct.toFixed(0)}%</span></div>
-    <div class="li"><span class="sw" style="background:#00a9c7;opacity:.4"></span>Individual rent<span class="r">${bbdk(CUR.indivRent)}</span></div>
-    <div class="li"><span class="sw" style="background:#004b8d;opacity:.4"></span>Corporate rent<span class="r">${bbdk(CUR.corpRent)}</span></div>`;
+    <div class="li"><span class="sw" style="background:#E30613"></span>Individual<span class="r">${CUR.indivUnits} units &middot; ${(100-CUR.corpPct).toFixed(0)}%</span></div>
+    <div class="li"><span class="sw" style="background:#222222"></span>Corporate<span class="r">${CUR.corpUnits} units &middot; ${CUR.corpPct.toFixed(0)}%</span></div>
+    <div class="li"><span class="sw" style="background:#E30613;opacity:.4"></span>Individual rent<span class="r">${bbdk(CUR.indivRent)}</span></div>
+    <div class="li"><span class="sw" style="background:#222222;opacity:.4"></span>Corporate rent<span class="r">${bbdk(CUR.corpRent)}</span></div>`;
   document.getElementById('segTable').innerHTML = `
     <tr><td>Units</td><td class="r mono">${CUR.indivUnits}</td><td class="r mono">${CUR.corpUnits}</td></tr>
     <tr><td>Avg unit size</td><td class="r mono">${CUR.indivArea} sf</td><td class="r mono">${CUR.corpArea} sf</td></tr>
@@ -1086,8 +1142,8 @@ function renderDemographics(CUR){
     <div class="seg f" style="width:${fpct}%">${fpct>12?Math.round(fpct)+'%':''}</div>
     <div class="seg m" style="width:${100-fpct}%">${(100-fpct)>12?Math.round(100-fpct)+'%':''}</div>`;
   document.getElementById('genderlegend').innerHTML = `
-    <div class="gi"><span class="sw" style="background:var(--navy)"></span>Female &middot; <b>${a.female}</b></div>
-    <div class="gi"><span class="sw" style="background:var(--teal)"></span>Male &middot; <b>${a.male}</b></div>`;
+    <div class="gi"><span class="sw" style="background:var(--accent)"></span>Female &middot; <b>${a.female}</b></div>
+    <div class="gi"><span class="sw" style="background:#222222"></span>Male &middot; <b>${a.male}</b></div>`;
   document.getElementById('demoInsight').innerHTML = demoInsight(STATE.loc, a, young);
 }
 
@@ -1170,10 +1226,10 @@ function renderPaymentMethods(CUR){
   const totalAmount = ms.reduce((s,m)=>s+m.amount,0);
   const maxUnits    = Math.max(...ms.map(m=>m.units));
   const typeGrad = {
-    autopay:'background:linear-gradient(90deg,var(--good),#62a074)',
-    online: 'background:linear-gradient(90deg,var(--navy),#2d8ec5)',
-    card:   'background:linear-gradient(90deg,var(--warn),#e0b35e)',
-    manual: 'background:linear-gradient(90deg,var(--muted),#99aab5)'
+    autopay:'background:linear-gradient(90deg,var(--accent),var(--teal))',
+    online: 'background:linear-gradient(90deg,#222222,#444444)',
+    card:   'background:linear-gradient(90deg,#7a7a7a,#9a9a9a)',
+    manual: 'background:linear-gradient(90deg,#b5b5b5,#cfcfcf)'
   };
   const occupied    = CUR.occupied;
   const coverage    = Math.round(100*totalUnits/occupied);
@@ -1192,7 +1248,7 @@ function renderPaymentMethods(CUR){
         <tbody>${ms.map(m=>`
           <tr>
             <td style="font-weight:600">${m.label}</td>
-            <td><span class="pill ${m.type==='autopay'?'full':m.type==='online'?'near':''}" style="${m.type==='card'?'background:#fff3e0;color:#7a5000':m.type==='manual'?'background:var(--paper2);color:var(--muted)':''}">${m.type==='autopay'?'Autopay':m.type==='online'?'Online':m.type==='card'?'Card':'Cash/cheque'}</span></td>
+            <td><span class="pill ${m.type==='autopay'?'full':m.type==='online'?'near':''}" style="${m.type==='card'?'background:#ededed;color:#444444':m.type==='manual'?'background:var(--paper2);color:var(--muted)':''}">${m.type==='autopay'?'Autopay':m.type==='online'?'Online':m.type==='card'?'Card':'Cash/cheque'}</span></td>
             <td class="r mono">${m.units}</td>
             <td class="r mono">${pctOcc(m.units)}%</td>
             <td class="r mono">${bbd(m.amount)}</td>
@@ -1212,9 +1268,19 @@ function renderPaymentMethods(CUR){
     </div>`;
 }
 
-function setLoc(k){ STATE.loc=k; STATE.month=null; render(); document.querySelector('.site-tabs-section').scrollIntoView({behavior:'smooth',block:'start'}); }
-function setMonth(mk){ STATE.month=mk; render(); }
+function applySection(){
+  const cur = SECTIONS.find(s=>s.id===STATE.section) || SECTIONS[0];
+  document.querySelectorAll('.panel').forEach(p=>
+    p.classList.toggle('active', p.getAttribute('data-section')===cur.id));
+  document.getElementById('siteBand').classList.toggle('show', cur.scope==='site');
+  document.querySelectorAll('#sectionNav .tab').forEach((b,i)=>
+    b.classList.toggle('active', SECTIONS[i] && SECTIONS[i].id===cur.id));
+}
+function setSection(id){ STATE.section=id; applySection(); window.scrollTo({top:0,behavior:'smooth'}); }
+function setLoc(k){ STATE.loc=k; STATE.month=null; render(); applySection(); }
+function setMonth(mk){ STATE.month=mk; render(); applySection(); }
 render();
+applySection();
 </script>
 </body>
 </html>
