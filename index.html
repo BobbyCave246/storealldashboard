@@ -361,6 +361,8 @@ footer b{color:var(--ink)}
         <div class="flag">Lever &middot; raising this directly reduces carried balances</div>
       </div>
     </div>
+    <div id="pmSpacer" style="height:16px;display:none"></div>
+    <div class="grid g2" id="pmSection"></div>
   </section>
 
   <!-- 6. FINANCIAL -->
@@ -406,7 +408,21 @@ const LOCATIONS = {
         corpArea:83, indivArea:56, corpLos:64.0, indivLos:48.5, top10:4.5,
         geoIndiv:{"St. Michael":85,"Christ Church":66,"St. James":48,"St. Thomas":22,"St. Philip":19,"St. George":16,"Other Barbados":10,"Overseas":68,"Unknown":18}, indivN:352,
         balUnits:110, balPct:24.0, balTotal:40558, aging:{"Current / ahead":447,"1–30 days":8,"31–60 days":0,"61–90 days":3,"90+ days":1}, autopayPct:35.3,
-        age:{valid:278,pct:61,mean:48,median:51,min:20,max:87,bands:{"<25":43,"25–34":42,"35–44":26,"45–54":51,"55–64":65,"65+":51},female:263,male:183}
+        age:{valid:278,pct:61,mean:48,median:51,min:20,max:87,bands:{"<25":43,"25–34":42,"35–44":26,"45–54":51,"55–64":65,"65+":51},female:263,male:183},
+        paymentMethods:{
+          period:"May 2026",
+          methods:[
+            {label:"Plug & Pay",    units:151, amount:45988.96, type:"autopay"},
+            {label:"Money Order",   units:95,  amount:47493.20, type:"manual"},
+            {label:"Bank Transfer", units:56,  amount:21219.11, type:"online"},
+            {label:"Cash",          units:30,  amount:10385.33, type:"manual"},
+            {label:"Check",         units:20,  amount:8225.78,  type:"manual"},
+            {label:"Visa",          units:17,  amount:6990.36,  type:"card"},
+            {label:"Master Card",   units:8,   amount:1773.09,  type:"card"},
+            {label:"Internet",      units:5,   amount:3130.00,  type:"online"},
+            {label:"Debit Card",    units:1,   amount:25.96,    type:"card"}
+          ]
+        }
       },
       "2026-06":{
         label:"June 2026", basis:"As of 1 June 2026",
@@ -420,7 +436,20 @@ const LOCATIONS = {
         geoIndiv:{"St. Michael":82,"Christ Church":63,"St. James":48,"St. Thomas":21,"St. Philip":19,"St. George":16,"Other Barbados":11,"Overseas":69,"Unknown":22}, indivN:351,
         balUnits:112, balPct:24.5, balTotal:41266, aging:{"Current / ahead":435,"1–30 days":0,"31–60 days":10,"61–90 days":8,"90+ days":4}, autopayPct:35.2,
         age:{valid:284,pct:62,mean:48,median:52,min:19,max:87,bands:{"<25":44,"25–34":43,"35–44":26,"45–54":52,"55–64":67,"65+":52},female:261,male:185},
-        mom:{ prev:"May 2026", tenantTurnover:9, retentionPct:100.0, netUnits:1 }
+        mom:{ prev:"May 2026", tenantTurnover:9, retentionPct:100.0, netUnits:1 },
+        paymentMethods:{
+          period:"June 2026",
+          methods:[
+            {label:"Plug & Pay",    units:145, amount:43696.97, type:"autopay"},
+            {label:"Money Order",   units:39,  amount:16962.85, type:"manual"},
+            {label:"Bank Transfer", units:31,  amount:13283.08, type:"online"},
+            {label:"Cash",          units:20,  amount:6980.54,  type:"manual"},
+            {label:"Visa",          units:9,   amount:2662.04,  type:"card"},
+            {label:"Check",         units:7,   amount:2984.97,  type:"manual"},
+            {label:"Master Card",   units:5,   amount:1290.00,  type:"card"},
+            {label:"Internet",      units:1,   amount:535.00,   type:"online"}
+          ]
+        }
       }
     }
   },
@@ -438,7 +467,19 @@ const LOCATIONS = {
         corpArea:89, indivArea:57, corpLos:40.1, indivLos:37.4, top10:8.0,
         geoIndiv:{"Christ Church":84,"St. Michael":31,"St. Philip":16,"St. James":15,"St. George":3,"St. Thomas":3,"Other Barbados":7,"Overseas":39,"Unknown":5}, indivN:203,
         balUnits:72, balPct:27.5, balTotal:24150, aging:{"Current / ahead":245,"1–30 days":0,"31–60 days":10,"61–90 days":5,"90+ days":2}, autopayPct:30.5,
-        age:{valid:236,pct:90,mean:54,median:55,min:19,max:94,bands:{"<25":9,"25–34":13,"35–44":39,"45–54":58,"55–64":79,"65+":38},female:146,male:112}
+        age:{valid:236,pct:90,mean:54,median:55,min:19,max:94,bands:{"<25":9,"25–34":13,"35–44":39,"45–54":58,"55–64":79,"65+":38},female:146,male:112},
+        paymentMethods:{
+          period:"June 2026",
+          methods:[
+            {label:"Plug & Pay",    units:62,  amount:17145.64, type:"autopay"},
+            {label:"Money Order",   units:27,  amount:11544.35, type:"manual"},
+            {label:"Bank Transfer", units:19,  amount:4696.95,  type:"online"},
+            {label:"Cash",          units:11,  amount:5020.45,  type:"manual"},
+            {label:"Check",         units:8,   amount:2901.72,  type:"manual"},
+            {label:"Visa",          units:5,   amount:2272.00,  type:"card"},
+            {label:"Master Card",   units:3,   amount:954.37,   type:"card"}
+          ]
+        }
       }
     }
   },
@@ -550,7 +591,20 @@ const LOCATIONS = {
                 "90+ days": 4
         },
         "autopayPct": 26.0,
-        "age": {"valid":119,"pct":48,"mean":33,"median":23,"min":20,"max":77,"bands":{"<25":71,"25–34":9,"35–44":12,"45–54":9,"55–64":11,"65+":7},"female":136,"male":98}
+        "age": {"valid":119,"pct":48,"mean":33,"median":23,"min":20,"max":77,"bands":{"<25":71,"25–34":9,"35–44":12,"45–54":9,"55–64":11,"65+":7},"female":136,"male":98},
+        "paymentMethods": {
+          "period": "June 2026",
+          "methods": [
+            {"label":"Plug & Pay",    "units":59, "amount":24594.00, "type":"autopay"},
+            {"label":"Money Order",   "units":28, "amount":11074.99, "type":"manual"},
+            {"label":"Visa",          "units":13, "amount":9020.44,  "type":"card"},
+            {"label":"Bank Transfer", "units":13, "amount":6295.53,  "type":"online"},
+            {"label":"Cash",          "units":10, "amount":4996.45,  "type":"manual"},
+            {"label":"Check",         "units":6,  "amount":4147.62,  "type":"manual"},
+            {"label":"Master Card",   "units":5,  "amount":1825.00,  "type":"card"},
+            {"label":"Internet",      "units":1,  "amount":535.00,   "type":"online"}
+          ]
+        }
 }
     }
   }
@@ -720,6 +774,7 @@ function render(){
   const late60 = CUR.aging['61–90 days']+CUR.aging['90+ days'];
   document.getElementById('ageNote').textContent = (CUR.aging['31–60 days']+late60)+' accounts meaningfully late (60+ days: '+late60+').';
   document.getElementById('autopay').innerHTML = CUR.autopayPct.toFixed(0)+'<small>%</small>';
+  renderPaymentMethods(CUR);
 
   /* financial */
   document.getElementById('finrow').innerHTML = `
@@ -827,6 +882,55 @@ function renderMoM(L, CUR, PREV, mkeys){
     momBody.innerHTML = `<div class="stub"><div class="ic">↗</div><h3 style="margin-top:6px">Trend &amp; churn — awaiting a second snapshot</h3>
       <p>Only one monthly snapshot exists for ${L.name} so far. Churn, retention and absorption trend populate automatically once the next rent roll is added — exactly as they did for Store All Central.</p></div>`;
   }
+}
+
+function renderPaymentMethods(CUR){
+  const pmSection = document.getElementById('pmSection');
+  const pmSpacer  = document.getElementById('pmSpacer');
+  if(!CUR.paymentMethods){ pmSection.innerHTML=''; pmSpacer.style.display='none'; return; }
+  pmSpacer.style.display='';
+  const pm = CUR.paymentMethods;
+  const ms = pm.methods;
+  const totalUnits  = ms.reduce((s,m)=>s+m.units,0);
+  const totalAmount = ms.reduce((s,m)=>s+m.amount,0);
+  const maxUnits    = Math.max(...ms.map(m=>m.units));
+  const typeGrad = {
+    autopay:'background:linear-gradient(90deg,var(--good),#62a074)',
+    online: 'background:linear-gradient(90deg,var(--navy),#2d8ec5)',
+    card:   'background:linear-gradient(90deg,var(--warn),#e0b35e)',
+    manual: 'background:linear-gradient(90deg,var(--muted),#99aab5)'
+  };
+  const autopayU = ms.filter(m=>m.type==='autopay').reduce((s,m)=>s+m.units,0);
+  const onlineU  = ms.filter(m=>m.type==='online').reduce((s,m)=>s+m.units,0);
+  const cardU    = ms.filter(m=>m.type==='card').reduce((s,m)=>s+m.units,0);
+  const manualU  = ms.filter(m=>m.type==='manual').reduce((s,m)=>s+m.units,0);
+  const autopayAmt = ms.filter(m=>m.type==='autopay').reduce((s,m)=>s+m.amount,0);
+  const pctA = n => Math.round(100*n/totalUnits);
+  pmSection.innerHTML = `
+    <div class="card">
+      <h3><span class="dot"></span>Payment methods &mdash; ${pm.period} receipts</h3>
+      <table style="margin-bottom:8px">
+        <thead><tr><th>Method</th><th>Type</th><th class="r">Units</th><th class="r">Amount</th><th class="r">Share</th></tr></thead>
+        <tbody>${ms.map(m=>`
+          <tr>
+            <td style="font-weight:600">${m.label}</td>
+            <td><span class="pill ${m.type==='autopay'?'full':m.type==='online'?'near':''}" style="${m.type==='card'?'background:#fff3e0;color:#7a5000':m.type==='manual'?'background:var(--paper2);color:var(--muted)':''}">${m.type==='autopay'?'Autopay':m.type==='online'?'Online':m.type==='card'?'Card':'Cash/cheque'}</span></td>
+            <td class="r mono">${m.units}</td>
+            <td class="r mono">${bbd(m.amount)}</td>
+            <td class="r"><div class="track" style="width:80px;display:inline-block;vertical-align:middle"><div class="fill" style="width:${100*m.units/maxUnits}%;${typeGrad[m.type]||''}"></div></div></td>
+          </tr>`).join('')}
+        </tbody>
+        <tfoot><tr style="border-top:2px solid var(--line)"><td style="font-weight:700">Total</td><td></td><td class="r mono" style="font-weight:700">${totalUnits}</td><td class="r mono" style="font-weight:700">${bbd(totalAmount)}</td><td></td></tr></tfoot>
+      </table>
+      <div class="note">Source: SiteLink receipts export &mdash; ${pm.period}. Bar width = share of paying units.</div>
+    </div>
+    <div class="insight" style="background:var(--navy2)">
+      <h4>Autopay conversion opportunity</h4>
+      <p><b>${autopayU} units (${pctA(autopayU)}%)</b> are already on automated card billing (Plug &amp; Pay), contributing <b>${bbd(autopayAmt)}/mo</b>. A further <b>${onlineU}</b> pay by bank transfer or online &mdash; borderline automatable.</p>
+      <p><b>${cardU} units</b> pay by Visa or Mastercard manually &mdash; the <b>easiest conversion target</b>. They already have a card on file; they just need to tick recurring billing.</p>
+      <p><b>${manualU} units</b> pay cash-equivalent (money order, cash, cheque). Worth offering ACH/bank-debit as an alternative at their next renewal contact.</p>
+      <div class="flag" style="margin-top:12px">Quick win &middot; ${cardU} manual card payers ready to convert &rarr; ${bbd(ms.filter(m=>m.type==='card').reduce((s,m)=>s+m.amount,0))} added to autopay roll</div>
+    </div>`;
 }
 
 function setLoc(k){ STATE.loc=k; STATE.month=null; render(); document.querySelector('.site-tabs-section').scrollIntoView({behavior:'smooth',block:'start'}); }
