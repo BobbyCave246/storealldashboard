@@ -408,7 +408,21 @@ const LOCATIONS = {
         corpArea:83, indivArea:56, corpLos:64.0, indivLos:48.5, top10:4.5,
         geoIndiv:{"St. Michael":85,"Christ Church":66,"St. James":48,"St. Thomas":22,"St. Philip":19,"St. George":16,"Other Barbados":10,"Overseas":68,"Unknown":18}, indivN:352,
         balUnits:110, balPct:24.0, balTotal:40558, aging:{"Current / ahead":447,"1–30 days":8,"31–60 days":0,"61–90 days":3,"90+ days":1}, autopayPct:35.3,
-        age:{valid:278,pct:61,mean:48,median:51,min:20,max:87,bands:{"<25":43,"25–34":42,"35–44":26,"45–54":51,"55–64":65,"65+":51},female:263,male:183}
+        age:{valid:278,pct:61,mean:48,median:51,min:20,max:87,bands:{"<25":43,"25–34":42,"35–44":26,"45–54":51,"55–64":65,"65+":51},female:263,male:183},
+        paymentMethods:{
+          period:"May 2026",
+          methods:[
+            {label:"Plug & Pay",    units:151, amount:45988.96, type:"autopay"},
+            {label:"Money Order",   units:95,  amount:47493.20, type:"manual"},
+            {label:"Bank Transfer", units:56,  amount:21219.11, type:"online"},
+            {label:"Cash",          units:30,  amount:10385.33, type:"manual"},
+            {label:"Check",         units:20,  amount:8225.78,  type:"manual"},
+            {label:"Visa",          units:17,  amount:6990.36,  type:"card"},
+            {label:"Master Card",   units:8,   amount:1773.09,  type:"card"},
+            {label:"Internet",      units:5,   amount:3130.00,  type:"online"},
+            {label:"Debit Card",    units:1,   amount:25.96,    type:"card"}
+          ]
+        }
       },
       "2026-06":{
         label:"June 2026", basis:"As of 1 June 2026",
