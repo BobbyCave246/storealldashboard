@@ -48,10 +48,10 @@ header h1 em{font-style:normal;font-weight:500;color:#dff8fb}
 
 /* ---- section ---- */
 section{padding:40px 0 8px}
-.sec-head{display:flex;align-items:baseline;gap:14px;margin-bottom:20px}
-.sec-num{font-family:'Montserrat';font-weight:800;font-size:12px;color:var(--accent);letter-spacing:.08em;border:1px solid var(--accent);border-radius:50%;width:30px;height:30px;display:grid;place-items:center;flex:none;background:#fff}
-.sec-head h2{font-family:'Montserrat';font-weight:800;font-size:24px;letter-spacing:-.02em;color:var(--navy2)}
-.sec-head p{font-size:13.5px;color:var(--muted);margin-left:auto;max-width:430px;text-align:right}
+.sec-head{display:flex;align-items:center;gap:14px;margin-bottom:20px}
+.sec-num{font-family:'Montserrat';font-weight:800;font-size:12px;color:var(--accent);letter-spacing:.04em;border:1.5px solid var(--accent);border-radius:50%;min-width:32px;height:32px;padding:0 6px;display:grid;place-items:center;flex:none;background:#fff;box-shadow:0 4px 12px -8px rgba(0,169,199,.6)}
+.sec-head h2{font-family:'Montserrat';font-weight:800;font-size:24px;letter-spacing:-.02em;color:var(--navy2);line-height:1.1}
+.sec-head p{font-size:13.5px;color:var(--muted);margin-left:auto;max-width:430px;text-align:right;line-height:1.45}
 
 /* ---- hero stat row ---- */
 .hero{display:grid;grid-template-columns:repeat(4,1fr);gap:16px;margin-top:-44px;position:relative;z-index:3}
@@ -192,6 +192,30 @@ details.action-plan summary span.badge{margin-left:auto;background:var(--accent)
 .action-item h5{font-family:'Montserrat';font-weight:800;font-size:13px;color:var(--navy2);margin-bottom:4px}
 .action-item p{font-size:13px;color:var(--muted);line-height:1.5}
 .action-item .atag{display:inline-flex;align-items:center;gap:5px;background:#e8f7fa;color:#006578;border-radius:6px;padding:3px 9px;font-size:11px;font-weight:700;margin-top:8px;margin-right:6px}
+
+/* ---- 6-month payment trends ---- */
+.trend-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:18px;margin-top:4px}
+.trend-site{border:1px solid var(--line);border-radius:10px;padding:14px 14px 12px;background:var(--paper)}
+.trend-site-name{font-family:'Montserrat';font-weight:800;font-size:13px;color:var(--navy2);display:flex;align-items:baseline;gap:6px;margin-bottom:12px}
+.trend-site-name small{font-weight:600;font-size:11px;color:var(--muted)}
+.trend-bars{display:flex;align-items:flex-end;gap:7px;height:104px;padding-top:18px}
+.trend-bar{flex:1;border-radius:5px 5px 0 0;position:relative;min-height:3px;background:linear-gradient(180deg,var(--accent),var(--teal));transition:height .3s}
+.trend-bar.port{background:linear-gradient(180deg,#2d8ec5,var(--navy))}
+.trend-bar .tval{position:absolute;top:-17px;left:50%;transform:translateX(-50%);font-family:'Montserrat';font-weight:800;font-size:9.5px;color:var(--navy2);white-space:nowrap}
+.trend-bar .tmon{position:absolute;bottom:-17px;left:50%;transform:translateX(-50%);font-size:9px;color:var(--muted);font-weight:600}
+.trend-foot{display:flex;align-items:center;gap:8px;margin-top:24px;font-size:12px;color:var(--muted);font-weight:600}
+.trend-foot b{color:var(--navy2);font-family:'Montserrat'}
+.collect-row{display:flex;align-items:flex-end;gap:10px;height:90px;padding-top:16px;margin-top:4px}
+.collect-bar{flex:1;border-radius:5px 5px 0 0;background:linear-gradient(180deg,#7fd3df,var(--teal));position:relative;min-height:3px}
+.collect-bar .cval{position:absolute;top:-16px;left:50%;transform:translateX(-50%);font-family:'Montserrat';font-weight:700;font-size:9.5px;color:var(--navy2);white-space:nowrap}
+.collect-bar .cmon{position:absolute;bottom:-16px;left:50%;transform:translateX(-50%);font-size:9px;color:var(--muted);font-weight:600}
+
+/* ---- header refinements ---- */
+.sec-num{transition:all .18s}
+details.section-toggle>summary{border-radius:12px;transition:background .15s}
+details.section-toggle>summary:hover{background:var(--paper2)}
+details.section-toggle>summary:hover .sec-num{background:var(--accent);color:#fff;box-shadow:0 4px 12px -4px rgba(0,169,199,.5)}
+details.section-toggle[open]>summary .sec-num{background:var(--accent);color:#fff}
 </style>
 </head>
 <body>
@@ -237,7 +261,7 @@ details.action-plan summary span.badge{margin-left:auto;background:var(--accent)
         <div class="sec-head" style="margin:0;flex:1;pointer-events:none">
           <div class="sec-num" style="transition:transform .2s">00b</div>
           <h2>Portfolio Payment Health</h2>
-          <p style="display:block">Aggregated payment method mix across all three sites — click to expand.</p>
+          <p style="display:block">6-month trends, aggregated method mix &amp; autopay action plan — click to expand.</p>
         </div>
       </summary>
       <div style="margin-top:16px" id="portfolioPayments"></div>
@@ -649,6 +673,16 @@ const LOCATIONS = {
   }
 };
 
+/* ===== 6-month payment trend (from SiteLink receipts, Jan–May 2026 — complete months for all sites) ===== */
+const PAYMENT_TREND = {
+  months: ["Jan","Feb","Mar","Apr","May"],
+  sites: {
+    "Central": { occupied:457, autopay:[148,152,153,156,151], collections:[151228,155737,141049,150283,147142] },
+    "South":   { occupied:259, autopay:[66,64,66,66,67],      collections:[80042,86055,89961,94520,86368] },
+    "Lears":   { occupied:246, autopay:[54,55,58,58,61],      collections:[102215,96141,102042,88140,111669] }
+  }
+};
+
 const bbd = n => "$"+Math.round(n).toLocaleString();
 const bbdk = n => "$"+(n/1000).toFixed(0)+"k";
 const delta = (cur,prev,unit="",dp=1) => {
@@ -716,6 +750,59 @@ function renderPortfolio(){
   renderPortfolioPayments();
 }
 
+function renderPaymentTrend(){
+  const T = PAYMENT_TREND;
+  if(!T) return '';
+  const months = T.months;
+  const n = months.length;
+  const siteColors = { "Central":"linear-gradient(180deg,var(--accent),var(--teal))", "South":"linear-gradient(180deg,#7fd3df,var(--teal))", "Lears":"linear-gradient(180deg,#5bb8d6,var(--navy))" };
+
+  // per-site autopay % trajectory
+  const apCeil = 40; // % axis ceiling so 22–34% differences are visible
+  const siteCards = Object.entries(T.sites).map(([name,d])=>{
+    const pcts = d.autopay.map(a=>100*a/d.occupied);
+    const first = pcts[0], last = pcts[n-1], chg = last-first;
+    const chgPill = `<span class="chg ${chg>0.05?'up':chg<-0.05?'down':'flat'}">${chg>0.05?'▲':chg<-0.05?'▼':''} ${Math.abs(chg).toFixed(1)}pp</span>`;
+    const bars = pcts.map((p,i)=>`<div class="trend-bar" style="height:${Math.max(3,100*p/apCeil)}%"><span class="tval">${p.toFixed(0)}%</span><span class="tmon">${months[i]}</span></div>`).join('');
+    return `<div class="trend-site">
+      <div class="trend-site-name">${name} <small>${d.occupied} units</small></div>
+      <div class="trend-bars">${bars}</div>
+      <div class="trend-foot"><b>${first.toFixed(1)}% → ${last.toFixed(1)}%</b> ${chgPill}</div>
+    </div>`;
+  }).join('');
+
+  // portfolio autopay trend
+  const totOcc = Object.values(T.sites).reduce((s,d)=>s+d.occupied,0);
+  const portPct = months.map((_,i)=>100*Object.values(T.sites).reduce((s,d)=>s+d.autopay[i],0)/totOcc);
+  const pFirst = portPct[0], pLast = portPct[n-1], pChg = pLast-pFirst;
+
+  // portfolio collections trend
+  const collTot = months.map((_,i)=>Object.values(T.sites).reduce((s,d)=>s+d.collections[i],0));
+  const collMax = Math.max(...collTot);
+  const collBars = collTot.map((c,i)=>`<div class="collect-bar" style="height:${Math.max(3,100*c/collMax)}%"><span class="cval">${bbdk(c)}</span><span class="cmon">${months[i]}</span></div>`).join('');
+
+  return `
+  <div class="grid g2" style="margin-bottom:16px">
+    <div class="card">
+      <h3><span class="dot"></span>Autopay adoption trend &middot; ${months[0]}–${months[n-1]} 2026</h3>
+      <div class="trend-grid">${siteCards}</div>
+      <div class="note">Plug &amp; Pay units as a share of occupied units, by month. Bars scaled to a ${apCeil}% ceiling so site differences are visible.</div>
+    </div>
+    <div>
+      <div class="card" style="margin-bottom:16px">
+        <h3><span class="dot"></span>Portfolio collections trend</h3>
+        <div class="collect-row">${collBars}</div>
+        <div class="note" style="margin-top:24px">Total receipts collected across all three sites per month.</div>
+      </div>
+      <div class="insight" style="background:var(--navy2)">
+        <h4>Organic autopay growth is slow</h4>
+        <p>Across five months, portfolio autopay moved from <b>${pFirst.toFixed(1)}%</b> to <b>${pLast.toFixed(1)}%</b> &mdash; just <b>${pChg>=0?'+':''}${pChg.toFixed(1)}pp</b> of organic growth. At this pace it would take years to materially shift the mix.</p>
+        <p>The trajectory confirms autopay won't climb on its own &mdash; it needs the active conversion push set out below.</p>
+      </div>
+    </div>
+  </div>`;
+}
+
 function renderPortfolioPayments(){
   const el = document.getElementById('portfolioPayments');
   if(!el) return;
@@ -761,6 +848,7 @@ function renderPortfolioPayments(){
   const pct = n => (100*n/totalOccupied).toFixed(1);
 
   el.innerHTML = `
+    ${renderPaymentTrend()}
     <div class="ppm-stat-row">
       <div class="ppm-stat">
         <div class="k">Autopay (Plug &amp; Pay)</div>
