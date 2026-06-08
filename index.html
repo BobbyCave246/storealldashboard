@@ -422,7 +422,20 @@ const LOCATIONS = {
         geoIndiv:{"St. Michael":82,"Christ Church":63,"St. James":48,"St. Thomas":21,"St. Philip":19,"St. George":16,"Other Barbados":11,"Overseas":69,"Unknown":22}, indivN:351,
         balUnits:112, balPct:24.5, balTotal:41266, aging:{"Current / ahead":435,"1–30 days":0,"31–60 days":10,"61–90 days":8,"90+ days":4}, autopayPct:35.2,
         age:{valid:284,pct:62,mean:48,median:52,min:19,max:87,bands:{"<25":44,"25–34":43,"35–44":26,"45–54":52,"55–64":67,"65+":52},female:261,male:185},
-        mom:{ prev:"May 2026", tenantTurnover:9, retentionPct:100.0, netUnits:1 }
+        mom:{ prev:"May 2026", tenantTurnover:9, retentionPct:100.0, netUnits:1 },
+        paymentMethods:{
+          period:"June 2026",
+          methods:[
+            {label:"Plug & Pay",    units:145, amount:43696.97, type:"autopay"},
+            {label:"Money Order",   units:39,  amount:16962.85, type:"manual"},
+            {label:"Bank Transfer", units:31,  amount:13283.08, type:"online"},
+            {label:"Cash",          units:20,  amount:6980.54,  type:"manual"},
+            {label:"Visa",          units:9,   amount:2662.04,  type:"card"},
+            {label:"Check",         units:7,   amount:2984.97,  type:"manual"},
+            {label:"Master Card",   units:5,   amount:1290.00,  type:"card"},
+            {label:"Internet",      units:1,   amount:535.00,   type:"online"}
+          ]
+        }
       }
     }
   },
@@ -440,7 +453,19 @@ const LOCATIONS = {
         corpArea:89, indivArea:57, corpLos:40.1, indivLos:37.4, top10:8.0,
         geoIndiv:{"Christ Church":84,"St. Michael":31,"St. Philip":16,"St. James":15,"St. George":3,"St. Thomas":3,"Other Barbados":7,"Overseas":39,"Unknown":5}, indivN:203,
         balUnits:72, balPct:27.5, balTotal:24150, aging:{"Current / ahead":245,"1–30 days":0,"31–60 days":10,"61–90 days":5,"90+ days":2}, autopayPct:30.5,
-        age:{valid:236,pct:90,mean:54,median:55,min:19,max:94,bands:{"<25":9,"25–34":13,"35–44":39,"45–54":58,"55–64":79,"65+":38},female:146,male:112}
+        age:{valid:236,pct:90,mean:54,median:55,min:19,max:94,bands:{"<25":9,"25–34":13,"35–44":39,"45–54":58,"55–64":79,"65+":38},female:146,male:112},
+        paymentMethods:{
+          period:"June 2026",
+          methods:[
+            {label:"Plug & Pay",    units:62,  amount:17145.64, type:"autopay"},
+            {label:"Money Order",   units:27,  amount:11544.35, type:"manual"},
+            {label:"Bank Transfer", units:19,  amount:4696.95,  type:"online"},
+            {label:"Cash",          units:11,  amount:5020.45,  type:"manual"},
+            {label:"Check",         units:8,   amount:2901.72,  type:"manual"},
+            {label:"Visa",          units:5,   amount:2272.00,  type:"card"},
+            {label:"Master Card",   units:3,   amount:954.37,   type:"card"}
+          ]
+        }
       }
     }
   },
