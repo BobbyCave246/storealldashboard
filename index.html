@@ -900,35 +900,39 @@ function renderPaymentMethods(CUR){
     card:   'background:linear-gradient(90deg,var(--warn),#e0b35e)',
     manual: 'background:linear-gradient(90deg,var(--muted),#99aab5)'
   };
-  const autopayU = ms.filter(m=>m.type==='autopay').reduce((s,m)=>s+m.units,0);
-  const onlineU  = ms.filter(m=>m.type==='online').reduce((s,m)=>s+m.units,0);
-  const cardU    = ms.filter(m=>m.type==='card').reduce((s,m)=>s+m.units,0);
-  const manualU  = ms.filter(m=>m.type==='manual').reduce((s,m)=>s+m.units,0);
-  const autopayAmt = ms.filter(m=>m.type==='autopay').reduce((s,m)=>s+m.amount,0);
-  const pctA = n => Math.round(100*n/totalUnits);
+  const occupied    = CUR.occupied;
+  const coverage    = Math.round(100*totalUnits/occupied);
+  const autopayU    = ms.filter(m=>m.type==='autopay').reduce((s,m)=>s+m.units,0);
+  const onlineU     = ms.filter(m=>m.type==='online').reduce((s,m)=>s+m.units,0);
+  const cardU       = ms.filter(m=>m.type==='card').reduce((s,m)=>s+m.units,0);
+  const manualU     = ms.filter(m=>m.type==='manual').reduce((s,m)=>s+m.units,0);
+  const autopayAmt  = ms.filter(m=>m.type==='autopay').reduce((s,m)=>s+m.amount,0);
+  const pctOcc  = n => (100*n/occupied).toFixed(1);   // % of all occupied units
+  const pctPay  = n => Math.round(100*n/totalUnits);  // % of payers in this export
   pmSection.innerHTML = `
     <div class="card">
       <h3><span class="dot"></span>Payment methods &mdash; ${pm.period} receipts</h3>
       <table style="margin-bottom:8px">
-        <thead><tr><th>Method</th><th>Type</th><th class="r">Units</th><th class="r">Amount</th><th class="r">Share</th></tr></thead>
+        <thead><tr><th>Method</th><th>Type</th><th class="r">Units</th><th class="r">% occupied</th><th class="r">Amount</th><th class="r">Share</th></tr></thead>
         <tbody>${ms.map(m=>`
           <tr>
             <td style="font-weight:600">${m.label}</td>
             <td><span class="pill ${m.type==='autopay'?'full':m.type==='online'?'near':''}" style="${m.type==='card'?'background:#fff3e0;color:#7a5000':m.type==='manual'?'background:var(--paper2);color:var(--muted)':''}">${m.type==='autopay'?'Autopay':m.type==='online'?'Online':m.type==='card'?'Card':'Cash/cheque'}</span></td>
             <td class="r mono">${m.units}</td>
+            <td class="r mono">${pctOcc(m.units)}%</td>
             <td class="r mono">${bbd(m.amount)}</td>
             <td class="r"><div class="track" style="width:80px;display:inline-block;vertical-align:middle"><div class="fill" style="width:${100*m.units/maxUnits}%;${typeGrad[m.type]||''}"></div></div></td>
           </tr>`).join('')}
         </tbody>
-        <tfoot><tr style="border-top:2px solid var(--line)"><td style="font-weight:700">Total</td><td></td><td class="r mono" style="font-weight:700">${totalUnits}</td><td class="r mono" style="font-weight:700">${bbd(totalAmount)}</td><td></td></tr></tfoot>
+        <tfoot><tr style="border-top:2px solid var(--line)"><td style="font-weight:700">In export</td><td></td><td class="r mono" style="font-weight:700">${totalUnits}</td><td class="r mono" style="font-weight:700">${coverage}%</td><td class="r mono" style="font-weight:700">${bbd(totalAmount)}</td><td></td></tr></tfoot>
       </table>
-      <div class="note">Source: SiteLink receipts export &mdash; ${pm.period}. Bar width = share of paying units.</div>
+      <div class="note">Export covers <b>${totalUnits} of ${occupied} occupied units (${coverage}%)</b>. Units not in this export paid outside the window, pre-paid, or hadn't billed yet. % of occupied is the correct denominator for autopay rate.</div>
     </div>
     <div class="insight" style="background:var(--navy2)">
       <h4>Autopay conversion opportunity</h4>
-      <p><b>${autopayU} units (${pctA(autopayU)}%)</b> are already on automated card billing (Plug &amp; Pay), contributing <b>${bbd(autopayAmt)}/mo</b>. A further <b>${onlineU}</b> pay by bank transfer or online &mdash; borderline automatable.</p>
-      <p><b>${cardU} units</b> pay by Visa or Mastercard manually &mdash; the <b>easiest conversion target</b>. They already have a card on file; they just need to tick recurring billing.</p>
-      <p><b>${manualU} units</b> pay cash-equivalent (money order, cash, cheque). Worth offering ACH/bank-debit as an alternative at their next renewal contact.</p>
+      <p><b>${autopayU} of ${occupied} units (${pctOcc(autopayU)}% of occupied)</b> are on automated card billing (Plug &amp; Pay), contributing <b>${bbd(autopayAmt)}/mo</b>. A further <b>${onlineU} (${pctOcc(onlineU)}%)</b> pay by bank transfer or online &mdash; borderline automatable.</p>
+      <p><b>${cardU} units (${pctOcc(cardU)}%)</b> pay by Visa or Mastercard manually &mdash; the <b>easiest conversion target</b>. They already have a card on file; they just need to tick recurring billing.</p>
+      <p><b>${manualU} units (${pctOcc(manualU)}%)</b> pay cash-equivalent (money order, cash, cheque). Worth offering ACH/bank-debit as an alternative at their next renewal contact.</p>
       <div class="flag" style="margin-top:12px">Quick win &middot; ${cardU} manual card payers ready to convert &rarr; ${bbd(ms.filter(m=>m.type==='card').reduce((s,m)=>s+m.amount,0))} added to autopay roll</div>
     </div>`;
 }
