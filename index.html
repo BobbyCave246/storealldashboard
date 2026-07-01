@@ -996,6 +996,7 @@ function renderAcquisition(){
   const traditional = agg["Phone"]+agg["Walk-in"];
   const notrec = agg["Not recorded"];
   const recDigital = DIGITAL.reduce((s,k)=>s+recAgg[k],0);
+  const recTraditional = (recAgg["Phone"]||0)+(recAgg["Walk-in"]||0);
   const digShareRecent = recN ? 100*recDigital/recN : 0;
   const lears = bySite.find(s=>s.name==='Lears');
   const learsPhone = lears ? (100*(lears.ch["Phone"]||0)/lears.total).toFixed(0) : null;
@@ -1028,12 +1029,12 @@ function renderAcquisition(){
       <div class="ppm-stat">
         <div class="k">Digital (Web + Email)</div>
         <div class="v">${pct(digital)}<small>%</small></div>
-        <div class="d">${digital} of ${total} occupied units found us online</div>
+        <div class="d">${digital} of ${total} online · ${recDigital} in the last 12 months</div>
       </div>
       <div class="ppm-stat">
         <div class="k">Traditional (Phone + Walk-in)</div>
         <div class="v">${pct(traditional)}<small>%</small></div>
-        <div class="d">${traditional} units — phone &amp; foot traffic</div>
+        <div class="d">${traditional} units · ${recTraditional} in the last 12 months</div>
       </div>
       <div class="ppm-stat">
         <div class="k">Website-originated</div>
