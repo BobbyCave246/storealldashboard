@@ -273,7 +273,7 @@ details.section-toggle[open]>summary .sec-num{background:var(--accent);color:#ff
   <div class="panel" data-section="portfolio-payments">
   <section>
     <div class="sec-head"><div class="sec-num">$</div><h2>Portfolio Payment Health</h2>
-      <p>6-month trends, aggregated method mix &amp; autopay action plan across all three sites.</p></div>
+      <p>Who's behind on payments, aggregated method mix, autopay action plan &amp; adoption trend across all three sites.</p></div>
     <div id="portfolioPayments"></div>
   </section>
   </div>
@@ -732,29 +732,17 @@ function renderPaymentTrend(){
   const portPct = months.map((_,i)=>100*Object.values(T.sites).reduce((s,d)=>s+d.autopay[i],0)/totOcc);
   const pFirst = portPct[0], pLast = portPct[n-1], pChg = pLast-pFirst;
 
-  // portfolio collections trend
-  const collTot = months.map((_,i)=>Object.values(T.sites).reduce((s,d)=>s+d.collections[i],0));
-  const collMax = Math.max(...collTot);
-  const collBars = collTot.map((c,i)=>`<div class="collect-bar" style="height:${Math.max(3,100*c/collMax)}%"><span class="cval">${bbdk(c)}</span><span class="cmon">${months[i]}</span></div>`).join('');
-
   return `
-  <div class="grid g2" style="margin-bottom:16px">
+  <div class="grid g2" style="margin-top:16px">
     <div class="card">
       <h3><span class="dot"></span>Autopay adoption trend &middot; ${months[0]}–${months[n-1]} 2026</h3>
       <div class="trend-grid">${siteCards}</div>
       <div class="note">Plug &amp; Pay units as a share of occupied units, by month. Bars scaled to a ${apCeil}% ceiling so site differences are visible.</div>
     </div>
-    <div>
-      <div class="card" style="margin-bottom:16px">
-        <h3><span class="dot"></span>Portfolio collections trend</h3>
-        <div class="collect-row">${collBars}</div>
-        <div class="note" style="margin-top:24px">Total receipts collected across all three sites per month.</div>
-      </div>
-      <div class="insight" style="background:var(--navy2)">
-        <h4>Organic autopay growth is slow</h4>
-        <p>Across five months, portfolio autopay moved from <b>${pFirst.toFixed(1)}%</b> to <b>${pLast.toFixed(1)}%</b> &mdash; just <b>${pChg>=0?'+':''}${pChg.toFixed(1)}pp</b> of organic growth. At this pace it would take years to materially shift the mix.</p>
-        <p>The trajectory confirms autopay won't climb on its own &mdash; it needs the active conversion push set out below.</p>
-      </div>
+    <div class="insight" style="background:var(--navy2)">
+      <h4>Organic autopay growth is slow</h4>
+      <p>Over six months, portfolio autopay moved from <b>${pFirst.toFixed(1)}%</b> to <b>${pLast.toFixed(1)}%</b> &mdash; just <b>${pChg>=0?'+':''}${pChg.toFixed(1)}pp</b> of organic growth. At this pace it would take years to materially shift the mix.</p>
+      <p>The trajectory confirms autopay won't climb on its own &mdash; it needs the active conversion push set out above.</p>
     </div>
   </div>`;
 }
@@ -803,8 +791,58 @@ function renderPortfolioPayments(){
   const autopayU = byType('autopay'), onlineU = byType('online'), cardU = byType('card'), manualU = byType('manual');
   const pct = n => (100*n/totalOccupied).toFixed(1);
 
+  // Portfolio payment delinquency — how many are behind on payments
+  let lateUnits = 0, severeUnits = 0, lateAmt = 0;
+  const arrearsBySite = [];
+  Object.entries(LOCATIONS).forEach(([key, L]) => {
+    const d = latestSnapshot(L).data;
+    const ag = d.aging || {};
+    const late = (d.balUnits != null) ? d.balUnits
+      : Object.entries(ag).reduce((s,[k,v]) => s + (k === 'Current / ahead' ? 0 : v), 0);
+    const severe = (ag['61–90 days']||0) + (ag['90+ days']||0);
+    lateUnits += late; severeUnits += severe; lateAmt += (d.balTotal || 0);
+    arrearsBySite.push({ name: L.name.replace('Store All ',''), occupied: d.occupied, late, severe, amount: d.balTotal || 0 });
+  });
+  const currentUnits = totalOccupied - lateUnits;
+
   el.innerHTML = `
-    ${renderPaymentTrend()}
+    <div class="card" style="margin-bottom:16px">
+      <h3><span class="dot"></span>Who's behind on payments — portfolio (June 2026)</h3>
+      <div class="ppm-stat-row">
+        <div class="ppm-stat">
+          <div class="k">Accounts behind</div>
+          <div class="v">${lateUnits}<small> of ${totalOccupied}</small></div>
+          <div class="d">${(100*lateUnits/totalOccupied).toFixed(1)}% of occupied units carry an overdue balance</div>
+        </div>
+        <div class="ppm-stat">
+          <div class="k">Seriously late (60+ days)</div>
+          <div class="v">${severeUnits}</div>
+          <div class="d">${(100*severeUnits/totalOccupied).toFixed(1)}% of occupied — genuine delinquency</div>
+        </div>
+        <div class="ppm-stat">
+          <div class="k">Total overdue</div>
+          <div class="v" style="font-size:20px">${bbd(lateAmt)}</div>
+          <div class="d">rent past due across all sites</div>
+        </div>
+        <div class="ppm-stat">
+          <div class="k">Current / ahead</div>
+          <div class="v">${(100*currentUnits/totalOccupied).toFixed(1)}<small>%</small></div>
+          <div class="d">${currentUnits} units paid up to date</div>
+        </div>
+      </div>
+      <table style="margin-top:4px">
+        <thead><tr><th>Site</th><th class="r">Occupied</th><th class="r">Behind</th><th class="r">60+ days</th><th class="r">Overdue</th></tr></thead>
+        <tbody>${arrearsBySite.map(s=>`
+          <tr><td style="font-weight:600">${s.name}</td>
+          <td class="r mono">${s.occupied}</td>
+          <td class="r mono">${s.late} (${(100*s.late/s.occupied).toFixed(1)}%)</td>
+          <td class="r mono">${s.severe}</td>
+          <td class="r mono">${bbd(s.amount)}</td></tr>`).join('')}
+        </tbody>
+      </table>
+      <div class="note">"Behind" = units carrying an overdue rent balance (past their paid-through date). "60+ days" are the genuinely delinquent accounts; most behind accounts are current-cycle billing rather than true arrears.</div>
+    </div>
+
     <div class="ppm-stat-row">
       <div class="ppm-stat">
         <div class="k">Autopay (Plug &amp; Pay)</div>
@@ -903,7 +941,8 @@ function renderPortfolioPayments(){
           </div>
         </details>
       </div>
-    </div>`;
+    </div>
+    ${renderPaymentTrend()}`;
 }
 
 function render(){
