@@ -287,6 +287,15 @@ details.section-toggle[open]>summary .sec-num{background:var(--accent);color:#ff
   </section>
   </div>
 
+  <!-- PANEL: LEAD FUNNEL -->
+  <div class="panel" data-section="lead-funnel">
+  <section>
+    <div class="sec-head"><div class="sec-num">↳</div><h2>Lead Funnel — inquiry → move-in conversion</h2>
+      <p>Where inquiries come from and how well they convert, across all three sites (SiteLink inquiry tracking · leads placed Jan–Jun 2026).</p></div>
+    <div id="leadFunnelBody"></div>
+  </section>
+  </div>
+
   <!-- SITE CONTEXT BAND (shown only for per-site sections) -->
   <div id="siteBand">
     <section class="site-tabs-section">
@@ -304,8 +313,8 @@ details.section-toggle[open]>summary .sec-num{background:var(--accent);color:#ff
   <div class="panel" data-section="occupancy">
   <!-- 1. OCCUPANCY -->
   <section>
-    <div class="sec-head"><div class="sec-num">01</div><h2>Occupancy &amp; Utilisation</h2>
-      <p>Physical fill versus revenue captured, and how each unit type is performing.</p></div>
+    <div class="sec-head"><div class="sec-num">01</div><h2>Occupancy, Utilisation &amp; Pricing</h2>
+      <p>Physical fill versus revenue captured, unit-type performance, and pricing yield per sq ft and per unit.</p></div>
     <div class="grid g3">
       <div class="card">
         <h3><span class="dot"></span>Occupancy by unit type</h3>
@@ -329,6 +338,9 @@ details.section-toggle[open]>summary .sec-num{background:var(--accent);color:#ff
         <div class="note">At ~99% occupancy, a small negative net is churn at the ceiling, not falling demand.</div>
       </div>
     </div>
+    <div style="border-top:1px solid var(--line);margin:24px 0 6px"></div>
+    <div style="font-family:'Montserrat';font-weight:800;text-transform:uppercase;letter-spacing:.1em;font-size:12px;color:var(--muted);margin:6px 0 12px">Pricing &amp; yield</div>
+    <div class="grid g3" id="finrow"></div>
   </section>
   </div>
 
@@ -463,21 +475,11 @@ details.section-toggle[open]>summary .sec-num{background:var(--accent);color:#ff
   </section>
   </div>
 
-  <!-- PANEL: FINANCIAL -->
-  <div class="panel" data-section="financial">
-  <!-- 7. FINANCIAL -->
-  <section>
-    <div class="sec-head"><div class="sec-num">07</div><h2>Financial &amp; Pricing</h2>
-      <p>Blended performance per square foot and per unit.</p></div>
-    <div class="grid g3" id="finrow"></div>
-  </section>
-  </div>
-
   <!-- PANEL: STRATEGIC -->
   <div class="panel" data-section="strategic">
   <!-- 8. STRATEGIC READ -->
   <section>
-    <div class="sec-head"><div class="sec-num">08</div><h2>Strategic Read</h2>
+    <div class="sec-head"><div class="sec-num">07</div><h2>Strategic Read</h2>
       <p>What this snapshot implies against the expansion framework.</p></div>
     <div class="insight" id="stratRead" style="background:var(--navy2)"></div>
   </section>
@@ -487,7 +489,7 @@ details.section-toggle[open]>summary .sec-num{background:var(--accent);color:#ff
   <div class="panel" data-section="mom">
   <!-- 9. MONTH OVER MONTH -->
   <section id="momSection">
-    <div class="sec-head"><div class="sec-num">09</div><h2>Month over Month</h2>
+    <div class="sec-head"><div class="sec-num">08</div><h2>Month over Month</h2>
       <p>Change since the previous snapshot — the metrics that need a series.</p></div>
     <div id="momBody"></div>
   </section>
@@ -688,13 +690,13 @@ const SECTIONS = [
   {id:'overview',           label:'Overview',          scope:'portfolio'},
   {id:'portfolio-payments', label:'Portfolio Payments',scope:'portfolio'},
   {id:'acquisition',        label:'Acquisition',       scope:'portfolio'},
+  {id:'lead-funnel',        label:'Lead Funnel',       scope:'portfolio'},
   {id:'occupancy',          label:'Occupancy',         scope:'site'},
   {id:'tenure',             label:'Tenure',            scope:'site'},
   {id:'segmentation',       label:'Segmentation',      scope:'site'},
   {id:'geography',          label:'Geography',         scope:'site'},
   {id:'demographics',       label:'Demographics',      scope:'site'},
   {id:'payments',           label:'Payments',          scope:'site'},
-  {id:'financial',          label:'Financial',         scope:'site'},
   {id:'strategic',          label:'Strategic',         scope:'site'},
   {id:'mom',                label:'Month over Month',  scope:'site'}
 ];
@@ -1158,12 +1160,12 @@ function renderAcquisition(){
         </tbody>
       </table>
       <div class="note">The base skews recent — <b>${Math.round(100*since2024/cohortTotal)}%</b> of current tenants moved in since 2024. Digital's share of move-ins climbed from <b>~2%</b> (2021–22) to <b>~${Math.round(100*yDig[CY.length-1]/yTot[CY.length-1])}%</b> in 2026 — but almost entirely via <b>email</b>; the website is dormant (most of its ${agg["Web"]} sign-ups predate 2020). "Not recorded" is largely legacy — ${ACQ_COHORTS.byChannel["Not recorded"][0]} of ${notrec} blanks are pre-2020. Cohorts count the <b>currently-occupied</b> base only (past movers excluded), so earlier years are thinned by churn. <b>2026 is Jan–Jun only.</b></div>
-    </div>
-    ${leadFunnelHTML()}`;
+    </div>`;
 }
 
-function leadFunnelHTML(){
-  const F = LEAD_FUNNEL; if(!F) return '';
+function renderLeadFunnel(){
+  const el = document.getElementById('leadFunnelBody'); if(!el) return;
+  const F = LEAD_FUNNEL; if(!F) return;
   const CH = { "Phone":"var(--navy2)","Walk-in":"#7a7a7a","Email":"var(--teal)","Web":"var(--accent)" };
   const sites = Object.entries(F.sites);
   const inq = sites.reduce((s,[,d])=>s+d.inquiries,0);
@@ -1197,11 +1199,7 @@ function leadFunnelHTML(){
       <td class="r mono" style="font-weight:700">${rate(d.converted,d.inquiries)}%</td>
       <td class="r mono">${d.fuMade}/${d.fuSched}</td>
     </tr>`).join('');
-  return `
-    <div style="border-top:1px solid var(--line);margin:26px 0 18px"></div>
-    <div class="sec-head" style="margin-bottom:14px"><div class="sec-num">↳</div><h2 style="font-size:20px">Lead funnel — inquiry → move-in conversion</h2>
-      <p>From SiteLink inquiry tracking · ${F.period}.</p></div>
-
+  el.innerHTML = `
     <div class="ppm-stat-row">
       <div class="ppm-stat"><div class="k">Inquiries</div><div class="v">${inq}</div><div class="d">tracked leads across all three sites</div></div>
       <div class="ppm-stat"><div class="k">Convert to move-in</div><div class="v">${rate(conv,inq)}<small>%</small></div><div class="d">${conv} inquiries became rentals</div></div>
@@ -1267,6 +1265,7 @@ function render(){
 
   renderPortfolio();
   renderAcquisition();
+  renderLeadFunnel();
 
   /* section nav (docked to header) */
   document.getElementById('sectionNav').innerHTML = SECTIONS.map((s,i)=>{
