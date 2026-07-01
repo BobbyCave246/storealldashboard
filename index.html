@@ -296,6 +296,15 @@ details.section-toggle[open]>summary .sec-num{background:var(--accent);color:#ff
   </section>
   </div>
 
+  <!-- PANEL: CUSTOMER PROFILE -->
+  <div class="panel" data-section="profile">
+  <section>
+    <div class="sec-head"><div class="sec-num">◎</div><h2>Customer Profile — who rents and why</h2>
+      <p>Decision drivers, catchment, use-case and seasonality across the active base (SiteLink Marketing Summary).</p></div>
+    <div id="profileBody"></div>
+  </section>
+  </div>
+
   <!-- SITE CONTEXT BAND (shown only for per-site sections) -->
   <div id="siteBand">
     <section class="site-tabs-section">
@@ -657,6 +666,21 @@ const LEAD_FUNNEL = {
   ]
 };
 
+/* ===== Customer profile (SiteLink Marketing Summary; current active base, all 3 sites) ===== */
+const CUSTOMER_PROFILE = {
+  total:978, resCom:{res:747,com:231},
+  why:[ {k:"Location",n:657}, {k:"Features",n:179}, {k:"Management",n:77}, {k:"Price",n:2}, {k:"Other",n:44} ],
+  distance:[ {k:"< 2 mi",n:28}, {k:"2–3 mi",n:167}, {k:"3–5 mi",n:221}, {k:"5–10 mi",n:362}, {k:"> 10 mi",n:59}, {k:"Overseas",n:123} ],
+  reason:[ {k:"Excess / declutter",n:338}, {k:"Moving",n:249}, {k:"Business needs",n:231}, {k:"Renovating",n:53}, {k:"Other",n:88} ],
+  what:[ {k:"Furniture / boxes",n:629}, {k:"Business inventory",n:156}, {k:"Business records",n:78}, {k:"Other",n:96} ],
+  season:[95,99,88,72,103,97,81,58,52,77,82,74],
+  sites:[
+    {name:"Central", res:349, com:108, locationPct:61, moutMonths:16},
+    {name:"South",   res:207, com:57,  locationPct:77, moutMonths:15},
+    {name:"Lears",   res:191, com:66,  locationPct:69, moutMonths:8}
+  ]
+};
+
 const bbd = n => "$"+Math.round(n).toLocaleString();
 const bbdk = n => "$"+(n/1000).toFixed(0)+"k";
 const delta = (cur,prev,unit="",dp=1) => {
@@ -671,6 +695,7 @@ const SECTIONS = [
   {id:'portfolio-payments', label:'Portfolio Payments',scope:'portfolio'},
   {id:'acquisition',        label:'Acquisition',       scope:'portfolio'},
   {id:'lead-funnel',        label:'Lead Funnel',       scope:'portfolio'},
+  {id:'profile',            label:'Customer Profile',  scope:'portfolio'},
   {id:'occupancy',          label:'Occupancy',         scope:'site'},
   {id:'tenure',             label:'Tenure',            scope:'site'},
   {id:'segmentation',       label:'Segmentation',      scope:'site'},
@@ -1233,6 +1258,82 @@ function renderLeadFunnel(){
     </div>`;
 }
 
+function renderCustomerProfile(){
+  const el = document.getElementById('profileBody'); if(!el) return;
+  const P = CUSTOMER_PROFILE; if(!P) return;
+  const TOT = P.total;
+  const sum = arr => arr.reduce((s,x)=>s+x.n,0);
+  const pctT = n => Math.round(100*n/TOT);
+  const within10 = P.distance.filter(x=>['< 2 mi','2–3 mi','3–5 mi','5–10 mi'].includes(x.k)).reduce((s,x)=>s+x.n,0);
+  const loc = P.why.find(x=>x.k==='Location').n;
+  const furn = P.what.find(x=>x.k==='Furniture / boxes').n;
+  const barList = (items, color) => { const t=sum(items); const mx=Math.max(...items.map(i=>i.n)); return items.map(it=>`
+    <div style="display:flex;align-items:center;gap:10px;margin:6px 0">
+      <div style="width:120px;font-size:12.5px;color:var(--navy2)">${it.k}</div>
+      <div class="track" style="flex:1"><div class="fill" style="width:${100*it.n/mx}%;background:${color}"></div></div>
+      <div class="mono" style="width:66px;text-align:right;font-size:12px;color:var(--muted)">${it.n} · ${Math.round(100*it.n/t)}%</div>
+    </div>`).join(''); };
+  const MI=['J','F','M','A','M','J','J','A','S','O','N','D'];
+  const MN=['Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec'];
+  const smax=Math.max(...P.season); const peak=MN[P.season.indexOf(smax)];
+  const seasonBars=P.season.map((v,i)=>`
+    <div style="flex:1;display:flex;flex-direction:column;align-items:center;gap:5px">
+      <div style="display:flex;flex-direction:column-reverse;height:96px;width:62%;min-width:14px;background:#fbfbfb;border:1px solid #ececec;border-radius:4px 4px 0 0" title="${MN[i]}: ${v}"><div style="height:${100*v/smax}%;background:${v===smax?'var(--accent)':'var(--navy2)'}"></div></div>
+      <div style="font-size:10px;color:var(--muted)">${MI[i]}</div>
+    </div>`).join('');
+  const siteRows = P.sites.map(s=>`
+    <tr>
+      <td style="font-weight:600">${s.name}</td>
+      <td class="r mono">${Math.round(100*s.res/(s.res+s.com))}% / ${Math.round(100*s.com/(s.res+s.com))}%</td>
+      <td class="r mono">${s.locationPct}%</td>
+      <td class="r mono">${s.moutMonths} mo</td>
+    </tr>`).join('');
+
+  el.innerHTML = `
+    <div class="ppm-stat-row">
+      <div class="ppm-stat"><div class="k">Chose us for location</div><div class="v">${pctT(loc)}<small>%</small></div><div class="d">vs ~0% for price — convenience, not cost</div></div>
+      <div class="ppm-stat"><div class="k">Live within 10 miles</div><div class="v">${pctT(within10)}<small>%</small></div><div class="d">hyper-local catchment</div></div>
+      <div class="ppm-stat"><div class="k">Residential</div><div class="v">${Math.round(100*P.resCom.res/TOT)}<small>%</small></div><div class="d">${P.resCom.res} vs ${P.resCom.com} commercial</div></div>
+      <div class="ppm-stat"><div class="k">Storing furniture / household</div><div class="v">${pctT(furn)}<small>%</small></div><div class="d">${furn} of ${TOT} tenants</div></div>
+    </div>
+
+    <div class="ppm-grid">
+      <div class="card">
+        <h3><span class="dot"></span>Why they chose us</h3>
+        ${barList(P.why,'var(--accent)')}
+        <h3 style="margin-top:16px"><span class="dot"></span>Reason for storing</h3>
+        ${barList(P.reason,'var(--navy2)')}
+        <h3 style="margin-top:16px"><span class="dot"></span>How far they live</h3>
+        ${barList(P.distance,'var(--teal)')}
+        <div class="note">Shares are of tenants with the field recorded. "Overseas" concentrates at Central (its diaspora segment).</div>
+      </div>
+
+      <div>
+        <div class="insight" style="background:var(--navy2);margin-bottom:16px">
+          <h4>Location-led &amp; hyper-local</h4>
+          <p><b>${pctT(loc)}%</b> rent because of <b>location</b> — and effectively no one for price. <b>${pctT(within10)}%</b> live within 10 miles. The marketing lever is <b>visibility and proximity</b> (Google Business Profile, local SEO, signage), not discounting.</p>
+        </div>
+        <div class="insight" style="background:var(--navy2);margin-bottom:16px">
+          <h4>Early-life churn — watch Lears</h4>
+          <p>Tenants who have left stayed <b>${P.sites[2].moutMonths} months</b> on average at Lears, versus ${P.sites[0].moutMonths}–${P.sites[1].moutMonths} at Central &amp; South. The newer site loses people early — an onboarding / first-90-days retention focus, not a demand problem.</p>
+        </div>
+        <div class="card">
+          <h3><span class="dot"></span>By site</h3>
+          <table>
+            <thead><tr><th>Site</th><th class="r">Res / Com</th><th class="r">Location</th><th class="r">Exit tenure</th></tr></thead>
+            <tbody>${siteRows}</tbody>
+          </table>
+        </div>
+      </div>
+    </div>
+
+    <div class="card" style="margin-top:16px">
+      <h3><span class="dot"></span>Move-in seasonality — all sites (active base)</h3>
+      <div style="display:flex;align-items:flex-end;gap:8px;padding:6px 2px 0">${seasonBars}</div>
+      <div class="note"><b>${peak}</b> is the busiest move-in month; the first half of the year (Jan–Jun) runs well ahead of the Aug–Sep trough — useful for timing promotions and staffing. Reflects the move-in month of the current active base.</div>
+    </div>`;
+}
+
 function render(){
   const L = LOCATIONS[STATE.loc];
   const mkeys = Object.keys(L.months).sort();
@@ -1244,6 +1345,7 @@ function render(){
   renderPortfolio();
   renderAcquisition();
   renderLeadFunnel();
+  renderCustomerProfile();
 
   /* section nav (docked to header) */
   document.getElementById('sectionNav').innerHTML = SECTIONS.map((s,i)=>{
