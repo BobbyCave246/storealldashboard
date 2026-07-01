@@ -639,6 +639,19 @@ const PAYMENT_TREND = {
   }
 };
 
+/* ===== Acquisition channel × move-in year (portfolio occupied base; 2026 = Jan–Jun) ===== */
+const ACQ_COHORTS = {
+  years:["≤2019","2020","2021","2022","2023","2024","2025","2026"],
+  byChannel:{
+    "Phone":       [40,32,33,59,91,104,139,104],
+    "Walk-in":     [26,11,7,6,25,16,38,19],
+    "Email":       [3,4,1,1,3,5,15,15],
+    "Web":         [5,0,0,1,4,5,1,1],
+    "Not recorded":[72,3,5,15,10,22,25,13]
+  },
+  medianTenure:{ "Phone":2.5,"Walk-in":3.5,"Email":1.5,"Web":3.5,"Not recorded":4.5 }
+};
+
 const bbd = n => "$"+Math.round(n).toLocaleString();
 const bbdk = n => "$"+(n/1000).toFixed(0)+"k";
 const delta = (cur,prev,unit="",dp=1) => {
@@ -987,6 +1000,29 @@ function renderAcquisition(){
   const lears = bySite.find(s=>s.name==='Lears');
   const learsPhone = lears ? (100*(lears.ch["Phone"]||0)/lears.total).toFixed(0) : null;
 
+  // ----- move-in cohort chart (channel × year) -----
+  const CY = ACQ_COHORTS.years;
+  const STACK = ["Phone","Walk-in","Not recorded","Email","Web"]; // digital (Email,Web) on top
+  const yTot = CY.map((_,i)=>STACK.reduce((s,c)=>s+(ACQ_COHORTS.byChannel[c]?.[i]||0),0));
+  const yDig = CY.map((_,i)=>(ACQ_COHORTS.byChannel["Email"]?.[i]||0)+(ACQ_COHORTS.byChannel["Web"]?.[i]||0));
+  const maxTot = Math.max(...yTot);
+  const cohortTotal = yTot.reduce((s,v)=>s+v,0);
+  const since2024 = CY.reduce((s,y,i)=> s + (parseInt(y)>=2024 ? yTot[i] : 0), 0);
+  const cohortBars = CY.map((y,i)=>{
+    const segs = STACK.map(c=>{
+      const v = ACQ_COHORTS.byChannel[c]?.[i]||0;
+      return v ? `<div title="${y} · ${c}: ${v}" style="height:${100*v/maxTot}%;background:${color[c]}"></div>` : '';
+    }).join('');
+    const dp = yTot[i] ? Math.round(100*yDig[i]/yTot[i]) : 0;
+    return `<div style="flex:1;display:flex;flex-direction:column;align-items:center;gap:6px">
+      <div style="font-family:'Montserrat';font-weight:800;font-size:11px;color:var(--accent)">${dp}%</div>
+      <div style="display:flex;flex-direction:column-reverse;height:150px;width:60%;min-width:22px;border-radius:5px 5px 0 0;overflow:hidden;background:#fbfbfb;border:1px solid #ececec">${segs}</div>
+      <div style="font-family:'Montserrat';font-weight:700;font-size:12px;color:var(--navy2)">${yTot[i]}</div>
+      <div style="font-size:11px;color:var(--muted)">${y}</div>
+    </div>`;
+  }).join('');
+  const legend = STACK.slice().map(c=>`<span style="display:inline-flex;align-items:center;margin-right:14px;font-size:12px;color:var(--muted)"><span style="display:inline-block;width:10px;height:10px;border-radius:2px;background:${color[c]};margin-right:5px"></span>${c}${DIGITAL.includes(c)?' <b style="color:var(--navy2);font-weight:700;margin-left:3px">·digital</b>':''}</span>`).join('');
+
   el.innerHTML = `
     <div class="ppm-stat-row">
       <div class="ppm-stat">
@@ -1081,6 +1117,23 @@ function renderAcquisition(){
           </div>
         </details>
       </div>
+    </div>
+
+    <div class="card" style="margin-top:16px">
+      <h3><span class="dot"></span>When they moved in — by channel &amp; year</h3>
+      <div style="display:flex;align-items:flex-end;gap:10px;padding:8px 4px 0">${cohortBars}</div>
+      <div style="margin-top:14px">${legend}<span style="font-size:12px;color:var(--muted)">&nbsp;&nbsp;· <b style="color:var(--accent)">%</b> above each bar = digital share of that year</span></div>
+      <table style="margin-top:14px;max-width:520px">
+        <thead><tr><th>Channel</th><th class="r">Median tenure</th><th></th></tr></thead>
+        <tbody>${ORDER.map(k=>`
+          <tr>
+            <td style="font-weight:600"><span style="display:inline-block;width:9px;height:9px;border-radius:2px;background:${color[k]};margin-right:7px;vertical-align:middle"></span>${k}</td>
+            <td class="r mono">${(ACQ_COHORTS.medianTenure[k]||0).toFixed(1)} yr</td>
+            <td style="color:var(--muted);font-size:12px">${k==='Email'?'newest channel':k==='Not recorded'?'oldest — legacy data gap':''}</td>
+          </tr>`).join('')}
+        </tbody>
+      </table>
+      <div class="note">The base skews recent — <b>${Math.round(100*since2024/cohortTotal)}%</b> of current tenants moved in since 2024. Digital's share of move-ins climbed from <b>~2%</b> (2021–22) to <b>~${Math.round(100*yDig[CY.length-1]/yTot[CY.length-1])}%</b> in 2026 — but almost entirely via <b>email</b>; the website is dormant (most of its ${agg["Web"]} sign-ups predate 2020). "Not recorded" is largely legacy — ${ACQ_COHORTS.byChannel["Not recorded"][0]} of ${notrec} blanks are pre-2020. Cohorts count the <b>currently-occupied</b> base only (past movers excluded), so earlier years are thinned by churn. <b>2026 is Jan–Jun only.</b></div>
     </div>`;
 }
 
