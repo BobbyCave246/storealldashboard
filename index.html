@@ -652,6 +652,29 @@ const ACQ_COHORTS = {
   medianTenure:{ "Phone":2.5,"Walk-in":3.5,"Email":1.5,"Web":3.5,"Not recorded":4.5 }
 };
 
+/* ===== Lead funnel (SiteLink inquiry tracking; leads placed Jan–Jun 2026) ===== */
+const LEAD_FUNNEL = {
+  period:"leads placed Jan–Jun 2026",
+  sites:{
+    "Central":{ inquiries:74,  converted:22, fuSched:61,  fuMade:6  },
+    "South":  { inquiries:102, converted:37, fuSched:100, fuMade:4  },
+    "Lears":  { inquiries:185, converted:79, fuSched:160, fuMade:41 }
+  },
+  byChannel:[
+    { c:"Phone",   inq:298, conv:105 },
+    { c:"Walk-in", inq:34,  conv:13  },
+    { c:"Email",   inq:26,  conv:18  },
+    { c:"Web",     inq:3,   conv:2   }
+  ],
+  bySource:[
+    { s:"Internet",        inq:153, conv:53 },
+    { s:"Other",           inq:75,  conv:25 },
+    { s:"Previous Tenant", inq:56,  conv:27 },
+    { s:"Referral",        inq:47,  conv:24 },
+    { s:"Drive-by",        inq:26,  conv:7  }
+  ]
+};
+
 const bbd = n => "$"+Math.round(n).toLocaleString();
 const bbdk = n => "$"+(n/1000).toFixed(0)+"k";
 const delta = (cur,prev,unit="",dp=1) => {
@@ -1135,6 +1158,102 @@ function renderAcquisition(){
         </tbody>
       </table>
       <div class="note">The base skews recent — <b>${Math.round(100*since2024/cohortTotal)}%</b> of current tenants moved in since 2024. Digital's share of move-ins climbed from <b>~2%</b> (2021–22) to <b>~${Math.round(100*yDig[CY.length-1]/yTot[CY.length-1])}%</b> in 2026 — but almost entirely via <b>email</b>; the website is dormant (most of its ${agg["Web"]} sign-ups predate 2020). "Not recorded" is largely legacy — ${ACQ_COHORTS.byChannel["Not recorded"][0]} of ${notrec} blanks are pre-2020. Cohorts count the <b>currently-occupied</b> base only (past movers excluded), so earlier years are thinned by churn. <b>2026 is Jan–Jun only.</b></div>
+    </div>
+    ${leadFunnelHTML()}`;
+}
+
+function leadFunnelHTML(){
+  const F = LEAD_FUNNEL; if(!F) return '';
+  const CH = { "Phone":"var(--navy2)","Walk-in":"#7a7a7a","Email":"var(--teal)","Web":"var(--accent)" };
+  const sites = Object.entries(F.sites);
+  const inq = sites.reduce((s,[,d])=>s+d.inquiries,0);
+  const conv = sites.reduce((s,[,d])=>s+d.converted,0);
+  const fuS = sites.reduce((s,[,d])=>s+d.fuSched,0);
+  const fuM = sites.reduce((s,[,d])=>s+d.fuMade,0);
+  const rate = (c,t)=> t ? Math.round(100*c/t) : 0;
+  const phone = F.byChannel.find(c=>c.c==='Phone');
+  const email = F.byChannel.find(c=>c.c==='Email');
+  const internet = F.bySource.find(s=>s.s==='Internet');
+  const chanRows = F.byChannel.map(c=>`
+    <tr>
+      <td style="font-weight:600"><span style="display:inline-block;width:9px;height:9px;border-radius:2px;background:${CH[c.c]||'#999'};margin-right:7px;vertical-align:middle"></span>${c.c}</td>
+      <td class="r mono">${c.inq}</td>
+      <td class="r mono">${c.conv}</td>
+      <td class="r mono" style="font-weight:700">${rate(c.conv,c.inq)}%</td>
+      <td class="r"><div class="track" style="width:60px;display:inline-block;vertical-align:middle"><div class="fill teal" style="width:${100*c.conv/c.inq}%"></div></div></td>
+    </tr>`).join('');
+  const srcRows = F.bySource.map(s=>`
+    <tr>
+      <td style="font-weight:600">${s.s}</td>
+      <td class="r mono">${s.inq}</td>
+      <td class="r mono" style="font-weight:700">${rate(s.conv,s.inq)}%</td>
+      <td class="r"><div class="track" style="width:60px;display:inline-block;vertical-align:middle"><div class="fill" style="width:${100*s.conv/s.inq}%"></div></div></td>
+    </tr>`).join('');
+  const siteRows = sites.map(([name,d])=>`
+    <tr>
+      <td style="font-weight:600">${name}</td>
+      <td class="r mono">${d.inquiries}</td>
+      <td class="r mono">${d.converted}</td>
+      <td class="r mono" style="font-weight:700">${rate(d.converted,d.inquiries)}%</td>
+      <td class="r mono">${d.fuMade}/${d.fuSched}</td>
+    </tr>`).join('');
+  return `
+    <div style="border-top:1px solid var(--line);margin:26px 0 18px"></div>
+    <div class="sec-head" style="margin-bottom:14px"><div class="sec-num">↳</div><h2 style="font-size:20px">Lead funnel — inquiry → move-in conversion</h2>
+      <p>From SiteLink inquiry tracking · ${F.period}.</p></div>
+
+    <div class="ppm-stat-row">
+      <div class="ppm-stat"><div class="k">Inquiries</div><div class="v">${inq}</div><div class="d">tracked leads across all three sites</div></div>
+      <div class="ppm-stat"><div class="k">Convert to move-in</div><div class="v">${rate(conv,inq)}<small>%</small></div><div class="d">${conv} inquiries became rentals</div></div>
+      <div class="ppm-stat"><div class="k">Follow-ups completed</div><div class="v">${rate(fuM,fuS)}<small>%</small></div><div class="d">${fuM} of ${fuS} scheduled — the execution gap</div></div>
+      <div class="ppm-stat"><div class="k">Phone-led demand</div><div class="v">${rate(phone.inq,inq)}<small>%</small></div><div class="d">${phone.inq} of ${inq} inquiries came by phone</div></div>
+    </div>
+
+    <div class="ppm-grid">
+      <div class="card">
+        <h3><span class="dot"></span>Conversion by inquiry channel</h3>
+        <table>
+          <thead><tr><th>Channel</th><th class="r">Inquiries</th><th class="r">Move-ins</th><th class="r">Rate</th><th class="r">&nbsp;</th></tr></thead>
+          <tbody>${chanRows}</tbody>
+        </table>
+        <h3 style="margin-top:16px"><span class="dot"></span>Conversion by marketing source</h3>
+        <table>
+          <thead><tr><th>Source</th><th class="r">Inquiries</th><th class="r">Rate</th><th class="r">&nbsp;</th></tr></thead>
+          <tbody>${srcRows}</tbody>
+        </table>
+        <h3 style="margin-top:16px"><span class="dot"></span>Funnel by site</h3>
+        <table>
+          <thead><tr><th>Site</th><th class="r">Inquiries</th><th class="r">Move-ins</th><th class="r">Rate</th><th class="r">Follow-ups</th></tr></thead>
+          <tbody>${siteRows}</tbody>
+        </table>
+        <div class="note">Email inquiries convert best (<b>${rate(email.conv,email.inq)}%</b>) but are rare; phone is <b>${rate(phone.inq,inq)}%</b> of volume at <b>${rate(phone.conv,phone.inq)}%</b>. "Follow-ups" = completed vs scheduled. A single pull (~${inq} leads), so treat site/source splits as directional.</div>
+      </div>
+
+      <div>
+        <div class="insight" style="background:var(--navy2);margin-bottom:16px">
+          <h4>The gap is follow-up, not leads</h4>
+          <p>Only <b>${fuM} of ${fuS}</b> scheduled follow-ups were actually completed (<b>${rate(fuM,fuS)}%</b>). The site that follows up most — <b>Lears (${F.sites.Lears.fuMade})</b> — also converts best (<b>${rate(F.sites.Lears.converted,F.sites.Lears.inquiries)}%</b>), while South completed just <b>${F.sites.South.fuMade}</b>. Automated follow-up (SMS / email / WhatsApp) after every inquiry is the clearest conversion lever.</p>
+        </div>
+        <div class="insight" style="background:var(--navy2);margin-bottom:16px">
+          <h4>Online drives demand — the phone closes it</h4>
+          <p><b>Internet</b> is the single biggest inquiry source (<b>${internet.inq} leads</b>), yet almost no one rents through the website itself — prospects find you online and then <b>call</b>. Two moves: make the website a <b>booking channel</b>, and lift Central's phone conversion (14%) toward Lears' (42%).</p>
+        </div>
+        <details class="action-plan">
+          <summary>Conversion action plan <span class="badge">2 actions</span></summary>
+          <div class="action-body">
+            <div class="action-item"><span class="pri p1">Priority 1</span><div>
+              <h5>Automate inquiry follow-up</h5>
+              <p><b>${fuS-fuM}</b> scheduled follow-ups went uncompleted. Trigger an automatic reminder sequence the moment an inquiry is logged; even a small lift on ${inq} inquiries at ${rate(conv,inq)}% conversion is several extra move-ins a month.</p>
+              <span class="atag">Effort: Low–Med</span><span class="atag">Lever: conversion</span>
+            </div></div>
+            <div class="action-item"><span class="pri p1">Priority 1</span><div>
+              <h5>Make the website close &amp; standardise phone scripting</h5>
+              <p>Turn online demand into online bookings, and standardise the phone follow-up script so Central catches up to Lears' conversion.</p>
+              <span class="atag">Effort: Medium</span>
+            </div></div>
+          </div>
+        </details>
+      </div>
     </div>`;
 }
 
