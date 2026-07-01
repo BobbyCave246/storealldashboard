@@ -278,6 +278,15 @@ details.section-toggle[open]>summary .sec-num{background:var(--accent);color:#ff
   </section>
   </div>
 
+  <!-- PANEL: ACQUISITION -->
+  <div class="panel" data-section="acquisition">
+  <section>
+    <div class="sec-head"><div class="sec-num">↗</div><h2>Acquisition — how customers found us</h2>
+      <p>Lead-channel mix across the portfolio and the digital-acquisition opportunity.</p></div>
+    <div id="acquisitionBody"></div>
+  </section>
+  </div>
+
   <!-- SITE CONTEXT BAND (shown only for per-site sections) -->
   <div id="siteBand">
     <section class="site-tabs-section">
@@ -535,6 +544,7 @@ const LOCATIONS = {
         balUnits:21, balPct:4.6, balTotal:13777, aging:{"Current / ahead":436,"1–30 days":11,"31–60 days":0,"61–90 days":6,"90+ days":4}, autopayPct:35.4,
         age:{valid:288,pct:63,mean:48,median:51,min:20,max:87,bands:{"<25":42,"25–34":46,"35–44":27,"45–54":53,"55–64":67,"65+":53},female:264,male:183},
         collStatus:{ paidCurrent:362, prepaid:49, behindNone:10 },
+        acquisition:{ channels:{"Phone":278,"Walk-in":60,"Email":24,"Web":7,"Not recorded":88}, recent:{n:92,"Phone":49,"Walk-in":22,"Email":9,"Web":1,"Not recorded":11} },
         mom:{ prev:"May 2026", tenantTurnover:7, retentionPct:98.5, netUnits:0 },
         paymentMethods:{
           period:"June 2026",
@@ -568,6 +578,7 @@ const LOCATIONS = {
         balUnits:17, balPct:6.4, balTotal:10435, aging:{"Current / ahead":247,"1–30 days":7,"31–60 days":0,"61–90 days":7,"90+ days":3}, autopayPct:30.3,
         age:{valid:235,pct:89,mean:53,median:55,min:19,max:94,bands:{"<25":9,"25–34":13,"35–44":38,"45–54":57,"55–64":80,"65+":38},female:145,male:115},
         collStatus:{ paidCurrent:203, prepaid:26, behindNone:10 },
+        acquisition:{ channels:{"Phone":117,"Walk-in":82,"Email":13,"Web":6,"Not recorded":46}, recent:{n:64,"Phone":37,"Walk-in":13,"Email":8,"Web":0,"Not recorded":6} },
         paymentMethods:{
           period:"June 2026",
           methods:[
@@ -599,6 +610,7 @@ const LOCATIONS = {
         balUnits:15, balPct:5.8, balTotal:12649, aging:{"Current / ahead":243,"1–30 days":7,"31–60 days":0,"61–90 days":4,"90+ days":4}, autopayPct:26.5,
         age:{valid:124,pct:48,mean:32,median:23,min:20,max:77,bands:{"<25":74,"25–34":10,"35–44":13,"45–54":8,"55–64":12,"65+":7},female:144,male:102},
         collStatus:{ paidCurrent:197, prepaid:18, behindNone:6 },
+        acquisition:{ channels:{"Phone":207,"Walk-in":6,"Email":10,"Web":4,"Not recorded":31}, recent:{n:114,"Phone":94,"Walk-in":4,"Email":6,"Web":0,"Not recorded":10} },
         paymentMethods:{
           period:"June 2026",
           methods:[
@@ -639,6 +651,7 @@ const delta = (cur,prev,unit="",dp=1) => {
 const SECTIONS = [
   {id:'overview',           label:'Overview',          scope:'portfolio'},
   {id:'portfolio-payments', label:'Portfolio Payments',scope:'portfolio'},
+  {id:'acquisition',        label:'Acquisition',       scope:'portfolio'},
   {id:'occupancy',          label:'Occupancy',         scope:'site'},
   {id:'tenure',             label:'Tenure',            scope:'site'},
   {id:'segmentation',       label:'Segmentation',      scope:'site'},
@@ -948,6 +961,129 @@ function renderPortfolioPayments(){
     ${renderPaymentTrend()}`;
 }
 
+function renderAcquisition(){
+  const el = document.getElementById('acquisitionBody');
+  if(!el) return;
+  const ORDER = ["Phone","Walk-in","Email","Web","Not recorded"];
+  const DIGITAL = ["Email","Web"];
+  const color = { "Phone":"var(--navy2)", "Walk-in":"#7a7a7a", "Email":"var(--teal)", "Web":"var(--accent)", "Not recorded":"#d5d5d5" };
+  const agg = {}, recAgg = {}; ORDER.forEach(k=>{agg[k]=0;recAgg[k]=0;});
+  let recN = 0; const bySite = [];
+  Object.entries(LOCATIONS).forEach(([key,L])=>{
+    const a = latestSnapshot(L).data.acquisition; if(!a) return;
+    const ch = a.channels||{}, r = a.recent||{};
+    const tot = ORDER.reduce((s,k)=>s+(ch[k]||0),0);
+    ORDER.forEach(k=>{ agg[k]+=(ch[k]||0); recAgg[k]+=(r[k]||0); });
+    recN += (r.n||0);
+    bySite.push({ name:L.name.replace('Store All ',''), total:tot, ch });
+  });
+  const total = ORDER.reduce((s,k)=>s+agg[k],0);
+  const pct = n => (100*n/total).toFixed(1);
+  const digital = DIGITAL.reduce((s,k)=>s+agg[k],0);
+  const traditional = agg["Phone"]+agg["Walk-in"];
+  const notrec = agg["Not recorded"];
+  const recDigital = DIGITAL.reduce((s,k)=>s+recAgg[k],0);
+  const digShareRecent = recN ? 100*recDigital/recN : 0;
+  const lears = bySite.find(s=>s.name==='Lears');
+  const learsPhone = lears ? (100*(lears.ch["Phone"]||0)/lears.total).toFixed(0) : null;
+
+  el.innerHTML = `
+    <div class="ppm-stat-row">
+      <div class="ppm-stat">
+        <div class="k">Digital (Web + Email)</div>
+        <div class="v">${pct(digital)}<small>%</small></div>
+        <div class="d">${digital} of ${total} occupied units found us online</div>
+      </div>
+      <div class="ppm-stat">
+        <div class="k">Traditional (Phone + Walk-in)</div>
+        <div class="v">${pct(traditional)}<small>%</small></div>
+        <div class="d">${traditional} units — phone &amp; foot traffic</div>
+      </div>
+      <div class="ppm-stat">
+        <div class="k">Website-originated</div>
+        <div class="v">${agg["Web"]}<small> · ${pct(agg["Web"])}%</small></div>
+        <div class="d">just ${recAgg["Web"]} web move-in in the last 12 months</div>
+      </div>
+      <div class="ppm-stat">
+        <div class="k">Source not recorded</div>
+        <div class="v">${pct(notrec)}<small>%</small></div>
+        <div class="d">${notrec} units — enquiry source left blank</div>
+      </div>
+    </div>
+
+    <div class="ppm-grid">
+      <div class="card">
+        <h3><span class="dot"></span>Channel mix — portfolio (${total} occupied units)</h3>
+        <div style="display:flex;height:30px;border-radius:8px;overflow:hidden;margin:6px 0 14px">
+          ${ORDER.map(k=>`<div title="${k}: ${agg[k]}" style="width:${100*agg[k]/total}%;background:${color[k]};min-width:2px"></div>`).join('')}
+        </div>
+        <table>
+          <thead><tr><th>Channel</th><th></th><th class="r">Units</th><th class="r">% of base</th></tr></thead>
+          <tbody>${ORDER.map(k=>`
+            <tr>
+              <td style="font-weight:600"><span style="display:inline-block;width:9px;height:9px;border-radius:2px;background:${color[k]};margin-right:7px;vertical-align:middle"></span>${k}</td>
+              <td>${DIGITAL.includes(k)?'<span class="pill full">Digital</span>':(k==='Not recorded'?'':'<span class="pill" style="background:var(--paper2);color:var(--muted)">Traditional</span>')}</td>
+              <td class="r mono">${agg[k]}</td>
+              <td class="r mono">${pct(agg[k])}%</td>
+            </tr>`).join('')}
+          </tbody>
+        </table>
+        <table style="margin-top:14px">
+          <thead><tr><th>Site</th><th class="r">Phone</th><th class="r">Walk-in</th><th class="r">Email</th><th class="r">Web</th><th class="r">Digital %</th><th class="r">Not rec.</th></tr></thead>
+          <tbody>${bySite.map(s=>{
+            const dg = (s.ch["Email"]||0)+(s.ch["Web"]||0);
+            return `<tr><td style="font-weight:600">${s.name}</td>
+              <td class="r mono">${s.ch["Phone"]||0}</td>
+              <td class="r mono">${s.ch["Walk-in"]||0}</td>
+              <td class="r mono">${s.ch["Email"]||0}</td>
+              <td class="r mono">${s.ch["Web"]||0}</td>
+              <td class="r mono">${(100*dg/s.total).toFixed(1)}%</td>
+              <td class="r mono">${s.ch["Not recorded"]||0}</td></tr>`;
+          }).join('')}
+          </tbody>
+        </table>
+        <div class="note">Channel is captured at enquiry (SiteLink <b>InquirySource</b>) for the currently-occupied base. Source wasn't recorded for ${notrec} units (${pct(notrec)}%).</div>
+      </div>
+
+      <div>
+        <div class="insight" style="background:var(--navy2);margin-bottom:16px">
+          <h4>Digital acquisition is the whitespace</h4>
+          <p>Only <b>${pct(digital)}%</b> of tenants found us online — and the website itself brought in just <b>${agg["Web"]} units ever</b>, <b>${recAgg["Web"]}</b> in the last 12 months. Phone dominates${learsPhone?` (Lears is ${learsPhone}% phone)`:''}.</p>
+          <p>Among tenants who moved in over the <b>last 12 months</b>, digital rose to <b>${digShareRecent.toFixed(1)}%</b> — but entirely via email enquiry, not the website. The web channel is effectively dormant.</p>
+        </div>
+        <details class="action-plan">
+          <summary>Digital acquisition action plan <span class="badge">3 actions</span></summary>
+          <div class="action-body">
+            <div class="action-item">
+              <span class="pri p1">Priority 1</span>
+              <div>
+                <h5>Turn the website into a booking channel</h5>
+                <p>With only ${agg["Web"]} web-sourced tenants, the site is a brochure, not a funnel. Add online reservation / move-in with live unit availability and pricing, and a prominent "Reserve now" call to action, then track web leads end-to-end.</p>
+                <span class="atag">Channel: Website</span><span class="atag">Effort: Medium</span>
+              </div>
+            </div>
+            <div class="action-item">
+              <span class="pri p1">Priority 1</span>
+              <div>
+                <h5>Own local search — Google Business Profile &amp; SEO</h5>
+                <p>Phone dominates because people search then call. Capture that demand earlier: complete, review-rich Google Business Profiles per site, local SEO for "storage + parish", and click-to-call on mobile — converting "found us by phone" into measurable digital sourcing.</p>
+                <span class="atag">Channel: Search / GBP</span><span class="atag">Effort: Low–Med</span>
+              </div>
+            </div>
+            <div class="action-item">
+              <span class="pri p2">Priority 2</span>
+              <div>
+                <h5>Capture the source every time</h5>
+                <p>${notrec} units (${pct(notrec)}%) have no recorded source, so the picture is blurrier than it needs to be. Make "How did you hear about us?" a required field at move-in — the cheapest way to sharpen every acquisition decision that follows.</p>
+                <span class="atag">Target: ${notrec} blanks</span><span class="atag">Effort: Low</span>
+              </div>
+            </div>
+          </div>
+        </details>
+      </div>
+    </div>`;
+}
+
 function render(){
   const L = LOCATIONS[STATE.loc];
   const mkeys = Object.keys(L.months).sort();
@@ -957,6 +1093,7 @@ function render(){
   const PREV = (mi>0) ? L.months[mkeys[mi-1]] : null;
 
   renderPortfolio();
+  renderAcquisition();
 
   /* section nav (docked to header) */
   document.getElementById('sectionNav').innerHTML = SECTIONS.map((s,i)=>{
