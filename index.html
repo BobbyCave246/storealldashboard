@@ -485,7 +485,7 @@ details.section-toggle[open]>summary .sec-num{background:var(--accent);color:#ff
   </div>
 
   <footer class="wrap" style="padding-left:0;padding-right:0">
-    <b>Store All Barbados — Management Dashboard.</b> Generated from SiteLink rent roll and rental-activity exports. Store All Central: two snapshots (May &amp; June 2026). Store All South: June 2026 (occupancy from May activity). Store All Lears: June 2026. Customer churn is measured by tenant change on units rented in both periods. Figures are operational indicators, not audited financials.
+    <b>Store All Barbados — Management Dashboard.</b> Generated from SiteLink rent roll, rental-activity and receipts exports. Store All Central: two snapshots (May &amp; June 2026). Store All South and Store All Lears: June 2026 (month-end position with full 1–30 June activity). Customer churn is measured by tenant change on units rented in both periods. Figures are operational indicators, not audited financials.
   </footer>
 </div>
 
@@ -523,29 +523,29 @@ const LOCATIONS = {
         }
       },
       "2026-06":{
-        label:"June 2026", basis:"As of 1 June 2026",
+        label:"June 2026", basis:"Month-end June 2026 · activity 1–30 Jun",
         totalUnits:461, occupied:457, vacant:4, physOcc:99.1, econOcc:98.4,
-        grossPot:120421, occRent:118528, totalArea:28628, occArea:28555,
-        revpaf:4.14, revOccSqft:4.15, avgRentUnit:259.36, movedIn:1, movedOut:0, net:1,
-        byType:[{t:"Drive-Up Storage",units:189,occ:189,pct:100.0},{t:"Indoor Storage",units:199,occ:196,pct:98.5},{t:"Climate Controlled",units:56,occ:56,pct:100.0},{t:"Mailbox",units:16,occ:16,pct:100.0},{t:"Mobile Storage",units:1,occ:1,pct:100.0}],
-        losMean:52.8, losMedian:39.6, losBands:{"<3 mo":22,"3–12 mo":68,"1–2 yr":69,"2–5 yr":126,"5 yr+":172},
-        corpUnits:106, indivUnits:351, corpPct:23.2, corpRent:33417, indivRent:85111, corpRentPct:28.2,
-        corpArea:83, indivArea:56, corpLos:65.6, indivLos:49.0, top10:4.5,
-        geoIndiv:{"St. Michael":82,"Christ Church":63,"St. James":48,"St. Thomas":21,"St. Philip":19,"St. George":16,"Other Barbados":11,"Overseas":69,"Unknown":22}, indivN:351,
-        balUnits:112, balPct:24.5, balTotal:41266, aging:{"Current / ahead":435,"1–30 days":0,"31–60 days":10,"61–90 days":8,"90+ days":4}, autopayPct:35.2,
-        age:{valid:284,pct:62,mean:48,median:52,min:19,max:87,bands:{"<25":44,"25–34":43,"35–44":26,"45–54":52,"55–64":67,"65+":52},female:261,male:185},
-        mom:{ prev:"May 2026", tenantTurnover:9, retentionPct:100.0, netUnits:1 },
+        grossPot:120421, occRent:118515, totalArea:28628, occArea:28563,
+        revpaf:4.14, revOccSqft:4.15, avgRentUnit:259.33, movedIn:7, movedOut:7, net:0,
+        byType:[{t:"Indoor Storage",units:199,occ:197,pct:99.0},{t:"Drive-Up Storage",units:189,occ:189,pct:100.0},{t:"Climate Controlled",units:56,occ:55,pct:98.2},{t:"Mailbox",units:16,occ:15,pct:93.8},{t:"Mobile Storage",units:1,occ:1,pct:100.0}],
+        losMean:53.4, losMedian:40.0, losBands:{"<3 mo":19,"3–12 mo":73,"1–2 yr":61,"2–5 yr":132,"5 yr+":172},
+        corpUnits:108, indivUnits:349, corpPct:23.6, corpRent:33830, indivRent:84685, corpRentPct:28.5,
+        corpArea:85, indivArea:56, corpLos:65.7, indivLos:49.6, top10:4.5,
+        geoIndiv:{"St. Michael":80,"Christ Church":64,"St. James":46,"St. Thomas":20,"St. Philip":21,"St. George":19,"Other Barbados":22,"Overseas":55,"Unknown":22}, indivN:349,
+        balUnits:21, balPct:4.6, balTotal:13777, aging:{"Current / ahead":436,"1–30 days":11,"31–60 days":0,"61–90 days":6,"90+ days":4}, autopayPct:35.4,
+        age:{valid:288,pct:63,mean:48,median:51,min:20,max:87,bands:{"<25":42,"25–34":46,"35–44":27,"45–54":53,"55–64":67,"65+":53},female:264,male:183},
+        mom:{ prev:"May 2026", tenantTurnover:7, retentionPct:98.5, netUnits:0 },
         paymentMethods:{
           period:"June 2026",
           methods:[
-            {label:"Plug & Pay",    units:145, amount:43696.97, type:"autopay"},
-            {label:"Money Order",   units:39,  amount:16962.85, type:"manual"},
-            {label:"Bank Transfer", units:31,  amount:13283.08, type:"online"},
-            {label:"Cash",          units:20,  amount:6980.54,  type:"manual"},
-            {label:"Visa",          units:9,   amount:2662.04,  type:"card"},
-            {label:"Check",         units:7,   amount:2984.97,  type:"manual"},
-            {label:"Master Card",   units:5,   amount:1290.00,  type:"card"},
-            {label:"Internet",      units:1,   amount:535.00,   type:"online"}
+            {label:"Plug & Pay",    units:148, amount:44704.47, type:"autopay"},
+            {label:"Money Order",   units:96,  amount:43306.29, type:"manual"},
+            {label:"Bank Transfer", units:50,  amount:19313.53, type:"online"},
+            {label:"Cash",          units:37,  amount:13134.28, type:"manual"},
+            {label:"Visa",          units:18,  amount:12853.26, type:"card"},
+            {label:"Check",         units:20,  amount:9957.98,  type:"manual"},
+            {label:"Master Card",   units:10,  amount:2821.11,  type:"card"},
+            {label:"Internet",      units:2,   amount:805.00,   type:"online"}
           ]
         }
       }
@@ -555,27 +555,27 @@ const LOCATIONS = {
     name:"Store All South", sub:"Gibbons, Christ Church",
     months:{
       "2026-06":{
-        label:"June 2026", basis:"Rent roll 1 Jun · activity May",
-        totalUnits:265, occupied:259, vacant:6, physOcc:97.7, econOcc:95.4,
-        grossPot:69607, occRent:66380, totalArea:17165, occArea:16688,
-        revpaf:3.87, revOccSqft:3.98, avgRentUnit:256.29, movedIn:7, movedOut:7, net:0,
-        byType:[{t:"Drive-Up Storage",units:188,occ:183,pct:97.3},{t:"Indoor Storage",units:75,occ:74,pct:98.7},{t:"Box Storage",units:2,occ:2,pct:100.0}],
-        losMean:38.0, losMedian:25.2, losBands:{"<3 mo":22,"3–12 mo":48,"1–2 yr":58,"2–5 yr":92,"5 yr+":42},
-        corpUnits:59, indivUnits:203, corpPct:22.5, corpRent:18390, indivRent:48542, corpRentPct:27.5,
-        corpArea:89, indivArea:57, corpLos:40.1, indivLos:37.4, top10:8.0,
-        geoIndiv:{"Christ Church":84,"St. Michael":31,"St. Philip":16,"St. James":15,"St. George":3,"St. Thomas":3,"Other Barbados":7,"Overseas":39,"Unknown":5}, indivN:203,
-        balUnits:72, balPct:27.5, balTotal:24150, aging:{"Current / ahead":245,"1–30 days":0,"31–60 days":10,"61–90 days":5,"90+ days":2}, autopayPct:30.5,
-        age:{valid:236,pct:90,mean:54,median:55,min:19,max:94,bands:{"<25":9,"25–34":13,"35–44":39,"45–54":58,"55–64":79,"65+":38},female:146,male:112},
+        label:"June 2026", basis:"Month-end June 2026 · activity 1–30 Jun",
+        totalUnits:265, occupied:264, vacant:1, physOcc:99.6, econOcc:97.6,
+        grossPot:69607, occRent:67929, totalArea:17165, occArea:17125,
+        revpaf:3.96, revOccSqft:3.97, avgRentUnit:257.30, movedIn:8, movedOut:2, net:6,
+        byType:[{t:"Drive-Up Storage",units:188,occ:187,pct:99.5},{t:"Indoor Storage",units:75,occ:75,pct:100.0},{t:"Box Storage",units:2,occ:2,pct:100.0}],
+        losMean:38.6, losMedian:25.7, losBands:{"<3 mo":22,"3–12 mo":42,"1–2 yr":62,"2–5 yr":95,"5 yr+":43},
+        corpUnits:57, indivUnits:207, corpPct:21.6, corpRent:18510, indivRent:49419, corpRentPct:27.2,
+        corpArea:92, indivArea:57, corpLos:50.9, indivLos:35.2, top10:7.9,
+        geoIndiv:{"St. Michael":27,"Christ Church":90,"St. James":9,"St. Thomas":3,"St. Philip":18,"St. George":4,"Other Barbados":10,"Overseas":38,"Unknown":8}, indivN:207,
+        balUnits:17, balPct:6.4, balTotal:10435, aging:{"Current / ahead":247,"1–30 days":7,"31–60 days":0,"61–90 days":7,"90+ days":3}, autopayPct:30.3,
+        age:{valid:235,pct:89,mean:53,median:55,min:19,max:94,bands:{"<25":9,"25–34":13,"35–44":38,"45–54":57,"55–64":80,"65+":38},female:145,male:115},
         paymentMethods:{
           period:"June 2026",
           methods:[
-            {label:"Plug & Pay",    units:62,  amount:17145.64, type:"autopay"},
-            {label:"Money Order",   units:27,  amount:11544.35, type:"manual"},
-            {label:"Bank Transfer", units:19,  amount:4696.95,  type:"online"},
-            {label:"Cash",          units:11,  amount:5020.45,  type:"manual"},
-            {label:"Check",         units:8,   amount:2901.72,  type:"manual"},
-            {label:"Visa",          units:5,   amount:2272.00,  type:"card"},
-            {label:"Master Card",   units:3,   amount:954.37,   type:"card"}
+            {label:"Money Order",   units:70,  amount:34996.81, type:"manual"},
+            {label:"Plug & Pay",    units:63,  amount:17334.56, type:"autopay"},
+            {label:"Bank Transfer", units:37,  amount:11017.30, type:"online"},
+            {label:"Cash",          units:19,  amount:9192.47,  type:"manual"},
+            {label:"Check",         units:13,  amount:5979.08,  type:"manual"},
+            {label:"Visa",          units:8,   amount:2953.84,  type:"card"},
+            {label:"Master Card",   units:5,   amount:1874.37,  type:"card"}
           ]
         }
       }
@@ -585,136 +585,42 @@ const LOCATIONS = {
     name:"Store All Lears", sub:"Dayrells Commercial Park, Lears",
     months:{
       "2026-06":{
-        "label": "June 2026",
-        "basis": "Rent roll 1 Jun · activity June",
-        "totalUnits": 259,
-        "occupied": 246,
-        "vacant": 13,
-        "physOcc": 95.0,
-        "econOcc": 93.1,
-        "grossPot": 89446,
-        "occRent": 83298,
-        "totalArea": 25528,
-        "occArea": 24248,
-        "revpaf": 3.26,
-        "revOccSqft": 3.44,
-        "avgRentUnit": 338.61,
-        "movedIn": 4,
-        "movedOut": 0,
-        "net": 4,
-        "byType": [
-                {
-                        "t": "5x8",
-                        "units": 49,
-                        "occ": 49,
-                        "pct": 100.0
-                },
-                {
-                        "t": "8x8",
-                        "units": 8,
-                        "occ": 8,
-                        "pct": 100.0
-                },
-                {
-                        "t": "8x10",
-                        "units": 4,
-                        "occ": 4,
-                        "pct": 100.0
-                },
-                {
-                        "t": "10x8",
-                        "units": 113,
-                        "occ": 103,
-                        "pct": 91.2
-                },
-                {
-                        "t": "8x16",
-                        "units": 2,
-                        "occ": 2,
-                        "pct": 100.0
-                },
-                {
-                        "t": "20x8",
-                        "units": 72,
-                        "occ": 69,
-                        "pct": 95.8
-                },
-                {
-                        "t": "40x8",
-                        "units": 6,
-                        "occ": 6,
-                        "pct": 100.0
-                }
-        ],
-        "losMean": 19.0,
-        "losMedian": 15.3,
-        "losBands": {
-                "<3 mo": 41,
-                "3–12 mo": 60,
-                "1–2 yr": 72,
-                "2–5 yr": 69,
-                "5 yr+": 0
-        },
-        "corpUnits": 83,
-        "indivUnits": 163,
-        "corpPct": 33.7,
-        "corpRent": 31945,
-        "indivRent": 51353,
-        "corpRentPct": 38.3,
-        "corpArea": 123,
-        "indivArea": 86,
-        "corpLos": 22.2,
-        "indivLos": 16.9,
-        "top10": 12.7,
-        "geoIndiv": {
-                "St. Michael": 35,
-                "Christ Church": 17,
-                "St. James": 34,
-                "St. Thomas": 14,
-                "St. Philip": 10,
-                "St. George": 15,
-                "Other Barbados": 12,
-                "Overseas": 18,
-                "Unknown": 8
-        },
-        "indivN": 163,
-        "balUnits": 59,
-        "balPct": 22.8,
-        "balTotal": 32742,
-        "aging": {
-                "Current / ahead": 234,
-                "1–30 days": 0,
-                "31–60 days": 6,
-                "61–90 days": 2,
-                "90+ days": 4
-        },
-        "autopayPct": 26.0,
-        "age": {"valid":119,"pct":48,"mean":33,"median":23,"min":20,"max":77,"bands":{"<25":71,"25–34":9,"35–44":12,"45–54":9,"55–64":11,"65+":7},"female":136,"male":98},
-        "paymentMethods": {
-          "period": "June 2026",
-          "methods": [
-            {"label":"Plug & Pay",    "units":59, "amount":24594.00, "type":"autopay"},
-            {"label":"Money Order",   "units":28, "amount":11074.99, "type":"manual"},
-            {"label":"Visa",          "units":13, "amount":9020.44,  "type":"card"},
-            {"label":"Bank Transfer", "units":13, "amount":6295.53,  "type":"online"},
-            {"label":"Cash",          "units":10, "amount":4996.45,  "type":"manual"},
-            {"label":"Check",         "units":6,  "amount":4147.62,  "type":"manual"},
-            {"label":"Master Card",   "units":5,  "amount":1825.00,  "type":"card"},
-            {"label":"Internet",      "units":1,  "amount":535.00,   "type":"online"}
+        label:"June 2026", basis:"Month-end June 2026 · activity 1–30 Jun",
+        totalUnits:270, occupied:257, vacant:13, physOcc:95.2, econOcc:93.4,
+        grossPot:93433, occRent:87285, totalArea:26648, occArea:25368,
+        revpaf:3.28, revOccSqft:3.44, avgRentUnit:339.63, movedIn:19, movedOut:4, net:15,
+        byType:[{t:"10x8",units:121,occ:111,pct:91.7},{t:"20x8",units:75,occ:72,pct:96.0},{t:"5x8",units:49,occ:49,pct:100.0},{t:"8x8",units:8,occ:8,pct:100.0},{t:"40x8",units:6,occ:6,pct:100.0},{t:"8x10",units:4,occ:4,pct:100.0},{t:"8x16",units:2,occ:2,pct:100.0},{t:"Other",units:5,occ:5,pct:100.0}],
+        losMean:18.5, losMedian:14.9, losBands:{"<3 mo":50,"3–12 mo":63,"1–2 yr":74,"2–5 yr":69,"5 yr+":1},
+        corpUnits:66, indivUnits:192, corpPct:25.6, corpRent:25374, indivRent:62238, corpRentPct:29.0,
+        corpArea:124, indivArea:90, corpLos:21.4, indivLos:17.4, top10:7.7,
+        geoIndiv:{"St. Michael":43,"Christ Church":21,"St. James":37,"St. Thomas":17,"St. Philip":8,"St. George":16,"Other Barbados":19,"Overseas":20,"Unknown":11}, indivN:192,
+        balUnits:15, balPct:5.8, balTotal:12649, aging:{"Current / ahead":243,"1–30 days":7,"31–60 days":0,"61–90 days":4,"90+ days":4}, autopayPct:26.5,
+        age:{valid:124,pct:48,mean:32,median:23,min:20,max:77,bands:{"<25":74,"25–34":10,"35–44":13,"45–54":8,"55–64":12,"65+":7},female:144,male:102},
+        paymentMethods:{
+          period:"June 2026",
+          methods:[
+            {label:"Money Order",   units:62, amount:27311.50, type:"manual"},
+            {label:"Plug & Pay",    units:63, amount:27108.68, type:"autopay"},
+            {label:"Visa",          units:29, amount:16297.09, type:"card"},
+            {label:"Check",         units:9,  amount:12612.62, type:"manual"},
+            {label:"Bank Transfer", units:23, amount:11084.05, type:"online"},
+            {label:"Cash",          units:15, amount:8114.05,  type:"manual"},
+            {label:"Master Card",   units:12, amount:4240.81,  type:"card"},
+            {label:"Internet",      units:3,  amount:1405.00,  type:"online"}
           ]
         }
-}
+      }
     }
   }
 };
 
-/* ===== 6-month payment trend (from SiteLink receipts, Jan–May 2026 — complete months for all sites) ===== */
+/* ===== 6-month payment trend (from SiteLink receipts, Jan–Jun 2026 — complete months for all sites) ===== */
 const PAYMENT_TREND = {
-  months: ["Jan","Feb","Mar","Apr","May"],
+  months: ["Jan","Feb","Mar","Apr","May","Jun"],
   sites: {
-    "Central": { occupied:457, autopay:[148,152,153,156,151], collections:[151228,155737,141049,150283,147142] },
-    "South":   { occupied:259, autopay:[66,64,66,66,67],      collections:[80042,86055,89961,94520,86368] },
-    "Lears":   { occupied:246, autopay:[54,55,58,58,61],      collections:[102215,96141,102042,88140,111669] }
+    "Central": { occupied:457, autopay:[148,152,153,156,151,148], collections:[151228,155737,141049,150283,147142,146896] },
+    "South":   { occupied:264, autopay:[66,64,66,66,67,63],       collections:[80042,86055,89961,94520,86368,83348] },
+    "Lears":   { occupied:257, autopay:[54,55,58,58,61,63],       collections:[102215,96141,102042,88140,111669,108174] }
   }
 };
 
