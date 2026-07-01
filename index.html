@@ -475,26 +475,6 @@ details.section-toggle[open]>summary .sec-num{background:var(--accent);color:#ff
   </section>
   </div>
 
-  <!-- PANEL: STRATEGIC -->
-  <div class="panel" data-section="strategic">
-  <!-- 8. STRATEGIC READ -->
-  <section>
-    <div class="sec-head"><div class="sec-num">07</div><h2>Strategic Read</h2>
-      <p>What this snapshot implies against the expansion framework.</p></div>
-    <div class="insight" id="stratRead" style="background:var(--navy2)"></div>
-  </section>
-  </div>
-
-  <!-- PANEL: MONTH OVER MONTH -->
-  <div class="panel" data-section="mom">
-  <!-- 9. MONTH OVER MONTH -->
-  <section id="momSection">
-    <div class="sec-head"><div class="sec-num">08</div><h2>Month over Month</h2>
-      <p>Change since the previous snapshot — the metrics that need a series.</p></div>
-    <div id="momBody"></div>
-  </section>
-  </div>
-
   <footer class="wrap" style="padding-left:0;padding-right:0">
     <b>Store All Barbados — Management Dashboard.</b> Generated from SiteLink rent roll, rental-activity and receipts exports. Store All Central: two snapshots (May &amp; June 2026). Store All South and Store All Lears: June 2026 (month-end position with full 1–30 June activity). Customer churn is measured by tenant change on units rented in both periods. Figures are operational indicators, not audited financials.
   </footer>
@@ -696,9 +676,7 @@ const SECTIONS = [
   {id:'segmentation',       label:'Segmentation',      scope:'site'},
   {id:'geography',          label:'Geography',         scope:'site'},
   {id:'demographics',       label:'Demographics',      scope:'site'},
-  {id:'payments',           label:'Payments',          scope:'site'},
-  {id:'strategic',          label:'Strategic',         scope:'site'},
-  {id:'mom',                label:'Month over Month',  scope:'site'}
+  {id:'payments',           label:'Payments',          scope:'site'}
 ];
 
 let STATE = { loc:"central", month:null, section:"overview" };
@@ -1369,12 +1347,6 @@ function render(){
     <div class="card"><h3><span class="dot"></span>RevPAF</h3><div class="bignum">$${CUR.revpaf.toFixed(2)}<small> /sf</small></div><div class="cap">Revenue per available sq ft — the blended performance metric</div></div>
     <div class="card"><h3><span class="dot"></span>Revenue / occupied sq ft</h3><div class="bignum">$${CUR.revOccSqft.toFixed(2)}<small> /sf</small></div><div class="cap">Pricing power, stripping out occupancy</div></div>
     <div class="card"><h3><span class="dot"></span>Avg rent / occupied unit</h3><div class="bignum">$${CUR.avgRentUnit.toFixed(0)}</div><div class="cap">Across ${CUR.occupied} occupied units &middot; ${bbd(CUR.occRent)}/mo total</div></div>`;
-
-  /* strategic read */
-  document.getElementById('stratRead').innerHTML = strategicRead(STATE.loc, CUR);
-
-  /* month over month */
-  renderMoM(L, CUR, PREV, mkeys);
 }
 
 function renderDemographics(CUR){
@@ -1418,58 +1390,6 @@ function demoInsight(loc, a, young){
     <h4>A broad, middle-aged spread</h4>
     <p>Central's tenants span the full range (${a.min}–${a.max}), with the largest groups in the 45–64 bands and a healthy under-35 tail (<b>${youngPct}%</b>). It's the most demographically balanced of the three sites.</p>
     <p>DOB is on file for <b>${a.pct}%</b> of accounts; capturing it at sign-up across the board would sharpen this picture and the catchment view alongside it.</p>`;
-}
-
-function strategicRead(loc, CUR){
-  if(loc==='central') return `
-    <h4>A full facility with pricing headroom</h4>
-    <p>At <b>99% physical</b> and <b>98% economic</b> occupancy sustained, Store All Central sits well above the 90% threshold the framework sets for evaluating added capacity. The binding constraint is space, not demand.</p>
-    <p>Very long tenure (median <b>${(CUR.losMedian/12).toFixed(1)} years</b>) in a near-full facility is the classic setup for testing <b>rate increases</b> — the cheapest lever available.</p>
-    <p>Beneath the flat surface: vacancies <b>re-let the same month</b> (strong demand), while arrears are <b>aging into worse buckets</b> — the one trend to watch.</p>`;
-  if(loc==='south') return `
-    <h4>Healthy, younger, and not yet at the ceiling</h4>
-    <p>Store All South runs at <b>98% physical / 95% economic</b> occupancy — full by most standards, but with a wider physical-to-economic gap than Central, pointing to slightly more discounting or arrears drag.</p>
-    <p>The tenant base is <b>younger</b> (median tenure ${(CUR.losMedian/12).toFixed(1)} yr vs Central's 3.3) and more <b>locally rooted</b> — Christ Church alone is over 40% of individuals, fitting the Gibbons south-coast catchment.</p>
-    <p>Revenue is more concentrated (top 10 = <b>${CUR.top10.toFixed(0)}%</b> vs Central's 4.5%) and auto-pay is lower at <b>${CUR.autopayPct.toFixed(0)}%</b> — a clear collections lever.</p>`;
-  return `
-    <h4>A newer site with room to tighten utilisation</h4>
-    <p>Store All Lears is at <b>${CUR.physOcc.toFixed(0)}% physical / ${CUR.econOcc.toFixed(0)}% economic</b> occupancy. That is healthy, but the gap to Central and South means there is still room to fill and improve revenue capture.</p>
-    <p>The tenant base is <b>younger</b> (median ${(CUR.losMedian/12).toFixed(1)} yr) with no 5+ year cohort yet, so the site is still maturing rather than behaving like a long-tenure legacy facility.</p>
-    <p>Vacancy is mainly in the larger volume groups, while corporate users contribute <b>${CUR.corpRentPct.toFixed(0)}%</b> of rent from <b>${CUR.corpPct.toFixed(0)}%</b> of units — useful for targeted provider/business outreach.</p>`;
-}
-
-function renderMoM(L, CUR, PREV, mkeys){
-  const momBody = document.getElementById('momBody');
-  if(PREV && CUR.mom){
-    const m = CUR.mom;
-    momBody.innerHTML = `
-      <div class="mom-grid">
-        <div class="mom-stat"><div class="k">Customer churn</div><div class="v" style="color:var(--good)">${(m.tenantTurnover/PREV.occupied*100).toFixed(1)}<small style="font-size:16px;color:var(--muted)">%</small></div><div class="d">${m.tenantTurnover} tenants left & were replaced</div></div>
-        <div class="mom-stat"><div class="k">Unit retention</div><div class="v">${m.retentionPct.toFixed(0)}<small style="font-size:16px;color:var(--muted)">%</small></div><div class="d">every ${m.prev} unit still rented</div></div>
-        <div class="mom-stat"><div class="k">Net absorption</div><div class="v">${m.netUnits>=0?'+':''}${m.netUnits}<small style="font-size:16px;color:var(--muted)"> unit</small></div><div class="d">vacancies re-let same month</div></div>
-        <div class="mom-stat"><div class="k">Rent roll change</div><div class="v" style="font-size:24px">${bbd(CUR.occRent-PREV.occRent)}</div><div class="d">${CUR.label} vs ${m.prev}</div></div>
-      </div>
-      <div style="height:16px"></div>
-      <div class="grid g2">
-        <div class="card"><h3><span class="dot"></span>Key metrics vs ${m.prev}</h3>
-          <table class="compare-tbl"><thead><tr><th>Metric</th><th class="r">${m.prev}</th><th class="r">${CUR.label}</th><th class="r">Change</th></tr></thead><tbody>
-            <tr><td>Physical occupancy</td><td class="r">${PREV.physOcc}%</td><td class="r">${CUR.physOcc}%</td><td class="r">${delta(CUR.physOcc,PREV.physOcc,'pp')}</td></tr>
-            <tr><td>Economic occupancy</td><td class="r">${PREV.econOcc}%</td><td class="r">${CUR.econOcc}%</td><td class="r">${delta(CUR.econOcc,PREV.econOcc,'pp')}</td></tr>
-            <tr><td>Median tenure (yr)</td><td class="r">${(PREV.losMedian/12).toFixed(1)}</td><td class="r">${(CUR.losMedian/12).toFixed(1)}</td><td class="r">${delta(CUR.losMedian/12,PREV.losMedian/12,'yr')}</td></tr>
-            <tr><td>Corporate share</td><td class="r">${PREV.corpPct.toFixed(0)}%</td><td class="r">${CUR.corpPct.toFixed(0)}%</td><td class="r">${delta(CUR.corpPct,PREV.corpPct,'pp',0)}</td></tr>
-            <tr><td>Accounts 60+ days late</td><td class="r">${PREV.aging['61–90 days']+PREV.aging['90+ days']}</td><td class="r">${CUR.aging['61–90 days']+CUR.aging['90+ days']}</td><td class="r">${delta(CUR.aging['61–90 days']+CUR.aging['90+ days'],PREV.aging['61–90 days']+PREV.aging['90+ days'],'',0)}</td></tr>
-            <tr><td>Auto-pay adoption</td><td class="r">${PREV.autopayPct.toFixed(0)}%</td><td class="r">${CUR.autopayPct.toFixed(0)}%</td><td class="r">${delta(CUR.autopayPct,PREV.autopayPct,'pp',0)}</td></tr>
-          </tbody></table>
-        </div>
-        <div class="insight" style="background:var(--navy2)"><h4>Two signals beneath a flat surface</h4>
-          <p>Headline occupancy barely moved, but <b>${m.tenantTurnover} units</b> changed tenant in-month — real customer churn of <b>${(m.tenantTurnover/PREV.occupied*100).toFixed(1)}%</b> invisible at the unit level because vacancies <b>re-let the same month</b>. A strong demand signal.</p>
-          <p>Arrears are <b>aging into worse buckets</b>: accounts 60+ days late rose from <b>${PREV.aging['61–90 days']+PREV.aging['90+ days']}</b> to <b>${CUR.aging['61–90 days']+CUR.aging['90+ days']}</b>, with total balance roughly flat. Existing debt getting older, not growing.</p>
-        </div>
-      </div>`;
-  } else {
-    momBody.innerHTML = `<div class="stub"><div class="ic">↗</div><h3 style="margin-top:6px">Trend &amp; churn — awaiting a second snapshot</h3>
-      <p>Only one monthly snapshot exists for ${L.name} so far. Churn, retention and absorption trend populate automatically once the next rent roll is added — exactly as they did for Store All Central.</p></div>`;
-  }
 }
 
 function renderPaymentMethods(CUR){
