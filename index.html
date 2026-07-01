@@ -534,6 +534,7 @@ const LOCATIONS = {
         geoIndiv:{"St. Michael":80,"Christ Church":64,"St. James":46,"St. Thomas":20,"St. Philip":21,"St. George":19,"Other Barbados":22,"Overseas":55,"Unknown":22}, indivN:349,
         balUnits:21, balPct:4.6, balTotal:13777, aging:{"Current / ahead":436,"1–30 days":11,"31–60 days":0,"61–90 days":6,"90+ days":4}, autopayPct:35.4,
         age:{valid:288,pct:63,mean:48,median:51,min:20,max:87,bands:{"<25":42,"25–34":46,"35–44":27,"45–54":53,"55–64":67,"65+":53},female:264,male:183},
+        collStatus:{ paidCurrent:362, prepaid:49, behindNone:10 },
         mom:{ prev:"May 2026", tenantTurnover:7, retentionPct:98.5, netUnits:0 },
         paymentMethods:{
           period:"June 2026",
@@ -566,6 +567,7 @@ const LOCATIONS = {
         geoIndiv:{"St. Michael":27,"Christ Church":90,"St. James":9,"St. Thomas":3,"St. Philip":18,"St. George":4,"Other Barbados":10,"Overseas":38,"Unknown":8}, indivN:207,
         balUnits:17, balPct:6.4, balTotal:10435, aging:{"Current / ahead":247,"1–30 days":7,"31–60 days":0,"61–90 days":7,"90+ days":3}, autopayPct:30.3,
         age:{valid:235,pct:89,mean:53,median:55,min:19,max:94,bands:{"<25":9,"25–34":13,"35–44":38,"45–54":57,"55–64":80,"65+":38},female:145,male:115},
+        collStatus:{ paidCurrent:203, prepaid:26, behindNone:10 },
         paymentMethods:{
           period:"June 2026",
           methods:[
@@ -596,6 +598,7 @@ const LOCATIONS = {
         geoIndiv:{"St. Michael":43,"Christ Church":21,"St. James":37,"St. Thomas":17,"St. Philip":8,"St. George":16,"Other Barbados":19,"Overseas":20,"Unknown":11}, indivN:192,
         balUnits:15, balPct:5.8, balTotal:12649, aging:{"Current / ahead":243,"1–30 days":7,"31–60 days":0,"61–90 days":4,"90+ days":4}, autopayPct:26.5,
         age:{valid:124,pct:48,mean:32,median:23,min:20,max:77,bands:{"<25":74,"25–34":10,"35–44":13,"45–54":8,"55–64":12,"65+":7},female:144,male:102},
+        collStatus:{ paidCurrent:197, prepaid:18, behindNone:6 },
         paymentMethods:{
           period:"June 2026",
           methods:[
@@ -791,56 +794,56 @@ function renderPortfolioPayments(){
   const autopayU = byType('autopay'), onlineU = byType('online'), cardU = byType('card'), manualU = byType('manual');
   const pct = n => (100*n/totalOccupied).toFixed(1);
 
-  // Portfolio payment delinquency — how many are behind on payments
-  let lateUnits = 0, severeUnits = 0, lateAmt = 0;
-  const arrearsBySite = [];
+  // Portfolio collections status — where every occupied unit stands in June
+  let paidCurrent = 0, prepaid = 0, offCycle = 0, behind = 0, behindNone = 0, severeUnits = 0, overdueAmt = 0;
+  const collBySite = [];
   Object.entries(LOCATIONS).forEach(([key, L]) => {
     const d = latestSnapshot(L).data;
+    const cs = d.collStatus || {};
     const ag = d.aging || {};
-    const late = (d.balUnits != null) ? d.balUnits
-      : Object.entries(ag).reduce((s,[k,v]) => s + (k === 'Current / ahead' ? 0 : v), 0);
-    const severe = (ag['61–90 days']||0) + (ag['90+ days']||0);
-    lateUnits += late; severeUnits += severe; lateAmt += (d.balTotal || 0);
-    arrearsBySite.push({ name: L.name.replace('Store All ',''), occupied: d.occupied, late, severe, amount: d.balTotal || 0 });
+    const beh = (d.balUnits != null) ? d.balUnits : 0;
+    const sev = (ag['61–90 days']||0) + (ag['90+ days']||0);
+    const pc = cs.paidCurrent||0, pp = cs.prepaid||0, bn = cs.behindNone||0;
+    const oc = Math.max(0, d.occupied - pc - pp - beh); // current, no June payment, not prepaid
+    paidCurrent += pc; prepaid += pp; offCycle += oc; behind += beh; behindNone += bn;
+    severeUnits += sev; overdueAmt += (d.balTotal||0);
+    collBySite.push({ name: L.name.replace('Store All ',''), occupied: d.occupied, paidCurrent: pc, prepaid: pp, offCycle: oc, behind: beh, severe: sev });
   });
-  const currentUnits = totalOccupied - lateUnits;
+  const behindPartial = behind - behindNone;
+  const paidJune = paidCurrent + behindPartial; // distinct units that transacted in June
+  const pctO = n => (100*n/totalOccupied).toFixed(1);
+  const seg = [
+    { label:'Paid & current',          units:paidCurrent, color:'var(--good)' },
+    { label:'Prepaid / ahead',         units:prepaid,     color:'#8fc79a' },
+    { label:'Off-cycle / not yet due', units:offCycle,    color:'#c9c9c9' },
+    { label:'Behind (overdue)',        units:behind,      color:'var(--accent)' }
+  ];
 
   el.innerHTML = `
     <div class="card" style="margin-bottom:16px">
-      <h3><span class="dot"></span>Who's behind on payments — portfolio (June 2026)</h3>
+      <h3><span class="dot"></span>Collections status — where the ${totalOccupied} occupied units stand (June 2026)</h3>
+      <div style="display:flex;height:30px;border-radius:8px;overflow:hidden;margin:6px 0 14px">
+        ${seg.map(s=>`<div title="${s.label}: ${s.units}" style="width:${100*s.units/totalOccupied}%;background:${s.color};min-width:2px"></div>`).join('')}
+      </div>
       <div class="ppm-stat-row">
+        ${seg.map(s=>`
         <div class="ppm-stat">
-          <div class="k">Accounts behind</div>
-          <div class="v">${lateUnits}<small> of ${totalOccupied}</small></div>
-          <div class="d">${(100*lateUnits/totalOccupied).toFixed(1)}% of occupied units carry an overdue balance</div>
-        </div>
-        <div class="ppm-stat">
-          <div class="k">Seriously late (60+ days)</div>
-          <div class="v">${severeUnits}</div>
-          <div class="d">${(100*severeUnits/totalOccupied).toFixed(1)}% of occupied — genuine delinquency</div>
-        </div>
-        <div class="ppm-stat">
-          <div class="k">Total overdue</div>
-          <div class="v" style="font-size:20px">${bbd(lateAmt)}</div>
-          <div class="d">rent past due across all sites</div>
-        </div>
-        <div class="ppm-stat">
-          <div class="k">Current / ahead</div>
-          <div class="v">${(100*currentUnits/totalOccupied).toFixed(1)}<small>%</small></div>
-          <div class="d">${currentUnits} units paid up to date</div>
-        </div>
+          <div class="k"><span style="display:inline-block;width:9px;height:9px;border-radius:2px;background:${s.color};margin-right:6px;vertical-align:middle"></span>${s.label}</div>
+          <div class="v">${s.units}<small> · ${pctO(s.units)}%</small></div>
+        </div>`).join('')}
       </div>
       <table style="margin-top:4px">
-        <thead><tr><th>Site</th><th class="r">Occupied</th><th class="r">Behind</th><th class="r">60+ days</th><th class="r">Overdue</th></tr></thead>
-        <tbody>${arrearsBySite.map(s=>`
+        <thead><tr><th>Site</th><th class="r">Occupied</th><th class="r">Paid &amp; current</th><th class="r">Prepaid</th><th class="r">Off-cycle</th><th class="r">Behind (60+)</th></tr></thead>
+        <tbody>${collBySite.map(s=>`
           <tr><td style="font-weight:600">${s.name}</td>
           <td class="r mono">${s.occupied}</td>
-          <td class="r mono">${s.late} (${(100*s.late/s.occupied).toFixed(1)}%)</td>
-          <td class="r mono">${s.severe}</td>
-          <td class="r mono">${bbd(s.amount)}</td></tr>`).join('')}
+          <td class="r mono">${s.paidCurrent}</td>
+          <td class="r mono">${s.prepaid}</td>
+          <td class="r mono">${s.offCycle}</td>
+          <td class="r mono">${s.behind} (${s.severe})</td></tr>`).join('')}
         </tbody>
       </table>
-      <div class="note">"Behind" = units carrying an overdue rent balance (past their paid-through date). "60+ days" are the genuinely delinquent accounts; most behind accounts are current-cycle billing rather than true arrears.</div>
+      <div class="note"><b>${paidJune} units paid in June</b> (${paidCurrent} now current + ${behindPartial} behind who paid partially). The <b>${prepaid+offCycle}</b> current units with no June payment aren't missing — <b>${prepaid}</b> are prepaid / paid ahead and <b>${offCycle}</b> are billed on another date this month. Only <b>${behind} are overdue</b> (${bbd(overdueAmt)}); of those <b>${severeUnits} are 60+ days late</b> and <b>${behindNone} paid nothing at all</b> — the real collections priority.</div>
     </div>
 
     <div class="ppm-stat-row">
