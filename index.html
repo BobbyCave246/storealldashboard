@@ -675,9 +675,9 @@ const CUSTOMER_PROFILE = {
   what:[ {k:"Furniture / boxes",n:629}, {k:"Business inventory",n:156}, {k:"Business records",n:78}, {k:"Other",n:96} ],
   season:[95,99,88,72,103,97,81,58,52,77,82,74],
   sites:[
-    {name:"Central", res:349, com:108, locationPct:61, moutMonths:16},
-    {name:"South",   res:207, com:57,  locationPct:77, moutMonths:15},
-    {name:"Lears",   res:191, com:66,  locationPct:69, moutMonths:8}
+    {name:"Central", res:349, com:108, locationPct:61},
+    {name:"South",   res:207, com:57,  locationPct:77},
+    {name:"Lears",   res:191, com:66,  locationPct:69}
   ]
 };
 
@@ -1264,7 +1264,9 @@ function renderCustomerProfile(){
   const TOT = P.total;
   const sum = arr => arr.reduce((s,x)=>s+x.n,0);
   const pctT = n => Math.round(100*n/TOT);
-  const within10 = P.distance.filter(x=>['< 2 mi','2–3 mi','3–5 mi','5–10 mi'].includes(x.k)).reduce((s,x)=>s+x.n,0);
+  const within5 = P.distance.filter(x=>['< 2 mi','2–3 mi','3–5 mi'].includes(x.k)).reduce((s,x)=>s+x.n,0);
+  const overseas = (P.distance.find(x=>x.k==='Overseas')||{n:0}).n;
+  const onIsland = TOT - overseas;
   const loc = P.why.find(x=>x.k==='Location').n;
   const furn = P.what.find(x=>x.k==='Furniture / boxes').n;
   const barList = (items, color) => { const t=sum(items); const mx=Math.max(...items.map(i=>i.n)); return items.map(it=>`
@@ -1286,13 +1288,12 @@ function renderCustomerProfile(){
       <td style="font-weight:600">${s.name}</td>
       <td class="r mono">${Math.round(100*s.res/(s.res+s.com))}% / ${Math.round(100*s.com/(s.res+s.com))}%</td>
       <td class="r mono">${s.locationPct}%</td>
-      <td class="r mono">${s.moutMonths} mo</td>
     </tr>`).join('');
 
   el.innerHTML = `
     <div class="ppm-stat-row">
       <div class="ppm-stat"><div class="k">Chose us for location</div><div class="v">${pctT(loc)}<small>%</small></div><div class="d">vs ~0% for price — convenience, not cost</div></div>
-      <div class="ppm-stat"><div class="k">Live within 10 miles</div><div class="v">${pctT(within10)}<small>%</small></div><div class="d">hyper-local catchment</div></div>
+      <div class="ppm-stat"><div class="k">Within ~5 miles</div><div class="v">${pctT(within5)}<small>%</small></div><div class="d">core catchment · 10-mi band ≈ most of the island</div></div>
       <div class="ppm-stat"><div class="k">Residential</div><div class="v">${Math.round(100*P.resCom.res/TOT)}<small>%</small></div><div class="d">${P.resCom.res} vs ${P.resCom.com} commercial</div></div>
       <div class="ppm-stat"><div class="k">Storing furniture / household</div><div class="v">${pctT(furn)}<small>%</small></div><div class="d">${furn} of ${TOT} tenants</div></div>
     </div>
@@ -1310,17 +1311,17 @@ function renderCustomerProfile(){
 
       <div>
         <div class="insight" style="background:var(--navy2);margin-bottom:16px">
-          <h4>Location-led &amp; hyper-local</h4>
-          <p><b>${pctT(loc)}%</b> rent because of <b>location</b> — and effectively no one for price. <b>${pctT(within10)}%</b> live within 10 miles. The marketing lever is <b>visibility and proximity</b> (Google Business Profile, local SEO, signage), not discounting.</p>
+          <h4>Location-led demand</h4>
+          <p><b>${pctT(loc)}%</b> rent because of <b>location</b> — and effectively no one for price, so the lever is <b>visibility and proximity</b> (Google Business Profile, local SEO, signage), not discounting. On a 14×21-mile island the mile bands are coarse — "within 10 miles" is most of Barbados — so the sharper local read is the <b>Geography</b> tab's parish view (South is ~43% Christ Church, its own parish).</p>
         </div>
         <div class="insight" style="background:var(--navy2);margin-bottom:16px">
-          <h4>Early-life churn — watch Lears</h4>
-          <p>Tenants who have left stayed <b>${P.sites[2].moutMonths} months</b> on average at Lears, versus ${P.sites[0].moutMonths}–${P.sites[1].moutMonths} at Central &amp; South. The newer site loses people early — an onboarding / first-90-days retention focus, not a demand problem.</p>
+          <h4>On-island vs overseas</h4>
+          <p>~<b>${Math.round(100*onIsland/TOT)}%</b> of tenants are on-island and ~<b>${pctT(overseas)}%</b> overseas — concentrated at Central. That lines up with the Geography section's overseas share, the one distance cut that's genuinely meaningful on a small island.</p>
         </div>
         <div class="card">
           <h3><span class="dot"></span>By site</h3>
           <table>
-            <thead><tr><th>Site</th><th class="r">Res / Com</th><th class="r">Location</th><th class="r">Exit tenure</th></tr></thead>
+            <thead><tr><th>Site</th><th class="r">Res / Com</th><th class="r">Chose for location</th></tr></thead>
             <tbody>${siteRows}</tbody>
           </table>
         </div>
