@@ -131,6 +131,84 @@ my things the same night — and I can manage everything from my phone."*
 ### Notifications
 - **Push + email** for transactional events (move-in confirmation with gate code, payment receipts). **SMS** is an available channel (number on file) but is reserved; not used for OTP.
 
+## Design System & Theme
+
+The app inherits Store All's existing brand, extracted directly from the current
+management dashboard (`index.html`) so the app and the business's other surfaces
+read as one brand. The identity is **bold red on clean near-white paper, with
+Montserrat for headings and Source Sans 3 for body** — confident, high-contrast,
+utilitarian. These are the canonical tokens; the Flutter theme is built from them
+(not from a generic Material seed).
+
+### Color tokens (light theme — the v1 theme)
+
+**Brand**
+- `brand/primary` — `#E30613` (Store All red) — primary actions, active states, emphasis.
+- `brand/primaryPressed` — `#b00010` — pressed/hover of primary.
+- `brand/primaryTint` — `#f6a3a3` — subtle red accents, selected chips.
+- `brand/primarySurface` — `#fdeaea` — tinted backgrounds behind red content.
+
+**Neutrals**
+- `text/primary` (ink) — `#111111` — body text.
+- `text/heading` — `#222222` — headings (paired with Montserrat).
+- `text/muted` — `#6b6b6b` — secondary/caption text.
+- `border/divider` — `#e4e4e4` — hairlines, input borders, card outlines.
+- `surface/card` — `#ffffff` — cards, sheets, inputs.
+- `background/paper` — `#f2f2f2` — app background behind cards.
+
+**Semantic (for balances, payment health, statuses)**
+- `success` — `#2f7d5b` on surface `#e4f4ec` — paid / autopay active / available.
+- `warning` — `#b88620` on surface `#fff5d6` — due soon / attention.
+- `danger` — `#c20510` on surface `#fdeaea` — overdue / payment failed / errors.
+
+### Typography
+- **Display & headings:** **Montserrat** (weights 600/700/800). Used for screen
+  titles, unit-type names, prices, and the gate code.
+- **Body & UI:** **Source Sans 3** (weights 400/500/600/700). Used for paragraphs,
+  labels, buttons, list items.
+- **Suggested ramp (mobile):** Display 28/700 · Title 22/700 · Section 18/600 ·
+  Body 16/400 · Label 14/600 · Caption 13/500 · Mono-ish (gate code) 24/700
+  Montserrat with wide letter-spacing for legibility.
+
+### Shape, spacing, elevation
+- **Radius:** default card/sheet **12px**; buttons & inputs **8px**; pills/chips
+  **20px** (full). (Matches the dashboard's dominant 12px card radius.)
+- **Spacing:** 4pt base grid — 4 / 8 / 12 / 16 / 24 / 32.
+- **Elevation:** deliberately soft. Card: `0 10px 30px -20px rgba(0,0,0,.30)`.
+  Primary red CTA gets a branded lift: `0 4px 12px -4px rgba(227,6,19,.40)`.
+
+### Key components (brand application)
+- **Primary CTA** ("Reserve & Move In", "Pay Now"): red `#E30613`, white label,
+  8–12px radius, branded shadow. This is the one dominant red on any screen —
+  red is for *action*, not decoration.
+- **Unit-type card:** white card, 12px radius, Montserrat size name + BBD price,
+  availability chip (green `success` when available), select CTA.
+- **Move-in cost breakdown:** line-item list (deposit, prorated rent, contents
+  protection, VAT) in muted body text with a bold Montserrat total.
+- **Gate-code display:** the hero moment — large Montserrat code on a
+  `primarySurface` panel, tap-to-copy, with unit number and site.
+- **Status chips:** semantic colors above (paid/due/overdue, available/occupied).
+- **Email-OTP input:** segmented code field; success/error states use semantic colors.
+
+### Flutter implementation notes
+- **Material 3 `ThemeData`** with a hand-built `ColorScheme` set to the exact
+  tokens above (do **not** rely on `ColorScheme.fromSeed` approximations — brand
+  red is fixed). Centralize as an `AppTheme` / token file so both the app and any
+  future product can import the same palette.
+- Load **Montserrat** and **Source Sans 3** as bundled fonts (or `google_fonts`),
+  mapped to `textTheme` display/headline vs body/label roles.
+- **Dark theme is v2**, not v1 — tokens are named so a dark map can be added later
+  without renaming.
+
+### Accessibility
+- **Do not set long body text in brand red** — red is reserved for CTAs, emphasis,
+  and the gate code. Body text is ink `#111111` on white/paper for strong contrast.
+- Ensure CTA label contrast (white on `#E30613`) and any red-on-white text/icons
+  are validated against **WCAG AA**; fall back to `primaryPressed` `#b00010` where
+  a darker red is needed to pass on small text.
+- Semantic state must never be conveyed by color alone — pair status chips with a
+  label/icon (e.g. "Overdue", "Paid").
+
 ## Testing Decisions
 
 - **What makes a good test here:** it exercises **external, observable behaviour** ("customer completes checkout and receives a unit number, gate code, and lease PDF"; "existing tenant links by email and sees their balance"), not internal implementation. Tests must be **fast and deterministic**, which the adapter seam makes possible.
@@ -148,6 +226,7 @@ my things the same night — and I can manage everything from my phone."*
 - **Move-out / notice-to-vacate, unit transfers, referrals, support ticketing** — v2.
 - **SMS-based OTP** and SMS payment reminders (SMS reserved, not wired to OTP in v1).
 - **Storing documents in SiteLink attachments** — v1 uses StoreAll's own encrypted storage.
+- **Dark theme** — tokens are structured to support it, but only the light theme ships in v1.
 
 ## Further Notes
 
