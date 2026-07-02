@@ -217,21 +217,62 @@ the separately-built website**.
    and **SOAP tooling is weak** — risky for the SiteLink adapter specifically.
    Not recommended given SOAP is the critical path.
 
-**Recommendation:** **TypeScript + NestJS** as the default; switch to **Python +
-FastAPI** if a SOAP-integration spike shows the SiteLink client is the dominant
-risk. Both isolate SOAP entirely inside the SiteLink adapter, so this choice does
-not leak into the domain or the app.
+**Decision (current):** **TypeScript + NestJS** is the chosen backend. It gives
+the cleanest expression of the ports/adapters design, is the most hireable, and
+likely shares a language with the separately-built marketing website. **Python +
+FastAPI remains the fallback** if a SOAP-integration spike shows the SiteLink
+client is the dominant risk (its `zeep` client is stronger). Either way SOAP is
+sealed inside the SiteLink adapter, so the choice never leaks into the domain or
+the app.
 
-### Hosting
-- **Deploy the backend as a container.** Serverless/edge functions are a poor fit
-  for this app's backend — it needs SOAP session pooling, background cron
-  (autopay/reminders), and a retry queue, none of which suit a scale-to-zero
-  functions model.
-- **Recommended: Google Cloud Run** — containers that keep warm instances yet
-  scale down; the pragmatic middle ground on ops vs. cost. Alternatives:
-  **Fly.io**, **Render**, or **AWS App Runner / ECS**.
-- Keep the marketing website on its own hosting; the backend is a separate,
-  independently deployable service.
+### Hosting & cloud
+
+**Decision (current): TypeScript backend on Railway.** For a small team, Railway
+is the obvious choice — push-to-deploy, managed Postgres, built-in cron, and a
+Redis add-on for the job queue, with predictable low pricing and no cloud-infra
+expertise required. A big cloud can come later if the app outgrows it; nothing in
+the architecture is Railway-specific.
+
+Baseline principle either way: **deploy the backend as a container/long-running
+service**, not serverless/edge functions — it needs SOAP session pooling,
+background cron (autopay/reminders), and a retry queue, none of which suit a
+scale-to-zero functions model. Note: none of the major clouds have a Barbados
+region; the nearest is US East for all of them, so data residency under the Data
+Protection Act is a cross-border-transfer safeguard issue, not a differentiator.
+
+**Concrete Railway setup:**
+- **API service** — the NestJS app (container via Nixpacks/Dockerfile).
+- **Worker service** — background jobs (autopay charges, reminders, post-to-
+  SiteLink retries) via BullMQ.
+- **Railway Postgres** — StoreAll's own database (accounts, OTP, saved-card token
+  references, autopay schedules, document metadata, idempotency keys).
+- **Railway Redis** — backing store for the BullMQ queue + scheduled jobs.
+- **Object storage: an S3-compatible bucket (recommend Cloudflare R2)** — for the
+  encrypted ID images and executed lease PDFs. *Railway has no native object
+  storage, so this is a deliberate external add-on; R2 is cheap with no egress fees
+  and supports signed URLs.*
+- **Secrets** via Railway environment variables (SiteLink, RBC, email, R2 keys).
+
+**Full cloud options (kept for the record):**
+
+| Option | What you'd use | Pros | Cons |
+|--------|----------------|------|------|
+| **Railway** ⭐ *(chosen)* | Service + managed Postgres + Redis + cron; R2 for files | Easiest for a small team; push-to-deploy; predictable low cost | Less control at large scale; smaller vendor; no native object storage |
+| **Render** | Same shape as Railway | Also very simple; mature managed Postgres | Slightly less polished DX than Railway for this stack |
+| **Google Cloud** | Cloud Run + Cloud SQL + Cloud Storage + Cloud Scheduler/Tasks | Grown-up cloud but approachable; scales to zero | More setup than Railway; fewer local specialists than AWS |
+| **AWS** | App Runner/ECS + RDS + S3 + EventBridge/SQS | Most common & hireable; every feature exists | Most moving parts; easiest to misconfigure/overspend |
+| **Azure** | Container Apps + Azure PostgreSQL + Blob Storage + Functions timer | Best if .NET or a Microsoft/Office 365 shop; single bill/logins | Clunkier DX for small teams; less community content |
+| **Fly.io** | Containers + managed Postgres | Developer-friendly; runs close to users; cheap | Smaller ecosystem; Postgres less hands-off |
+| **Cloudways** | Managed VPS over DO/AWS/GCP/Vultr | Managed server ops (patching, backups) | Server-centric, historically PHP/WordPress; **Postgres not first-class** (MySQL-first) — weak fit for this stack |
+
+**How to choose if revisited:** not-cloud-specialist small team → **Railway/Render**;
+want a proper cloud but simple → **Google Cloud Run**; Microsoft/.NET shop → **Azure**;
+already invested in AWS → **AWS**. The **cloud and the backend language are
+independent**, and **the choice is invisible to the Flutter app** — it just calls an
+HTTPS endpoint.
+
+Keep the marketing website on its own hosting; the backend is a separate,
+independently deployable service.
 
 ## Design System & Theme
 
