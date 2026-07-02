@@ -131,6 +131,107 @@ my things the same night — and I can manage everything from my phone."*
 ### Notifications
 - **Push + email** for transactional events (move-in confirmation with gate code, payment receipts). **SMS** is an available channel (number on file) but is reserved; not used for OTP.
 
+## Backend & Hosting
+
+### Shape: one backend service, not functions-behind-a-gateway
+The backend is a **single cohesive service (a modular monolith)** organised around
+the domain and the two ports — **not** a set of serverless functions-per-endpoint,
+and **not** microservices. An **API gateway is an optional edge layer in front of
+it**, not a substitute for it.
+
+Rationale, specific to this project:
+- **Move-in is a saga.** Assign unit → charge RBC → generate + e-sign lease → post
+  receipt to SiteLink → fetch gate code. This needs **idempotency keys and
+  compensating actions in one orchestrator** (e.g. card charged but SiteLink post
+  fails must be recoverable). Splitting it across functions creates a distributed
+  transaction for no benefit.
+- **SiteLink is SOAP with session-based auth.** An always-on service can **pool and
+  reuse sessions/connections**; serverless cold-starts re-authenticate per
+  invocation — slower and more fragile in the payment path.
+- **Background work exists:** autopay charges, payment reminders, failed-card
+  retries, and receipt-post retries need a **scheduler + retry queue**, natural in
+  a service and awkward in pure FaaS.
+- **Modularity is already in-process** via the ports; network boundaries aren't
+  needed to get clean seams, and the test strategy relies on mocking ports in-process.
+- **Scale reality:** one operator, 3 sites, ~162 units — steady, modest load gets
+  no value from scale-to-zero and pays for it in checkout-path cold starts.
+
+### The SiteLink SOAP adapter
+- The `StorageProvider` **port is protocol-agnostic** — the domain speaks StoreAll
+  vocabulary only.
+- Its first implementation, the **SiteLink adapter, is internally a SOAP client**
+  against the SiteLink Web Edition API (WSDL). All SOAP/XML, envelopes, and
+  SiteLink field names are **fully contained inside this adapter** and never reach
+  the domain.
+- Adapter responsibilities: **WSDL-generated types**, **session establishment +
+  pooling/reuse** (SiteLink auth is session-based), request/response mapping to
+  domain models, error translation, and **retry/backoff** on transient SOAP faults.
+- A future product can supply a different `StorageProvider` implementation
+  (REST/GraphQL/another SOAP system) without touching the domain or the app.
+
+### Payment gateway adapter
+- The `PaymentGateway` port's first implementation is the **RBC Plug and Pay
+  adapter** (card charge, **tokenization** for autopay, refund, receipt). All
+  gateway specifics stay inside the adapter; the domain sees only tokens and
+  outcomes. Raw PAN never enters StoreAll systems.
+
+### Cross-cutting backend concerns
+- **Idempotency** on every money/move-in operation (idempotency keys) so retries
+  never double-charge or double-assign.
+- **Job scheduler + durable queue** for autopay runs, reminders, and
+  post-to-SiteLink retries.
+- **Document service** for lease-template merge, PDF generation, and e-signature
+  capture; outputs to StoreAll's **own encrypted object storage** (ID images +
+  executed leases), keyed by tenant.
+- **Secrets management** for SiteLink, RBC, email, and storage credentials.
+- **Observability** — structured logging, tracing across the move-in saga, and
+  alerting on payment/SOAP failures.
+- **Edge API gateway (optional, add when needed):** TLS, auth-token validation,
+  **rate limiting** (protect the email-OTP endpoint), request logging/WAF.
+
+### Recommended backend stacks (ranked for this project)
+
+The deciding factors here are (1) **SOAP tooling quality** for the SiteLink
+adapter, (2) a framework that expresses the **modular-monolith + ports/adapters**
+cleanly with good testability, and (3) **team hireability / likely alignment with
+the separately-built website**.
+
+1. **TypeScript + NestJS — recommended default.** NestJS's modules + dependency
+   injection map almost one-to-one onto the ports/adapters design and make the
+   in-process port-mocking test strategy trivial. Huge ecosystem (BullMQ for
+   queues/cron, first-class REST/GraphQL), most hireable, and likely shares a
+   language with the marketing website (JS/TS). SOAP via the `soap` package is
+   adequate and stays sealed inside the SiteLink adapter. **Best all-round balance.**
+2. **Python + FastAPI — pick this if SOAP robustness dominates.** `zeep` is the
+   strongest SOAP client in any ecosystem, which de-risks the single hardest
+   integration; FastAPI is modern, typed, and clean, with Celery for background
+   jobs. Choose over NestJS if the SiteLink SOAP surface proves painful.
+3. **C# / .NET (ASP.NET Core) — strongest SOAP + performance.** First-class SOAP
+   (WCF-style clients / connected services), excellent typing, built-in hosted
+   services for background work, and many existing SiteLink integrations are .NET.
+   Heavier, and hireability in-region is the main question.
+4. **Java/Kotlin + Spring Boot — enterprise-grade, best-in-class SOAP (JAX-WS).**
+   Very robust, but more verbose and slower to build for a small team.
+5. **Dart (Serverpod / Dart Frog) — only if same-language-as-Flutter is a priority.**
+   Shared models end-to-end with the app is appealing, but the ecosystem is young
+   and **SOAP tooling is weak** — risky for the SiteLink adapter specifically.
+   Not recommended given SOAP is the critical path.
+
+**Recommendation:** **TypeScript + NestJS** as the default; switch to **Python +
+FastAPI** if a SOAP-integration spike shows the SiteLink client is the dominant
+risk. Both isolate SOAP entirely inside the SiteLink adapter, so this choice does
+not leak into the domain or the app.
+
+### Hosting
+- **Deploy the backend as a container**, not on Vercel functions (the current
+  dashboard's Vercel edge setup suits a static page, not a SOAP-integrating,
+  connection-pooling, cron-running service).
+- **Recommended: Google Cloud Run** — containers that keep warm instances yet
+  scale down; the pragmatic middle ground on ops vs. cost. Alternatives:
+  **Fly.io**, **Render**, or **AWS App Runner / ECS**.
+- Keep the marketing website on its own hosting; the backend is a separate,
+  independently deployable service.
+
 ## Design System & Theme
 
 The app inherits Store All's existing brand, extracted directly from the current
