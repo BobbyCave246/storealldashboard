@@ -223,9 +223,10 @@ risk. Both isolate SOAP entirely inside the SiteLink adapter, so this choice doe
 not leak into the domain or the app.
 
 ### Hosting
-- **Deploy the backend as a container**, not on Vercel functions (the current
-  dashboard's Vercel edge setup suits a static page, not a SOAP-integrating,
-  connection-pooling, cron-running service).
+- **Deploy the backend as a container.** Serverless/edge functions are a poor fit
+  for this app's backend — it needs SOAP session pooling, background cron
+  (autopay/reminders), and a retry queue, none of which suit a scale-to-zero
+  functions model.
 - **Recommended: Google Cloud Run** — containers that keep warm instances yet
   scale down; the pragmatic middle ground on ops vs. cost. Alternatives:
   **Fly.io**, **Render**, or **AWS App Runner / ECS**.
@@ -234,81 +235,107 @@ not leak into the domain or the app.
 
 ## Design System & Theme
 
-The app inherits Store All's existing brand, extracted directly from the current
-management dashboard (`index.html`) so the app and the business's other surfaces
-read as one brand. The identity is **bold red on clean near-white paper, with
-Montserrat for headings and Source Sans 3 for body** — confident, high-contrast,
-utilitarian. These are the canonical tokens; the Flutter theme is built from them
-(not from a generic Material seed).
+This is a **consumer-facing mobile app**, so the design system is built for it
+directly — not inherited from the internal management dashboard (which is a
+data-dense analytics tool with the wrong aesthetic for customers). The one asset
+we carry over is Store All's genuine brand: the **logo and brand red**. Everything
+else is designed fresh for a **clean, trustworthy** self-service experience.
+
+### Design principles
+- **Trust first.** Generous whitespace, clear hierarchy, honest and legible
+  pricing, visible security cues at payment. The app is handling people's money and
+  their belongings — it should feel calm and dependable, not busy.
+- **One brand color, used with intent.** Store All red anchors the brand and marks
+  the *primary action* on a screen — it is not scattered as decoration. Most of the
+  UI is white, ink, and soft neutrals; red earns attention where it appears.
+- **Guided, one-thing-per-screen flows.** Booking, move-in, and payment are broken
+  into calm steps with clear progress, not dense forms.
 
 ### Color tokens (light theme — the v1 theme)
 
 **Brand**
-- `brand/primary` — `#E30613` (Store All red) — primary actions, active states, emphasis.
-- `brand/primaryPressed` — `#b00010` — pressed/hover of primary.
-- `brand/primaryTint` — `#f6a3a3` — subtle red accents, selected chips.
-- `brand/primarySurface` — `#fdeaea` — tinted backgrounds behind red content.
+- `brand/primary` — `#E30613` (Store All red) — the primary action on a screen, active states.
+- `brand/primaryPressed` — `#B00010` — pressed state of primary.
+- `brand/primaryTint` — `#FDECEC` — soft red surface behind brand/celebratory moments (e.g. the gate-code panel).
+- `brand/onPrimary` — `#FFFFFF` — text/icons on red.
 
-**Neutrals**
-- `text/primary` (ink) — `#111111` — body text.
-- `text/heading` — `#222222` — headings (paired with Montserrat).
-- `text/muted` — `#6b6b6b` — secondary/caption text.
-- `border/divider` — `#e4e4e4` — hairlines, input borders, card outlines.
-- `surface/card` — `#ffffff` — cards, sheets, inputs.
-- `background/paper` — `#f2f2f2` — app background behind cards.
+**Neutrals (trust-oriented, cool and clean)**
+- `text/primary` (ink) — `#1A1A1A` — body and headings.
+- `text/secondary` — `#5A6068` — supporting text.
+- `text/muted` — `#8A9099` — captions, hints, disabled.
+- `border/divider` — `#E6E8EB` — hairlines, input borders, card outlines.
+- `surface/card` — `#FFFFFF` — cards, sheets, inputs.
+- `background` — `#F7F8FA` — soft app background behind cards.
 
-**Semantic (for balances, payment health, statuses)**
-- `success` — `#2f7d5b` on surface `#e4f4ec` — paid / autopay active / available.
-- `warning` — `#b88620` on surface `#fff5d6` — due soon / attention.
-- `danger` — `#c20510` on surface `#fdeaea` — overdue / payment failed / errors.
+**Semantic (money & status)**
+- `success` — `#1F8A54` on surface `#E7F5EE` — paid / autopay active / available.
+- `warning` — `#B7791F` on surface `#FDF3E2` — due soon / attention.
+- `danger` — `#C62828` on surface `#FDECEC` — overdue / payment failed / errors.
+  *(Kept visually distinct from brand red by context — inline field errors and
+  banners, never a full-width button — so "error red" and "action red" don't
+  read as the same thing.)*
 
 ### Typography
-- **Display & headings:** **Montserrat** (weights 600/700/800). Used for screen
-  titles, unit-type names, prices, and the gate code.
-- **Body & UI:** **Source Sans 3** (weights 400/500/600/700). Used for paragraphs,
-  labels, buttons, list items.
+- **Single, highly-legible family for trust and cohesion.** Recommend **Inter**
+  (or the platform system font) across headings and body — clean, neutral, and
+  excellent on small screens. A single family reads as more trustworthy and
+  reduces styling risk vs. mixing display faces.
+- **If Store All's logo/marketing uses a defined brand typeface, mirror it for
+  large headings only** (hero/screen titles) to tie back to the brand, keeping
+  Inter for all UI/body. (This replaces the dashboard's Montserrat/Source Sans
+  pairing, which was a dashboard choice, not a customer-brand decision.)
 - **Suggested ramp (mobile):** Display 28/700 · Title 22/700 · Section 18/600 ·
-  Body 16/400 · Label 14/600 · Caption 13/500 · Mono-ish (gate code) 24/700
-  Montserrat with wide letter-spacing for legibility.
+  Body 16/400 · Label 14/600 · Caption 13/500 · Gate code 30/700 with wide
+  letter-spacing (tabular figures) for glanceable legibility.
 
 ### Shape, spacing, elevation
-- **Radius:** default card/sheet **12px**; buttons & inputs **8px**; pills/chips
-  **20px** (full). (Matches the dashboard's dominant 12px card radius.)
-- **Spacing:** 4pt base grid — 4 / 8 / 12 / 16 / 24 / 32.
-- **Elevation:** deliberately soft. Card: `0 10px 30px -20px rgba(0,0,0,.30)`.
-  Primary red CTA gets a branded lift: `0 4px 12px -4px rgba(227,6,19,.40)`.
+- **Radius (soft, friendly):** cards/sheets **16px**; buttons & inputs **12px**;
+  chips/pills **full**. Consumer-warm, not the dashboard's tight corners.
+- **Spacing:** 8pt base grid — 4 / 8 / 12 / 16 / 24 / 32 / 48 — used generously.
+- **Elevation (restrained):** rely on whitespace and hairline borders, not heavy
+  shadows. One soft raise token for sheets/dialogs (e.g. `0 8px 24px -12px
+  rgba(16,24,40,.12)`). Primary buttons are flat fills, not drop-shadowed — cleaner
+  and calmer.
 
-### Key components (brand application)
-- **Primary CTA** ("Reserve & Move In", "Pay Now"): red `#E30613`, white label,
-  8–12px radius, branded shadow. This is the one dominant red on any screen —
-  red is for *action*, not decoration.
-- **Unit-type card:** white card, 12px radius, Montserrat size name + BBD price,
-  availability chip (green `success` when available), select CTA.
-- **Move-in cost breakdown:** line-item list (deposit, prorated rent, contents
-  protection, VAT) in muted body text with a bold Montserrat total.
-- **Gate-code display:** the hero moment — large Montserrat code on a
-  `primarySurface` panel, tap-to-copy, with unit number and site.
-- **Status chips:** semantic colors above (paid/due/overdue, available/occupied).
-- **Email-OTP input:** segmented code field; success/error states use semantic colors.
+### Key components (app-flow oriented)
+- **Primary CTA** ("Reserve & Move In", "Pay Now"): solid red `#E30613`, white
+  label, 12px radius, full-width at the bottom of step screens. One primary red
+  action per screen.
+- **Secondary action:** outline/ghost button in ink — no red.
+- **Unit-type card:** white, 16px radius, hairline border, clear size + BBD price,
+  an availability chip (green when available), and a select affordance.
+- **Move-in cost breakdown:** transparent line items (deposit, prorated rent,
+  contents protection, VAT) with a bold total — pricing clarity is a trust cue.
+- **Step / progress header:** a lightweight progress indicator through the move-in
+  saga (select → details → pay → sign → done) so customers always know where they are.
+- **Payment screen:** explicit **security cues** (lock icon, "secured by RBC",
+  saved-card state), calm confirmation on success.
+- **Gate-code display:** the hero moment — large code on the `brand/primaryTint`
+  panel, tap-to-copy, with unit number and site; the celebratory payoff of move-in.
+- **Status chips:** semantic colors + label/icon (Paid / Due soon / Overdue;
+  Available / Occupied).
+- **Email-OTP input:** segmented code field with clear success/error states.
+- **Empty/first-run states:** friendly, reassuring copy — supports the trust goal.
 
 ### Flutter implementation notes
-- **Material 3 `ThemeData`** with a hand-built `ColorScheme` set to the exact
-  tokens above (do **not** rely on `ColorScheme.fromSeed` approximations — brand
-  red is fixed). Centralize as an `AppTheme` / token file so both the app and any
-  future product can import the same palette.
-- Load **Montserrat** and **Source Sans 3** as bundled fonts (or `google_fonts`),
-  mapped to `textTheme` display/headline vs body/label roles.
-- **Dark theme is v2**, not v1 — tokens are named so a dark map can be added later
-  without renaming.
+- **Material 3 `ThemeData`** with a **hand-built `ColorScheme`** set to the exact
+  tokens above (do **not** use `ColorScheme.fromSeed` — brand red is fixed and the
+  neutrals are deliberately cool). Centralize as an `AppTheme` / design-token file
+  so the app (and any future product) imports one source of truth.
+- Bundle **Inter** (or use `google_fonts` / platform font), mapped to `textTheme`
+  roles; reserve any brand display face for headline roles only.
+- **Dark theme is v2** — tokens are named so a dark map can be added later without
+  renaming.
 
 ### Accessibility
-- **Do not set long body text in brand red** — red is reserved for CTAs, emphasis,
-  and the gate code. Body text is ink `#111111` on white/paper for strong contrast.
-- Ensure CTA label contrast (white on `#E30613`) and any red-on-white text/icons
-  are validated against **WCAG AA**; fall back to `primaryPressed` `#b00010` where
-  a darker red is needed to pass on small text.
-- Semantic state must never be conveyed by color alone — pair status chips with a
-  label/icon (e.g. "Overdue", "Paid").
+- **Never set body text in brand red** — red is reserved for the primary action and
+  brand moments. Body is ink `#1A1A1A` on white/`background` for strong contrast.
+- Validate **WCAG AA** for white-on-`#E30613` CTA labels and any red text/icons;
+  fall back to `primaryPressed` `#B00010` where a darker red is needed to pass on
+  small text.
+- **Never convey status by color alone** — pair every status chip with a label/icon
+  (e.g. "Overdue", "Paid"). This matters most on the payment/balance screens.
+- Target **44×44pt minimum touch targets** and support system text scaling.
 
 ## Testing Decisions
 
