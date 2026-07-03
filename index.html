@@ -486,7 +486,7 @@ details.section-toggle[open]>summary .sec-num{background:var(--accent);color:#ff
   </div>
 
   <footer class="wrap" style="padding-left:0;padding-right:0">
-    <b>Store All Barbados — Data Dashboard.</b> Generated from SiteLink rent roll, rental-activity and receipts exports. Store All Central: two snapshots (May &amp; June 2026). Store All South and Store All Lears: June 2026 (month-end position with full 1–30 June activity). Payment-health arrears (units behind, balances &amp; aging) refreshed from the 2 July 2026 rent roll for all three sites — portfolio overdue down from 53 to 45 units. Customer churn is measured by tenant change on units rented in both periods. Figures are operational indicators, not audited financials.
+    <b>Store All Barbados — Data Dashboard.</b> Generated from SiteLink rent roll, rental-activity and receipts exports. Store All Central: two snapshots (May &amp; June 2026). Store All South and Store All Lears: June 2026 (month-end position with full 1–30 June activity). Payment-health arrears (units behind, balances &amp; aging) refreshed from the 2 July 2026 rent roll for all three sites — portfolio overdue down from 53 to 45 units. Payment methods reflect the July 2026 reclassification: "Money Order" = CIBC bank-app transfer, "Internet" = Republic bank-app transfer, "Bank Transfer" = website Pay Now — all digital, not cash-equivalent. Acquisition distinguishes marketing source (how customers found us) from enquiry channel (how they contacted us). Lears occupancy reflects 14 out-of-service units as of 2 July. Customer churn is measured by tenant change on units rented in both periods. Figures are operational indicators, not audited financials.
   </footer>
 </div>
 
@@ -515,7 +515,7 @@ const LOCATIONS = {
             {label:"CIBC (bank transfer)", units:95,  amount:47493.20, type:"online"},
             {label:"Website (Pay Now)", units:56,  amount:21219.11, type:"online"},
             {label:"Cash",          units:30,  amount:10385.33, type:"manual"},
-            {label:"Check",         units:20,  amount:8225.78,  type:"manual"},
+            {label:"Cheque",         units:20,  amount:8225.78,  type:"manual"},
             {label:"Visa",          units:17,  amount:6990.36,  type:"card"},
             {label:"Master Card",   units:8,   amount:1773.09,  type:"card"},
             {label:"Republic (bank transfer)", units:5,   amount:3130.00,  type:"online"},
@@ -547,7 +547,7 @@ const LOCATIONS = {
             {label:"Website (Pay Now)", units:50,  amount:19313.53, type:"online"},
             {label:"Cash",          units:37,  amount:13134.28, type:"manual"},
             {label:"Visa",          units:18,  amount:12853.26, type:"card"},
-            {label:"Check",         units:20,  amount:9957.98,  type:"manual"},
+            {label:"Cheque",         units:20,  amount:9957.98,  type:"manual"},
             {label:"Master Card",   units:10,  amount:2821.11,  type:"card"},
             {label:"Republic (bank transfer)", units:2,   amount:805.00,   type:"online"}
           ]
@@ -580,7 +580,7 @@ const LOCATIONS = {
             {label:"Plug & Pay",    units:63,  amount:17334.56, type:"autopay"},
             {label:"Website (Pay Now)", units:37,  amount:11017.30, type:"online"},
             {label:"Cash",          units:19,  amount:9192.47,  type:"manual"},
-            {label:"Check",         units:13,  amount:5979.08,  type:"manual"},
+            {label:"Cheque",         units:13,  amount:5979.08,  type:"manual"},
             {label:"Visa",          units:8,   amount:2953.84,  type:"card"},
             {label:"Master Card",   units:5,   amount:1874.37,  type:"card"}
           ]
@@ -612,7 +612,7 @@ const LOCATIONS = {
             {label:"CIBC (bank transfer)", units:62, amount:27311.50, type:"online"},
             {label:"Plug & Pay",    units:63, amount:27108.68, type:"autopay"},
             {label:"Visa",          units:29, amount:16297.09, type:"card"},
-            {label:"Check",         units:9,  amount:12612.62, type:"manual"},
+            {label:"Cheque",         units:9,  amount:12612.62, type:"manual"},
             {label:"Website (Pay Now)", units:23, amount:11084.05, type:"online"},
             {label:"Cash",          units:15, amount:8114.05,  type:"manual"},
             {label:"Master Card",   units:12, amount:4240.81,  type:"card"},
@@ -723,6 +723,7 @@ function portfolioSummary(){
   });
   const sum = (field) => sites.reduce((t,s)=>t+(s.data[field]||0),0);
   const totalUnits = sum('totalUnits'), occupied = sum('occupied'), vacant = sum('vacant');
+  const unrentable = sum('unrentable');
   const grossPot = sum('grossPot'), occRent = sum('occRent'), totalArea = sum('totalArea'), occArea = sum('occArea');
   const corpUnits = sum('corpUnits'), indivUnits = sum('indivUnits'), corpRent = sum('corpRent'), indivRent = sum('indivRent');
   const movedIn = sum('movedIn'), movedOut = sum('movedOut');
@@ -730,8 +731,8 @@ function portfolioSummary(){
   const weightedMedianTenure = sites.reduce((t,s)=>t+s.data.losMedian*s.data.occupied,0)/occupied;
   const periods = [...new Set(sites.map(s=>s.data.label))].join(' / ');
   return {
-    sites, periods, totalUnits, occupied, vacant, grossPot, occRent, totalArea, occArea,
-    physOcc: occupied/totalUnits*100, econOcc: occRent/grossPot*100,
+    sites, periods, totalUnits, occupied, vacant, unrentable, grossPot, occRent, totalArea, occArea,
+    physOcc: occupied/totalUnits*100, rentableOcc: occupied/(totalUnits-unrentable)*100, econOcc: occRent/grossPot*100,
     revpaf: occRent/totalArea, revOccSqft: occRent/occArea, avgRentUnit: occRent/occupied,
     corpUnits, indivUnits, corpRent, indivRent, movedIn, movedOut,
     corpPct: corpUnits/(corpUnits+indivUnits)*100, corpRentPct: corpRent/(corpRent+indivRent)*100,
@@ -745,14 +746,15 @@ function renderPortfolio(){
   document.getElementById('portfolioHeaderUnits').textContent = P.totalUnits.toLocaleString();
 
   document.getElementById('portfolioHero').innerHTML = `
-    <div class="stat"><div class="k">Portfolio occupancy</div><div class="v">${P.physOcc.toFixed(1)}<small>%</small></div><div class="d">${P.occupied} of ${P.totalUnits} units filled across 3 sites</div></div>
+    <div class="stat"><div class="k">Portfolio occupancy</div><div class="v">${P.physOcc.toFixed(1)}<small>%</small></div><div class="d">${P.occupied} of ${P.totalUnits} units${P.unrentable?` · ${P.rentableOcc.toFixed(1)}% of rentable stock (${P.unrentable} out of service)`:' filled across 3 sites'}</div></div>
     <div class="stat"><div class="k">Monthly rent roll</div><div class="v" style="font-size:31px">${bbdk(P.occRent)}</div><div class="d">${P.econOcc.toFixed(1)}% of ${bbdk(P.grossPot)} gross potential</div></div>
     <div class="stat alt"><div class="k">Avg tenure</div><div class="v">${(P.weightedMeanTenure/12).toFixed(1)}<small>yr</small></div><div class="d">weighted avg · site-median blend ${(P.weightedMedianTenure/12).toFixed(1)} yr</div></div>
     <div class="stat"><div class="k">Customer split</div><div class="v">${P.corpPct.toFixed(0)}<small>%</small></div><div class="d">corporate units · ${P.corpRentPct.toFixed(0)}% of revenue</div></div>`;
 
   document.getElementById('portfolioSiteRows').innerHTML = P.sites.map(s => {
     const d = s.data;
-    return `<tr><td>${s.name}</td><td class="r">${d.physOcc.toFixed(1)}%</td><td class="r">${bbdk(d.occRent)}</td><td class="r">${(d.losMedian/12).toFixed(1)} yr</td><td class="r">${d.corpPct.toFixed(0)}%</td></tr>`;
+    const occCell = d.unrentable ? `${d.physOcc.toFixed(1)}% <span style="color:var(--muted);font-size:11px">(${(100*d.occupied/(d.totalUnits-d.unrentable)).toFixed(1)}% rentable)</span>` : `${d.physOcc.toFixed(1)}%`;
+    return `<tr><td>${s.name}</td><td class="r">${occCell}</td><td class="r">${bbdk(d.occRent)}</td><td class="r">${(d.losMedian/12).toFixed(1)} yr</td><td class="r">${d.corpPct.toFixed(0)}%</td></tr>`;
   }).join('');
 
   const topRent = [...P.sites].sort((a,b)=>b.data.occRent-a.data.occRent)[0];
@@ -760,7 +762,7 @@ function renderPortfolio(){
   const mostFull = [...P.sites].sort((a,b)=>b.data.physOcc-a.data.physOcc)[0];
   document.getElementById('portfolioRead').innerHTML = `
     <h4>Portfolio read</h4>
-    <p>The portfolio is effectively full at <b>${P.physOcc.toFixed(1)}% physical occupancy</b>, with <b>${bbd(P.occRent)}/mo</b> in current rent roll and <b>${P.econOcc.toFixed(1)}%</b> economic occupancy.</p>
+    <p>The portfolio is effectively full at <b>${P.rentableOcc.toFixed(1)}% of rentable stock</b> (${P.physOcc.toFixed(1)}% of all units — ${P.unrentable||0} are out of service at Lears), with <b>${bbd(P.occRent)}/mo</b> in current rent roll and <b>${P.econOcc.toFixed(1)}%</b> economic occupancy.</p>
     <p><b>${mostFull.name}</b> is the most capacity-constrained site; <b>${topRent.name}</b> contributes the largest rent roll; <b>${youngest.name}</b> has the youngest tenant base and the clearest room to mature.</p>
     <p>The split is still mostly individual-led: <b>${P.indivUnits}</b> individual units versus <b>${P.corpUnits}</b> corporate units, while corporate customers contribute a higher share of rent than units.</p>`;
 
@@ -1212,7 +1214,7 @@ function renderAcquisition(){
           </tr>`).join('')}
         </tbody>
       </table>
-      <div class="note">The base skews recent — <b>${Math.round(100*since2024/cohortTotal)}%</b> of current tenants moved in since 2024. Digital's share of move-ins climbed from <b>~2%</b> (2021–22) to <b>~${Math.round(100*yDig[CY.length-1]/yTot[CY.length-1])}%</b> in 2026 — but almost entirely via <b>email</b>; the website is dormant (most of its ${agg["Web"]} sign-ups predate 2020). "Not recorded" is largely legacy — ${ACQ_COHORTS.byChannel["Not recorded"][0]} of ${notrec} blanks are pre-2020. Cohorts count the <b>currently-occupied</b> base only (past movers excluded), so earlier years are thinned by churn. <b>2026 is Jan–Jun only.</b></div>
+      <div class="note">The base skews recent — <b>${Math.round(100*since2024/cohortTotal)}%</b> of current tenants moved in since 2024. Digital's share of move-ins climbed from <b>~2%</b> (2021–22) to <b>~${Math.round(100*yDig[CY.length-1]/yTot[CY.length-1])}%</b> in 2026 — but almost entirely via <b>email</b>; the website takes almost no <i>bookings</i> (most of its ${agg["Web"]} sign-ups predate 2020), even though its Pay Now feature now handles a meaningful share of rent collection. "Not recorded" is largely legacy — ${ACQ_COHORTS.byChannel["Not recorded"][0]} of ${notrec} blanks are pre-2020. Cohorts count the <b>currently-occupied</b> base only (past movers excluded), so earlier years are thinned by churn. <b>2026 is Jan–Jun only.</b></div>
     </div>`;
 }
 
@@ -1442,9 +1444,10 @@ function render(){
     return `<div class="bar-row"><span class="lab">${r.t.replace(' Storage','')}</span><div class="track"><div class="fill teal" style="width:${r.pct}%"></div></div><span class="num">${pill}</span></div>`;
   }).join('');
   const vacancyDrivers = CUR.byType.filter(r => (r.units-r.occ)>0).sort((a,b)=>(b.units-b.occ)-(a.units-a.occ));
-  document.getElementById('typeNote').textContent = vacancyDrivers.length
+  document.getElementById('typeNote').textContent = (vacancyDrivers.length
     ? 'Vacancy is concentrated in ' + vacancyDrivers.slice(0,2).map(r => `${r.t.replace(' Storage','')} (${r.units-r.occ})`).join(' and ') + '.'
-    : 'All displayed unit groups are full.';
+    : 'All displayed unit groups are full.')
+    + (CUR.unrentable ? ` Note: ${CUR.unrentable} of these units are out of service (unrentable) as of 2 Jul — only ${CUR.vacant} rentable unit${CUR.vacant===1?' is':'s are'} actually vacant.` : '');
 
   /* tenure */
   document.getElementById('losmean').innerHTML = CUR.losMean.toFixed(0)+'<small> mo &middot; '+(CUR.losMean/12).toFixed(1)+' yr</small>';
