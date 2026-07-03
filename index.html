@@ -512,13 +512,13 @@ const LOCATIONS = {
           period:"May 2026",
           methods:[
             {label:"Plug & Pay",    units:151, amount:45988.96, type:"autopay"},
-            {label:"Money Order",   units:95,  amount:47493.20, type:"manual"},
-            {label:"Bank Transfer", units:56,  amount:21219.11, type:"online"},
+            {label:"CIBC (bank transfer)", units:95,  amount:47493.20, type:"online"},
+            {label:"Website (Pay Now)", units:56,  amount:21219.11, type:"online"},
             {label:"Cash",          units:30,  amount:10385.33, type:"manual"},
             {label:"Check",         units:20,  amount:8225.78,  type:"manual"},
             {label:"Visa",          units:17,  amount:6990.36,  type:"card"},
             {label:"Master Card",   units:8,   amount:1773.09,  type:"card"},
-            {label:"Internet",      units:5,   amount:3130.00,  type:"online"},
+            {label:"Republic (bank transfer)", units:5,   amount:3130.00,  type:"online"},
             {label:"Debit Card",    units:1,   amount:25.96,    type:"card"}
           ]
         }
@@ -543,13 +543,13 @@ const LOCATIONS = {
           period:"June 2026",
           methods:[
             {label:"Plug & Pay",    units:148, amount:44704.47, type:"autopay"},
-            {label:"Money Order",   units:96,  amount:43306.29, type:"manual"},
-            {label:"Bank Transfer", units:50,  amount:19313.53, type:"online"},
+            {label:"CIBC (bank transfer)", units:96,  amount:43306.29, type:"online"},
+            {label:"Website (Pay Now)", units:50,  amount:19313.53, type:"online"},
             {label:"Cash",          units:37,  amount:13134.28, type:"manual"},
             {label:"Visa",          units:18,  amount:12853.26, type:"card"},
             {label:"Check",         units:20,  amount:9957.98,  type:"manual"},
             {label:"Master Card",   units:10,  amount:2821.11,  type:"card"},
-            {label:"Internet",      units:2,   amount:805.00,   type:"online"}
+            {label:"Republic (bank transfer)", units:2,   amount:805.00,   type:"online"}
           ]
         }
       }
@@ -576,9 +576,9 @@ const LOCATIONS = {
         paymentMethods:{
           period:"June 2026",
           methods:[
-            {label:"Money Order",   units:70,  amount:34996.81, type:"manual"},
+            {label:"CIBC (bank transfer)", units:70,  amount:34996.81, type:"online"},
             {label:"Plug & Pay",    units:63,  amount:17334.56, type:"autopay"},
-            {label:"Bank Transfer", units:37,  amount:11017.30, type:"online"},
+            {label:"Website (Pay Now)", units:37,  amount:11017.30, type:"online"},
             {label:"Cash",          units:19,  amount:9192.47,  type:"manual"},
             {label:"Check",         units:13,  amount:5979.08,  type:"manual"},
             {label:"Visa",          units:8,   amount:2953.84,  type:"card"},
@@ -609,14 +609,14 @@ const LOCATIONS = {
         paymentMethods:{
           period:"June 2026",
           methods:[
-            {label:"Money Order",   units:62, amount:27311.50, type:"manual"},
+            {label:"CIBC (bank transfer)", units:62, amount:27311.50, type:"online"},
             {label:"Plug & Pay",    units:63, amount:27108.68, type:"autopay"},
             {label:"Visa",          units:29, amount:16297.09, type:"card"},
             {label:"Check",         units:9,  amount:12612.62, type:"manual"},
-            {label:"Bank Transfer", units:23, amount:11084.05, type:"online"},
+            {label:"Website (Pay Now)", units:23, amount:11084.05, type:"online"},
             {label:"Cash",          units:15, amount:8114.05,  type:"manual"},
             {label:"Master Card",   units:12, amount:4240.81,  type:"card"},
-            {label:"Internet",      units:3,  amount:1405.00,  type:"online"}
+            {label:"Republic (bank transfer)", units:3,  amount:1405.00,  type:"online"}
           ]
         }
       }
@@ -921,7 +921,7 @@ function renderPortfolioPayments(){
         <div class="d">${cardU} units — card already on file</div>
       </div>
       <div class="ppm-stat">
-        <div class="k">Cash / Cheque / M.Order</div>
+        <div class="k">Cash / Cheque</div>
         <div class="v">${pct(manualU)}<small>%</small></div>
         <div class="d">${manualU} units — hardest to convert</div>
       </div>
@@ -967,9 +967,9 @@ function renderPortfolioPayments(){
         <div class="insight" style="background:var(--navy2);margin-bottom:16px">
           <h4>Where the opportunity is</h4>
           <p>Autopay stands at <b>${pct(autopayU)}%</b> of the portfolio. The remaining <b>${(100-parseFloat(pct(autopayU))).toFixed(1)}%</b> splits into three conversion tiers — each needing a different approach.</p>
-          <p><b>${onlineU} units</b> already pay digitally by bank transfer or online. A single targeted message offering to switch to recurring is likely enough.</p>
+          <p><b>${onlineU} units</b> already pay digitally — bank-app transfers (CIBC, Republic) or the website's Pay Now. This is now the largest non-autopay tier: a single targeted message offering to switch to recurring is likely enough.</p>
           <p><b>${cardU} units</b> pay by card manually each month. They have a card on file — the friction is one click.</p>
-          <p><b>${manualU} units</b> pay cash-equivalent. This is the largest block and needs a longer-term incentive strategy.</p>
+          <p><b>${manualU} units</b> pay by cash or cheque — the genuinely hard-to-convert group, needing a longer-term incentive strategy.</p>
         </div>
 
         <details class="action-plan">
@@ -994,8 +994,8 @@ function renderPortfolioPayments(){
             <div class="action-item">
               <span class="pri p2">Priority 2</span>
               <div>
-                <h5>Offer ACH / bank-debit as an alternative to money order &amp; cash</h5>
-                <p><b>${manualU} units</b> (${pct(manualU)}%) pay cash-equivalent. A direct switch to card autopay is unlikely for this group — but bank-debit (ACH) is a closer alternative for tenants who don't want a card charge. Target these at lease renewal with a framed offer: "Pay by bank transfer automatically — no more monthly trip." A small incentive (one month at a reduced rate) may accelerate uptake.</p>
+                <h5>Offer ACH / bank-debit as an alternative to cash &amp; cheque</h5>
+                <p><b>${manualU} units</b> (${pct(manualU)}%) pay by cash or cheque. A direct switch to card autopay is unlikely for this group — but bank-debit (ACH) is a closer alternative for tenants who don't want a card charge. Target these at lease renewal with a framed offer: "Pay by bank transfer automatically — no more monthly trip." A small incentive (one month at a reduced rate) may accelerate uptake.</p>
                 <span class="atag">Target: ${manualU} units</span><span class="atag">Effort: Medium</span><span class="atag">Timeline: At renewal</span>
               </div>
             </div>
@@ -1600,9 +1600,9 @@ function renderPaymentMethods(CUR){
     </div>
     <div class="insight" style="background:var(--navy2)">
       <h4>Autopay conversion opportunity</h4>
-      <p><b>${autopayU} of ${occupied} units (${pctOcc(autopayU)}% of occupied)</b> are on automated card billing (Plug &amp; Pay), contributing <b>${bbd(autopayAmt)}/mo</b>. A further <b>${onlineU} (${pctOcc(onlineU)}%)</b> pay by bank transfer or online &mdash; borderline automatable.</p>
+      <p><b>${autopayU} of ${occupied} units (${pctOcc(autopayU)}% of occupied)</b> are on automated card billing (Plug &amp; Pay), contributing <b>${bbd(autopayAmt)}/mo</b>. A further <b>${onlineU} (${pctOcc(onlineU)}%)</b> pay digitally &mdash; CIBC / Republic bank-app transfers or the website's Pay Now &mdash; and are prime autopay candidates.</p>
       <p><b>${cardU} units (${pctOcc(cardU)}%)</b> pay by Visa or Mastercard manually &mdash; the <b>easiest conversion target</b>. They already have a card on file; they just need to tick recurring billing.</p>
-      <p><b>${manualU} units (${pctOcc(manualU)}%)</b> pay cash-equivalent (money order, cash, cheque). Worth offering ACH/bank-debit as an alternative at their next renewal contact.</p>
+      <p><b>${manualU} units (${pctOcc(manualU)}%)</b> pay cash-equivalent (cash, cheque). Worth offering ACH/bank-debit as an alternative at their next renewal contact.</p>
       <div class="flag" style="margin-top:12px">Quick win &middot; ${cardU} manual card payers ready to convert &rarr; ${bbd(ms.filter(m=>m.type==='card').reduce((s,m)=>s+m.amount,0))} added to autopay roll</div>
     </div>`;
 }
