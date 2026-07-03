@@ -538,6 +538,7 @@ const LOCATIONS = {
         collStatus:{ paidCurrent:364, prepaid:49, behindNone:10 },
         acquisition:{ channels:{"Phone":278,"Walk-in":60,"Email":24,"Web":7,"Not recorded":88}, recent:{n:92,"Phone":49,"Walk-in":22,"Email":9,"Web":1,"Not recorded":11} },
         marketing:{ "Internet":145,"Referral":121,"Previous Tenant":66,"Drive-by":27,"Yellow Pages":40,"Facebook":2,"Other":55,"Unknown":1 },
+        marketingValue:{ "Internet":1746596,"Referral":2293375,"Previous Tenant":1168975,"Drive-by":479954,"Yellow Pages":1006806,"Facebook":25132,"Other":975196,"Unknown":25971 },
         mom:{ prev:"May 2026", tenantTurnover:7, retentionPct:98.5, netUnits:0 },
         paymentMethods:{
           period:"June 2026",
@@ -573,6 +574,7 @@ const LOCATIONS = {
         collStatus:{ paidCurrent:205, prepaid:26, behindNone:10 },
         acquisition:{ channels:{"Phone":117,"Walk-in":82,"Email":13,"Web":6,"Not recorded":46}, recent:{n:64,"Phone":37,"Walk-in":13,"Email":8,"Web":0,"Not recorded":6} },
         marketing:{ "Internet":82,"Referral":53,"Previous Tenant":44,"Drive-by":31,"Yellow Pages":7,"Facebook":3,"Other":24,"Unknown":17 },
+        marketingValue:{ "Internet":673731,"Referral":548706,"Previous Tenant":493658,"Drive-by":307559,"Yellow Pages":139318,"Facebook":23319,"Other":143370,"Unknown":524829 },
         paymentMethods:{
           period:"June 2026",
           methods:[
@@ -606,6 +608,7 @@ const LOCATIONS = {
         collStatus:{ paidCurrent:201, prepaid:18, behindNone:6 },
         acquisition:{ channels:{"Phone":207,"Walk-in":6,"Email":10,"Web":4,"Not recorded":31}, recent:{n:114,"Phone":94,"Walk-in":4,"Email":6,"Web":0,"Not recorded":10} },
         marketing:{ "Internet":99,"Referral":43,"Previous Tenant":50,"Drive-by":26,"Yellow Pages":13,"Facebook":1,"Other":24,"Unknown":0 },
+        marketingValue:{ "Internet":721225,"Referral":334144,"Previous Tenant":334912,"Drive-by":218682,"Yellow Pages":124637,"Facebook":16887,"Other":204333,"Unknown":0 },
         paymentMethods:{
           period:"June 2026",
           methods:[
@@ -852,6 +855,10 @@ function renderPortfolioPayments(){
   const byType = (t) => aggArr.filter(m=>m.type===t).reduce((s,m)=>s+m.units,0);
   const byTypeAmt = (t) => aggArr.filter(m=>m.type===t).reduce((s,m)=>s+m.amount,0);
   const autopayU = byType('autopay'), onlineU = byType('online'), cardU = byType('card'), manualU = byType('manual');
+  const autopayA = byTypeAmt('autopay'), onlineA = byTypeAmt('online'), cardA = byTypeAmt('card'), manualA = byTypeAmt('manual');
+  const maxAmt = Math.max(...aggArr.map(m=>m.amount));
+  const rpct = a => (100*a/totalAmount).toFixed(1);
+  const topRevMethod = [...aggArr].sort((a,b)=>b.amount-a.amount)[0];
   const pct = n => (100*n/totalOccupied).toFixed(1);
 
   // Portfolio collections status — where every occupied unit stands in June
@@ -910,30 +917,31 @@ function renderPortfolioPayments(){
       <div class="ppm-stat">
         <div class="k">Autopay (Plug &amp; Pay)</div>
         <div class="v">${pct(autopayU)}<small>%</small></div>
-        <div class="d">${autopayU} of ${totalOccupied} occupied units</div>
+        <div class="d">${autopayU} units &middot; <b>${bbdk(autopayA)}/mo</b> (${rpct(autopayA)}% of $)</div>
       </div>
       <div class="ppm-stat">
-        <div class="k">Online / Bank Transfer</div>
+        <div class="k">Bank transfer / online</div>
         <div class="v">${pct(onlineU)}<small>%</small></div>
-        <div class="d">${onlineU} units — already digital</div>
+        <div class="d">${onlineU} units &middot; <b>${bbdk(onlineA)}/mo</b> (${rpct(onlineA)}% of $)</div>
       </div>
       <div class="ppm-stat">
         <div class="k">Manual Card (Visa / MC)</div>
         <div class="v">${pct(cardU)}<small>%</small></div>
-        <div class="d">${cardU} units — card already on file</div>
+        <div class="d">${cardU} units &middot; <b>${bbdk(cardA)}/mo</b> (${rpct(cardA)}% of $)</div>
       </div>
       <div class="ppm-stat">
         <div class="k">Cash / Cheque</div>
         <div class="v">${pct(manualU)}<small>%</small></div>
-        <div class="d">${manualU} units — hardest to convert</div>
+        <div class="d">${manualU} units &middot; <b>${bbdk(manualA)}/mo</b> (${rpct(manualA)}% of $)</div>
       </div>
     </div>
+    <div class="note" style="margin:6px 2px 0">Unit share and revenue share tell different stories: <b>${topRevMethod.label}</b> is the single largest money channel at <b>${bbd(topRevMethod.amount)}/mo</b> (${rpct(topRevMethod.amount)}% of collections), ahead of autopay by revenue even though autopay has more accounts. Cash/cheque is ${pct(manualU)}% of units but ${rpct(manualA)}% of revenue — those payers carry slightly larger units.</div>
 
     <div class="ppm-grid">
       <div class="card">
         <h3><span class="dot"></span>Payment method breakdown — portfolio (June 2026)</h3>
         <table>
-          <thead><tr><th>Method</th><th>Type</th><th class="r">Units</th><th class="r">% occupied</th><th class="r">Amount</th><th class="r">Share</th></tr></thead>
+          <thead><tr><th>Method</th><th>Type</th><th class="r">Units</th><th class="r">% occupied</th><th class="r">Amount / mo</th><th class="r">% of revenue</th></tr></thead>
           <tbody>${aggArr.map(m=>`
             <tr>
               <td style="font-weight:600">${m.label}</td>
@@ -941,7 +949,7 @@ function renderPortfolioPayments(){
               <td class="r mono">${m.units}</td>
               <td class="r mono">${pct(m.units)}%</td>
               <td class="r mono">${bbd(m.amount)}</td>
-              <td class="r"><div class="track" style="width:70px;display:inline-block;vertical-align:middle"><div class="fill" style="width:${100*m.units/maxUnits}%;${typeGrad[m.type]||''}"></div></div></td>
+              <td class="r mono"><span style="display:inline-block;min-width:34px">${rpct(m.amount)}%</span><div class="track" style="width:60px;display:inline-block;vertical-align:middle;margin-left:6px"><div class="fill" style="width:${100*m.amount/maxAmt}%;${typeGrad[m.type]||''}"></div></div></td>
             </tr>`).join('')}
           </tbody>
           <tfoot><tr style="border-top:2px solid var(--line)">
@@ -1038,18 +1046,27 @@ function renderAcquisition(){
   // ----- marketing source (how they FOUND us) — SiteLink sMktCat -----
   const MKT_ORDER = ["Internet","Referral","Previous Tenant","Drive-by","Yellow Pages","Facebook","Other","Unknown"];
   const mktColor = {"Internet":"var(--accent)","Referral":"var(--navy2)","Previous Tenant":"var(--teal)","Drive-by":"#7a7a7a","Yellow Pages":"#b88620","Facebook":"#3b5998","Other":"#c9c9c9","Unknown":"#e4e4e4"};
-  const mAgg = {}; MKT_ORDER.forEach(k=>mAgg[k]=0);
+  const mAgg = {}, mVal = {}; MKT_ORDER.forEach(k=>{mAgg[k]=0;mVal[k]=0;});
   const mBySite = [];
   Object.entries(LOCATIONS).forEach(([key,L])=>{
     const m = latestSnapshot(L).data.marketing; if(!m) return;
+    const mv = latestSnapshot(L).data.marketingValue || {};
     const tot = MKT_ORDER.reduce((s,k)=>s+(m[k]||0),0);
-    MKT_ORDER.forEach(k=>mAgg[k]+=(m[k]||0));
+    MKT_ORDER.forEach(k=>{mAgg[k]+=(m[k]||0); mVal[k]+=(mv[k]||0);});
     mBySite.push({ name:L.name.replace('Store All ',''), total:tot, m });
   });
   const mTotal = MKT_ORDER.reduce((s,k)=>s+mAgg[k],0) || 1;
+  const mValTotal = MKT_ORDER.reduce((s,k)=>s+mVal[k],0) || 1;
   const mpct = n => (100*n/mTotal).toFixed(1);
   const foundOnline = mAgg["Internet"]+mAgg["Facebook"];
   const wordOfMouth = mAgg["Referral"]+mAgg["Previous Tenant"];
+  // per-tenant value, sorted, for the "by value" view (exclude Unknown as a data-gap bucket)
+  const valRows = MKT_ORDER.filter(k=>k!=="Unknown" && mAgg[k]>0)
+    .map(k=>({k, val:mVal[k], cnt:mAgg[k], per:mVal[k]/mAgg[k]}))
+    .sort((a,b)=>b.val-a.val);
+  const maxPer = Math.max(...valRows.map(r=>r.per));
+  const netVal = mAgg["Internet"] ? mVal["Internet"]/mAgg["Internet"] : 0;
+  const refVal = mAgg["Referral"] ? mVal["Referral"]/mAgg["Referral"] : 0;
   const shortLbl = k => k.replace('Previous Tenant','Prev. Ten.').replace('Yellow Pages','Y. Pages');
 
   // ----- move-in cohort chart (channel × year) -----
@@ -1098,6 +1115,25 @@ function renderAcquisition(){
       </table>
       </div>
       <div class="note"><b>How they found us</b> (SiteLink marketing category, <b>sMktCat</b>) — the true acquisition source, distinct from the <b>contact channel</b> below. Online discovery (Internet + Facebook) is <b>${mpct(foundOnline)}%</b>; word-of-mouth &amp; repeat (Referral + Previous Tenant) is <b>${mpct(wordOfMouth)}%</b>.</div>
+    </div>
+
+    <div class="card" style="margin-bottom:16px">
+      <h3><span class="dot"></span>How customers found us — by lifetime value ($${(mValTotal/1e6).toFixed(1)}M across ${mTotal} tenants)</h3>
+      <div style="overflow-x:auto">
+      <table>
+        <thead><tr><th>Source</th><th class="r">Tenants</th><th class="r">Lifetime value</th><th class="r">% of value</th><th class="r">Value / tenant</th></tr></thead>
+        <tbody>${valRows.map(r=>`
+          <tr>
+            <td style="font-weight:600"><span style="display:inline-block;width:9px;height:9px;border-radius:2px;background:${mktColor[r.k]};margin-right:7px;vertical-align:middle"></span>${r.k}</td>
+            <td class="r mono">${r.cnt}</td>
+            <td class="r mono">${bbd(r.val)}</td>
+            <td class="r mono">${(100*r.val/mValTotal).toFixed(1)}%</td>
+            <td class="r mono"><b>${bbd(r.per)}</b><div class="track" style="width:56px;display:inline-block;vertical-align:middle;margin-left:6px"><div class="fill" style="width:${100*r.per/maxPer}%;background:linear-gradient(90deg,var(--accent),var(--teal))"></div></div></td>
+          </tr>`).join('')}
+        </tbody>
+      </table>
+      </div>
+      <div class="note"><b>Volume ≠ value.</b> Internet brings the most tenants (${mAgg["Internet"]}) but the lowest revenue per head of the major sources (${bbd(netVal)}). A <b>referred</b> tenant is worth <b>${bbd(refVal)}</b> lifetime — <b>${Math.round(100*(refVal/netVal-1))}% more</b> than an internet-sourced one — and referral + previous-tenant together are the largest value pool. Word-of-mouth is the value engine: protect and incentivise it (referral credits, move-out win-back). <span style="color:var(--muted)">Yellow Pages shows the highest per-tenant value but is a shrinking legacy channel of long-tenured commercial accounts.</span></div>
     </div>
 
     <div style="border-top:1px solid var(--line);margin:22px 0 14px;padding-top:14px">
