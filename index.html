@@ -336,6 +336,7 @@ details.section-toggle[open]>summary .sec-num{background:var(--accent);color:#ff
         <div style="height:14px"></div>
         <div class="bignum" id="econ"></div><div class="cap">Economic occupancy — rent vs gross potential</div>
         <div class="note">Near-identical figures mean almost no discounting; rent collected is close to full list price.</div>
+        <div class="note" id="unrentableNote" style="display:none"></div>
       </div>
       <div class="card">
         <h3><span class="dot"></span>Monthly movement</h3>
@@ -590,7 +591,7 @@ const LOCATIONS = {
     months:{
       "2026-06":{
         label:"June 2026", basis:"Month-end June 2026 · activity 1–30 Jun",
-        totalUnits:270, occupied:257, vacant:13, physOcc:95.2, econOcc:93.4,
+        totalUnits:270, occupied:255, vacant:1, unrentable:14, physOcc:94.4, econOcc:93.4,
         grossPot:93433, occRent:87285, totalArea:26648, occArea:25368,
         revpaf:3.28, revOccSqft:3.44, avgRentUnit:339.63, movedIn:19, movedOut:4, net:15,
         byType:[{t:"10x8",units:121,occ:111,pct:91.7},{t:"20x8",units:75,occ:72,pct:96.0},{t:"5x8",units:49,occ:49,pct:100.0},{t:"8x8",units:8,occ:8,pct:100.0},{t:"40x8",units:6,occ:6,pct:100.0},{t:"8x10",units:4,occ:4,pct:100.0},{t:"8x16",units:2,occ:2,pct:100.0},{t:"Other",units:5,occ:5,pct:100.0}],
@@ -1375,6 +1376,15 @@ function render(){
   /* occupancy */
   document.getElementById('phys').innerHTML = CUR.physOcc+'<small>%</small>';
   document.getElementById('econ').innerHTML = CUR.econOcc+'<small>%</small>';
+  const unNote = document.getElementById('unrentableNote');
+  if (CUR.unrentable) {
+    const rentable = CUR.totalUnits - CUR.unrentable;
+    const rentableOcc = (100*CUR.occupied/rentable).toFixed(1);
+    unNote.style.display = '';
+    unNote.innerHTML = `<b>${CUR.unrentable} units currently unrentable</b> (out of service) — excluded from rentable stock. Of the ${rentable} rentable units, ${CUR.occupied} are filled (<b>${rentableOcc}%</b>). As of 2 Jul 2026.`;
+  } else {
+    unNote.style.display = 'none';
+  }
   document.getElementById('mi').textContent = CUR.movedIn;
   document.getElementById('mo').textContent = CUR.movedOut;
   document.getElementById('net').innerHTML = (CUR.net>=0?'+':'')+CUR.net;
