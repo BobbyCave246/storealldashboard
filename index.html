@@ -336,6 +336,7 @@ details.section-toggle[open]>summary .sec-num{background:var(--accent);color:#ff
         <div style="height:14px"></div>
         <div class="bignum" id="econ"></div><div class="cap">Economic occupancy — rent vs gross potential</div>
         <div class="note">Near-identical figures mean almost no discounting; rent collected is close to full list price.</div>
+        <div class="note" id="unrentableNote" style="display:none"></div>
       </div>
       <div class="card">
         <h3><span class="dot"></span>Monthly movement</h3>
@@ -485,7 +486,7 @@ details.section-toggle[open]>summary .sec-num{background:var(--accent);color:#ff
   </div>
 
   <footer class="wrap" style="padding-left:0;padding-right:0">
-    <b>Store All Barbados — Data Dashboard.</b> Generated from SiteLink rent roll, rental-activity and receipts exports. Store All Central: two snapshots (May &amp; June 2026). Store All South and Store All Lears: June 2026 (month-end position with full 1–30 June activity). Customer churn is measured by tenant change on units rented in both periods. Figures are operational indicators, not audited financials.
+    <b>Store All Barbados — Data Dashboard.</b> Generated from SiteLink rent roll, rental-activity and receipts exports. Store All Central: two snapshots (May &amp; June 2026). Store All South and Store All Lears: June 2026 (month-end position with full 1–30 June activity). Payment-health arrears (units behind, balances &amp; aging) refreshed from the 2 July 2026 rent roll for all three sites — portfolio overdue down from 53 to 45 units. Customer churn is measured by tenant change on units rented in both periods. Figures are operational indicators, not audited financials.
   </footer>
 </div>
 
@@ -532,9 +533,9 @@ const LOCATIONS = {
         corpUnits:108, indivUnits:349, corpPct:23.6, corpRent:33830, indivRent:84685, corpRentPct:28.5,
         corpArea:85, indivArea:56, corpLos:65.7, indivLos:49.6, top10:4.5,
         geoIndiv:{"St. Michael":80,"Christ Church":64,"St. James":46,"St. Thomas":20,"St. Philip":21,"St. George":19,"Other Barbados":22,"Overseas":55,"Unknown":22}, indivN:349,
-        balUnits:21, balPct:4.6, balTotal:13777, aging:{"Current / ahead":436,"1–30 days":11,"31–60 days":0,"61–90 days":6,"90+ days":4}, autopayPct:35.4,
+        balUnits:19, balPct:4.2, balTotal:12866, aging:{"Current / ahead":438,"1–30 days":9,"31–60 days":6,"61–90 days":3,"90+ days":1}, autopayPct:35.4,
         age:{valid:288,pct:63,mean:48,median:51,min:20,max:87,bands:{"<25":42,"25–34":46,"35–44":27,"45–54":53,"55–64":67,"65+":53},female:264,male:183},
-        collStatus:{ paidCurrent:362, prepaid:49, behindNone:10 },
+        collStatus:{ paidCurrent:364, prepaid:49, behindNone:10 },
         acquisition:{ channels:{"Phone":278,"Walk-in":60,"Email":24,"Web":7,"Not recorded":88}, recent:{n:92,"Phone":49,"Walk-in":22,"Email":9,"Web":1,"Not recorded":11} },
         mom:{ prev:"May 2026", tenantTurnover:7, retentionPct:98.5, netUnits:0 },
         paymentMethods:{
@@ -566,9 +567,9 @@ const LOCATIONS = {
         corpUnits:57, indivUnits:207, corpPct:21.6, corpRent:18510, indivRent:49419, corpRentPct:27.2,
         corpArea:92, indivArea:57, corpLos:50.9, indivLos:35.2, top10:7.9,
         geoIndiv:{"St. Michael":27,"Christ Church":90,"St. James":9,"St. Thomas":3,"St. Philip":18,"St. George":4,"Other Barbados":10,"Overseas":38,"Unknown":8}, indivN:207,
-        balUnits:17, balPct:6.4, balTotal:10435, aging:{"Current / ahead":247,"1–30 days":7,"31–60 days":0,"61–90 days":7,"90+ days":3}, autopayPct:30.3,
+        balUnits:15, balPct:5.7, balTotal:9552, aging:{"Current / ahead":249,"1–30 days":5,"31–60 days":7,"61–90 days":1,"90+ days":2}, autopayPct:30.3,
         age:{valid:235,pct:89,mean:53,median:55,min:19,max:94,bands:{"<25":9,"25–34":13,"35–44":38,"45–54":57,"55–64":80,"65+":38},female:145,male:115},
-        collStatus:{ paidCurrent:203, prepaid:26, behindNone:10 },
+        collStatus:{ paidCurrent:205, prepaid:26, behindNone:10 },
         acquisition:{ channels:{"Phone":117,"Walk-in":82,"Email":13,"Web":6,"Not recorded":46}, recent:{n:64,"Phone":37,"Walk-in":13,"Email":8,"Web":0,"Not recorded":6} },
         paymentMethods:{
           period:"June 2026",
@@ -590,7 +591,7 @@ const LOCATIONS = {
     months:{
       "2026-06":{
         label:"June 2026", basis:"Month-end June 2026 · activity 1–30 Jun",
-        totalUnits:270, occupied:257, vacant:13, physOcc:95.2, econOcc:93.4,
+        totalUnits:270, occupied:255, vacant:1, unrentable:14, physOcc:94.4, econOcc:93.4,
         grossPot:93433, occRent:87285, totalArea:26648, occArea:25368,
         revpaf:3.28, revOccSqft:3.44, avgRentUnit:339.63, movedIn:19, movedOut:4, net:15,
         byType:[{t:"10x8",units:121,occ:111,pct:91.7},{t:"20x8",units:75,occ:72,pct:96.0},{t:"5x8",units:49,occ:49,pct:100.0},{t:"8x8",units:8,occ:8,pct:100.0},{t:"40x8",units:6,occ:6,pct:100.0},{t:"8x10",units:4,occ:4,pct:100.0},{t:"8x16",units:2,occ:2,pct:100.0},{t:"Other",units:5,occ:5,pct:100.0}],
@@ -598,9 +599,9 @@ const LOCATIONS = {
         corpUnits:66, indivUnits:192, corpPct:25.6, corpRent:25374, indivRent:62238, corpRentPct:29.0,
         corpArea:124, indivArea:90, corpLos:21.4, indivLos:17.4, top10:7.7,
         geoIndiv:{"St. Michael":43,"Christ Church":21,"St. James":37,"St. Thomas":17,"St. Philip":8,"St. George":16,"Other Barbados":19,"Overseas":20,"Unknown":11}, indivN:192,
-        balUnits:15, balPct:5.8, balTotal:12649, aging:{"Current / ahead":243,"1–30 days":7,"31–60 days":0,"61–90 days":4,"90+ days":4}, autopayPct:26.5,
+        balUnits:11, balPct:4.3, balTotal:9078, aging:{"Current / ahead":246,"1–30 days":5,"31–60 days":3,"61–90 days":3,"90+ days":0}, autopayPct:26.5,
         age:{valid:124,pct:48,mean:32,median:23,min:20,max:77,bands:{"<25":74,"25–34":10,"35–44":13,"45–54":8,"55–64":12,"65+":7},female:144,male:102},
-        collStatus:{ paidCurrent:197, prepaid:18, behindNone:6 },
+        collStatus:{ paidCurrent:201, prepaid:18, behindNone:6 },
         acquisition:{ channels:{"Phone":207,"Walk-in":6,"Email":10,"Web":4,"Not recorded":31}, recent:{n:114,"Phone":94,"Walk-in":4,"Email":6,"Web":0,"Not recorded":10} },
         paymentMethods:{
           period:"June 2026",
@@ -875,7 +876,7 @@ function renderPortfolioPayments(){
 
   el.innerHTML = `
     <div class="card" style="margin-bottom:16px">
-      <h3><span class="dot"></span>Collections status — where the ${totalOccupied} occupied units stand (June 2026)</h3>
+      <h3><span class="dot"></span>Collections status — where the ${totalOccupied} occupied units stand (June 2026 · arrears as of 2 Jul)</h3>
       <div style="display:flex;height:30px;border-radius:8px;overflow:hidden;margin:6px 0 14px">
         ${seg.map(s=>`<div title="${s.label}: ${s.units}" style="width:${100*s.units/totalOccupied}%;background:${s.color};min-width:2px"></div>`).join('')}
       </div>
@@ -1375,6 +1376,15 @@ function render(){
   /* occupancy */
   document.getElementById('phys').innerHTML = CUR.physOcc+'<small>%</small>';
   document.getElementById('econ').innerHTML = CUR.econOcc+'<small>%</small>';
+  const unNote = document.getElementById('unrentableNote');
+  if (CUR.unrentable) {
+    const rentable = CUR.totalUnits - CUR.unrentable;
+    const rentableOcc = (100*CUR.occupied/rentable).toFixed(1);
+    unNote.style.display = '';
+    unNote.innerHTML = `<b>${CUR.unrentable} units currently unrentable</b> (out of service) — excluded from rentable stock. Of the ${rentable} rentable units, ${CUR.occupied} are filled (<b>${rentableOcc}%</b>). As of 2 Jul 2026.`;
+  } else {
+    unNote.style.display = 'none';
+  }
   document.getElementById('mi').textContent = CUR.movedIn;
   document.getElementById('mo').textContent = CUR.movedOut;
   document.getElementById('net').innerHTML = (CUR.net>=0?'+':'')+CUR.net;
