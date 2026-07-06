@@ -129,6 +129,16 @@ function systemPrompt(data) {
 }
 
 export default async function handler(req, res) {
+  // Health check — visit /api/ask in the browser to confirm the function is
+  // deployed and whether it can see the API key. (No key is exposed.)
+  if (req.method === 'GET') {
+    res.status(200).json({
+      status: 'ok',
+      model: MODEL,
+      configured: Boolean(process.env.ANTHROPIC_API_KEY)
+    });
+    return;
+  }
   if (req.method !== 'POST') {
     res.status(405).json({ error: 'Method not allowed' });
     return;

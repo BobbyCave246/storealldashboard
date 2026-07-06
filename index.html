@@ -1798,19 +1798,32 @@ applySection();
     out.querySelector('[data-dismiss]').addEventListener('click', () => { out.hidden = true; out.innerHTML = ''; });
   }
 
-  // Keyword fallback — used only if the AI endpoint is unavailable.
-  function keywordJump(q){
+  function wireDismiss(){
+    const dm = out.querySelector('[data-dismiss]');
+    if(dm) dm.addEventListener('click', () => { out.hidden = true; out.innerHTML = ''; });
+  }
+
+  // Keyword navigation — offered as a manual fallback, never used to hide an error.
+  function keywordTarget(q){
     const t = q.toLowerCase();
     const loc = Object.keys(LOCATIONS).find(k =>
       t.includes(k) || t.includes(LOCATIONS[k].name.toLowerCase().replace('store all ','')));
     const sec = SECTIONS.find(s => t.includes(s.label.toLowerCase()) || t.includes(s.id.replace('-',' ')));
-    if(loc || sec){
-      jumpTo({ loc: loc || STATE.loc, month: null, section: (sec || {}).id || STATE.section });
-      show(`<div class="ai-eyebrow">Best match</div><div class="ai-summary">Search is offline, so I jumped to the closest matching view.</div><div class="ai-actions"><button class="ai-dismiss" data-dismiss="1">Clear</button></div>`);
-      out.querySelector('[data-dismiss]').addEventListener('click', () => { out.hidden = true; out.innerHTML = ''; });
-      return true;
-    }
-    return false;
+    if(loc || sec) return { loc: loc || STATE.loc, month: null, section: (sec || {}).id || STATE.section };
+    return null;
+  }
+
+  function showError(detail, q){
+    const target = keywordTarget(q);
+    let html = `<div class="ai-eyebrow">Search unavailable</div>`;
+    html += `<div class="ai-err">${esc(detail)}</div>`;
+    html += `<div class="ai-actions">`;
+    if(target) html += `<button class="ai-jump" data-kw="1">Jump to closest matching view →</button>`;
+    html += `<button class="ai-dismiss" data-dismiss="1">Clear</button></div>`;
+    show(html);
+    const kw = out.querySelector('[data-kw]');
+    if(kw) kw.addEventListener('click', () => { jumpTo(target); out.hidden = true; out.innerHTML = ''; });
+    wireDismiss();
   }
 
   form.addEventListener('submit', async (e) => {
@@ -1819,25 +1832,29 @@ applySection();
     if(!q) return;
     btn.disabled = true;
     show(`<div class="ai-loading"><span class="ai-spinner"></span> Searching the data…</div>`);
+    let r, raw, d = null;
     try {
-      const r = await fetch('/api/ask', {
+      r = await fetch('/api/ask', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ question: q, data: LOCATIONS })
       });
-      const d = await r.json();
-      if(!r.ok || d.error){
-        if(!keywordJump(q)) show(`<div class="ai-eyebrow">Search unavailable</div><div class="ai-err">${esc((d && d.error) || 'Something went wrong.')}</div><div class="ai-actions"><button class="ai-dismiss" data-dismiss="1">Clear</button></div>`);
-      } else {
-        renderAnswer(d);
-      }
+      raw = await r.text();
+      try { d = JSON.parse(raw); } catch(_){ /* non-JSON body (e.g. an auth or crash page) */ }
     } catch(err){
-      if(!keywordJump(q)) show(`<div class="ai-eyebrow">Search unavailable</div><div class="ai-err">Could not reach the search service.</div><div class="ai-actions"><button class="ai-dismiss" data-dismiss="1">Clear</button></div>`);
-    } finally {
       btn.disabled = false;
-      const dm = out.querySelector('[data-dismiss]');
-      if(dm && !dm._b){ dm._b = 1; dm.addEventListener('click', () => { out.hidden = true; out.innerHTML = ''; }); }
+      showError('Could not reach the search service (network error).', q);
+      return;
     }
+    btn.disabled = false;
+    if(!r.ok || !d || d.error){
+      const detail = (d && d.error)
+        ? d.error
+        : `Server returned HTTP ${r.status}${raw ? ' — ' + raw.replace(/\s+/g,' ').slice(0,180) : ''}`;
+      showError(detail, q);
+      return;
+    }
+    renderAnswer(d);
   });
 })();
 </script>

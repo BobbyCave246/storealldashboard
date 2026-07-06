@@ -2,6 +2,7 @@
   "name": "storeall-dashboard",
   "version": "1.0.0",
   "private": true,
+  "type": "module",
   "description": "Store All Barbados data dashboard with AI search",
   "dependencies": {
     "@anthropic-ai/sdk": "^0.72.0"
