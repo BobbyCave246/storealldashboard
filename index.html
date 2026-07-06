@@ -688,6 +688,16 @@ const CUSTOMER_PROFILE = {
   ]
 };
 
+/* ===== Delinquency watch — rolling 31+ days-past-due tracker (update on each rent-roll pull) ===== */
+const DELINQUENCY = {
+  asof:"latest pull · Jul 2026", prev:45, occupied:973,
+  sites:[
+    {name:"Central", n:18, severe:9, amt:12531},
+    {name:"South",   n:15, severe:9, amt:9176},
+    {name:"Lears",   n:11, severe:6, amt:9078}
+  ]
+};
+
 const bbd = n => "$"+Math.round(n).toLocaleString();
 const bbdk = n => "$"+(n/1000).toFixed(0)+"k";
 const delta = (cur,prev,unit="",dp=1) => {
@@ -886,7 +896,29 @@ function renderPortfolioPayments(){
     { label:'Behind (overdue)',        units:behind,      color:'var(--accent)' }
   ];
 
+  const DQ = DELINQUENCY;
+  const dqTotal = DQ.sites.reduce((s,x)=>s+x.n,0);
+  const dqSevere = DQ.sites.reduce((s,x)=>s+x.severe,0);
+  const dqAmt = DQ.sites.reduce((s,x)=>s+x.amt,0);
+  const dqDelta = dqTotal - DQ.prev;
+  const dqRows = DQ.sites.map(x=>`<tr><td style="font-weight:600">${x.name}</td><td class="r mono">${x.n}</td><td class="r mono">${x.severe}</td><td class="r mono">${bbd(x.amt)}</td></tr>`).join('');
+
   el.innerHTML = `
+    <div class="card" style="margin-bottom:16px">
+      <h3><span class="dot"></span>Delinquency watch — genuinely overdue (31+ days) &middot; ${DQ.asof}</h3>
+      <div class="ppm-stat-row">
+        <div class="ppm-stat"><div class="k">Accounts 31+ days late</div><div class="v">${dqTotal}<small> of ${DQ.occupied}</small></div><div class="d">${dqDelta===0?'no change vs':(dqDelta>0?'▲ '+dqDelta+' vs':'▼ '+Math.abs(dqDelta)+' vs')} previous check (${DQ.prev})</div></div>
+        <div class="ppm-stat"><div class="k">Seriously late (60+ days)</div><div class="v">${dqSevere}</div><div class="d">${(100*dqSevere/DQ.occupied).toFixed(1)}% of occupied — genuine delinquency</div></div>
+        <div class="ppm-stat"><div class="k">Overdue balance</div><div class="v" style="font-size:20px">${bbd(dqAmt)}</div><div class="d">rent 31+ days past due</div></div>
+        <div class="ppm-stat"><div class="k">Share of occupied</div><div class="v">${(100*dqTotal/DQ.occupied).toFixed(1)}<small>%</small></div><div class="d">${dqTotal} of ${DQ.occupied} units</div></div>
+      </div>
+      <table style="margin-top:4px">
+        <thead><tr><th>Site</th><th class="r">31+ days</th><th class="r">60+ days</th><th class="r">Overdue $</th></tr></thead>
+        <tbody>${dqRows}</tbody>
+      </table>
+      <div class="note"><b>31+ days past due</b> excludes current-cycle rent, so it's comparable pull-to-pull regardless of the day of the month (the raw "any days late" count balloons early in the month). Updated from the latest rent-roll pull — a rolling tracker, separate from the June month-end snapshot below.</div>
+    </div>
+
     <div class="card" style="margin-bottom:16px">
       <h3><span class="dot"></span>Collections status — where the ${totalOccupied} occupied units stand (June 2026 · arrears as of 2 Jul)</h3>
       <div style="display:flex;height:30px;border-radius:8px;overflow:hidden;margin:6px 0 14px">
