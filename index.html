@@ -226,8 +226,8 @@ details.section-toggle>summary{border-radius:12px;transition:background .15s}
 details.section-toggle>summary:hover{background:var(--paper2)}
 details.section-toggle>summary:hover .sec-num{background:var(--accent);color:#fff;box-shadow:0 4px 12px -4px rgba(227,6,19,.4)}
 details.section-toggle[open]>summary .sec-num{background:var(--accent);color:#fff}
-/* ---- AI search ---- */
-.ai-search{margin:26px 0 4px}
+/* ---- AI search (lives in the dark header) ---- */
+.ai-search{margin:20px 0 2px;max-width:760px}
 .ai-form{display:flex;gap:10px;align-items:stretch;background:var(--card);border:1px solid var(--line);border-radius:14px;padding:8px 8px 8px 16px;box-shadow:0 12px 34px -24px rgba(0,0,0,.34);transition:border-color .15s,box-shadow .15s}
 .ai-form:focus-within{border-color:var(--accent);box-shadow:0 12px 34px -20px rgba(227,6,19,.35)}
 .ai-ico{align-self:center;font-size:17px;opacity:.7;line-height:1}
@@ -236,9 +236,12 @@ details.section-toggle[open]>summary .sec-num{background:var(--accent);color:#ff
 .ai-btn{font-family:'Montserrat';font-weight:800;letter-spacing:.03em;font-size:13px;color:#fff;background:var(--accent);border:0;border-radius:9px;padding:0 22px;cursor:pointer;transition:filter .15s}
 .ai-btn:hover{filter:brightness(1.08)}
 .ai-btn:disabled{opacity:.55;cursor:default}
-.ai-hint{font-size:11.5px;color:var(--muted);margin:8px 2px 0}
-.ai-results{margin-top:16px;background:var(--card);border:1px solid var(--line);border-radius:14px;padding:22px;box-shadow:0 10px 30px -22px rgba(0,0,0,.30)}
+.ai-hint{font-size:11.5px;color:#cfcfcf;margin:8px 2px 0}
+.ai-results{margin:34px 0 8px;background:var(--card);border:1px solid var(--line);border-radius:14px;padding:24px;box-shadow:0 10px 30px -22px rgba(0,0,0,.30)}
 .ai-results[hidden]{display:none}
+/* while a search result is showing, it takes the place of the active tab */
+.wrap.searching .panel{display:none}
+.wrap.searching #siteBand{display:none}
 .ai-eyebrow{font-family:'Montserrat';text-transform:uppercase;letter-spacing:.14em;font-size:10px;font-weight:800;color:var(--accent);display:flex;align-items:center;gap:8px}
 .ai-eyebrow .conf{color:var(--muted);letter-spacing:.06em}
 .ai-summary{font-size:16px;line-height:1.55;color:var(--ink);margin:10px 0 2px}
@@ -263,6 +266,15 @@ details.section-toggle[open]>summary .sec-num{background:var(--accent);color:#ff
     <div class="eyebrow">Store All Barbados &middot; Performance Reporting</div>
     <h1>Store All Barbados — <em>Data Dashboard</em></h1>
     <div class="sub">Per-location performance across the portfolio: occupancy, customer mix, tenure, catchment and payment health. Select a location below.</div>
+    <div class="ai-search">
+      <form class="ai-form" id="aiForm" autocomplete="off">
+        <span class="ai-ico">🔎</span>
+        <input class="ai-input" id="aiInput" name="q"
+               placeholder="Ask the data — e.g. “latest payment numbers for June” or “which site has the worst delinquency?”">
+        <button class="ai-btn" id="aiBtn" type="submit">Ask</button>
+      </form>
+      <div class="ai-hint">Natural-language search across every site and month in this dashboard.</div>
+    </div>
     <div class="metabar">
       <div>Portfolio period<b id="portfolioHeaderPeriod">June 2026</b></div>
       <div>Total units<b id="portfolioHeaderUnits">985</b></div>
@@ -275,17 +287,8 @@ details.section-toggle[open]>summary .sec-num{background:var(--accent);color:#ff
 
 <div class="wrap">
 
-  <!-- AI SEARCH -->
-  <div class="ai-search">
-    <form class="ai-form" id="aiForm" autocomplete="off">
-      <span class="ai-ico">🔎</span>
-      <input class="ai-input" id="aiInput" name="q"
-             placeholder="Ask the data — e.g. “latest payment numbers for June” or “which site has the worst delinquency?”">
-      <button class="ai-btn" id="aiBtn" type="submit">Ask</button>
-    </form>
-    <div class="ai-hint">Natural-language search across every site and month in this dashboard.</div>
-    <div class="ai-results" id="aiResults" hidden></div>
-  </div>
+  <!-- AI SEARCH RESULTS — replaces the active panel while a search is shown -->
+  <div class="ai-results" id="aiResults" hidden></div>
 
   <!-- PANEL: OVERVIEW -->
   <div class="panel" data-section="overview">
@@ -1739,6 +1742,7 @@ applySection();
   const input = document.getElementById('aiInput');
   const btn = document.getElementById('aiBtn');
   const out = document.getElementById('aiResults');
+  const mainWrap = out.parentElement; // the content wrap that holds the panels
 
   const esc = s => String(s==null?'':s).replace(/[&<>"']/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
   const fmt = (v, unit) => {
@@ -1779,7 +1783,18 @@ applySection();
 
   function sectionLabel(id){ const s = SECTIONS.find(x => x.id === id); return s ? s.label : id; }
 
-  function show(html){ out.innerHTML = html; out.hidden = false; }
+  function show(html){
+    out.innerHTML = html;
+    out.hidden = false;
+    mainWrap.classList.add('searching');       // hide the active panel; results take its place
+    try { out.scrollIntoView({ behavior:'smooth', block:'start' }); } catch(_){}
+  }
+  function clearResults(){
+    out.hidden = true;
+    out.innerHTML = '';
+    mainWrap.classList.remove('searching');
+    applySection();                            // restore the previously active tab
+  }
 
   function renderAnswer(d){
     const conf = d.confidence ? `<span class="conf">· ${esc(d.confidence)} confidence</span>` : '';
@@ -1794,13 +1809,13 @@ applySection();
     html += `<button class="ai-dismiss" data-dismiss="1">Clear</button></div>`;
     show(html);
     const jb = out.querySelector('[data-jump]');
-    if(jb) jb.addEventListener('click', () => jumpTo(d.navigate));
-    out.querySelector('[data-dismiss]').addEventListener('click', () => { out.hidden = true; out.innerHTML = ''; });
+    if(jb) jb.addEventListener('click', () => jumpTo(d.navigate)); // navigation clears the search view
+    out.querySelector('[data-dismiss]').addEventListener('click', clearResults);
   }
 
   function wireDismiss(){
     const dm = out.querySelector('[data-dismiss]');
-    if(dm) dm.addEventListener('click', () => { out.hidden = true; out.innerHTML = ''; });
+    if(dm) dm.addEventListener('click', clearResults);
   }
 
   // Keyword navigation — offered as a manual fallback, never used to hide an error.
@@ -1822,7 +1837,7 @@ applySection();
     html += `<button class="ai-dismiss" data-dismiss="1">Clear</button></div>`;
     show(html);
     const kw = out.querySelector('[data-kw]');
-    if(kw) kw.addEventListener('click', () => { jumpTo(target); out.hidden = true; out.innerHTML = ''; });
+    if(kw) kw.addEventListener('click', () => jumpTo(target)); // navigation clears the search view
     wireDismiss();
   }
 
@@ -1855,6 +1870,20 @@ applySection();
       return;
     }
     renderAnswer(d);
+  });
+
+  // Any dashboard navigation (nav tabs, location tabs, month buttons) dismisses
+  // the search overlay so the real panel shows through.
+  ['setSection','setLoc','setMonth'].forEach(name => {
+    const orig = window[name];
+    if(typeof orig === 'function'){
+      window[name] = function(){
+        if(mainWrap.classList.contains('searching')){
+          out.hidden = true; out.innerHTML = ''; mainWrap.classList.remove('searching');
+        }
+        return orig.apply(this, arguments);
+      };
+    }
   });
 })();
 </script>
