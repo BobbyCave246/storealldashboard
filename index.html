@@ -1876,6 +1876,7 @@ applySection();
       window[name] = function(){
         if(mainWrap.classList.contains('searching')){
           out.hidden = true; out.innerHTML = ''; mainWrap.classList.remove('searching');
+          input.value = '';   // wipe the query when the user navigates to a tab
         }
         return orig.apply(this, arguments);
       };
