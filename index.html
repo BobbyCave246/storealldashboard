@@ -226,6 +226,34 @@ details.section-toggle>summary{border-radius:12px;transition:background .15s}
 details.section-toggle>summary:hover{background:var(--paper2)}
 details.section-toggle>summary:hover .sec-num{background:var(--accent);color:#fff;box-shadow:0 4px 12px -4px rgba(227,6,19,.4)}
 details.section-toggle[open]>summary .sec-num{background:var(--accent);color:#fff}
+/* ---- AI search ---- */
+.ai-search{margin:26px 0 4px}
+.ai-form{display:flex;gap:10px;align-items:stretch;background:var(--card);border:1px solid var(--line);border-radius:14px;padding:8px 8px 8px 16px;box-shadow:0 12px 34px -24px rgba(0,0,0,.34);transition:border-color .15s,box-shadow .15s}
+.ai-form:focus-within{border-color:var(--accent);box-shadow:0 12px 34px -20px rgba(227,6,19,.35)}
+.ai-ico{align-self:center;font-size:17px;opacity:.7;line-height:1}
+.ai-input{flex:1;border:0;outline:0;background:transparent;font-family:'Source Sans 3',sans-serif;font-size:15.5px;color:var(--ink);min-width:0}
+.ai-input::placeholder{color:var(--muted)}
+.ai-btn{font-family:'Montserrat';font-weight:800;letter-spacing:.03em;font-size:13px;color:#fff;background:var(--accent);border:0;border-radius:9px;padding:0 22px;cursor:pointer;transition:filter .15s}
+.ai-btn:hover{filter:brightness(1.08)}
+.ai-btn:disabled{opacity:.55;cursor:default}
+.ai-hint{font-size:11.5px;color:var(--muted);margin:8px 2px 0}
+.ai-results{margin-top:16px;background:var(--card);border:1px solid var(--line);border-radius:14px;padding:22px;box-shadow:0 10px 30px -22px rgba(0,0,0,.30)}
+.ai-results[hidden]{display:none}
+.ai-eyebrow{font-family:'Montserrat';text-transform:uppercase;letter-spacing:.14em;font-size:10px;font-weight:800;color:var(--accent);display:flex;align-items:center;gap:8px}
+.ai-eyebrow .conf{color:var(--muted);letter-spacing:.06em}
+.ai-summary{font-size:16px;line-height:1.55;color:var(--ink);margin:10px 0 2px}
+.ai-visual{margin-top:18px}
+.ai-visual .vtitle{font-family:'Montserrat';text-transform:uppercase;letter-spacing:.1em;font-size:11px;color:var(--navy);font-weight:800;margin-bottom:12px}
+.ai-kpis{display:grid;grid-template-columns:repeat(auto-fit,minmax(150px,1fr));gap:14px}
+.ai-actions{margin-top:18px;display:flex;gap:10px;flex-wrap:wrap;align-items:center}
+.ai-jump{font-family:'Montserrat';font-weight:700;font-size:12.5px;color:var(--navy2);background:var(--paper2);border:1px solid var(--line);border-radius:9px;padding:9px 16px;cursor:pointer;transition:all .15s}
+.ai-jump:hover{border-color:var(--accent);color:var(--accent)}
+.ai-dismiss{font-size:12px;color:var(--muted);background:none;border:0;cursor:pointer;margin-left:auto}
+.ai-dismiss:hover{color:var(--accent)}
+.ai-loading{display:flex;align-items:center;gap:10px;color:var(--muted);font-size:14px}
+.ai-spinner{width:16px;height:16px;border:2px solid var(--line);border-top-color:var(--accent);border-radius:50%;animation:aispin .7s linear infinite}
+@keyframes aispin{to{transform:rotate(360deg)}}
+.ai-err{color:var(--bad);font-size:14px}
 </style>
 </head>
 <body>
@@ -246,6 +274,18 @@ details.section-toggle[open]>summary .sec-num{background:var(--accent);color:#ff
 </header>
 
 <div class="wrap">
+
+  <!-- AI SEARCH -->
+  <div class="ai-search">
+    <form class="ai-form" id="aiForm" autocomplete="off">
+      <span class="ai-ico">🔎</span>
+      <input class="ai-input" id="aiInput" name="q"
+             placeholder="Ask the data — e.g. “latest payment numbers for June” or “which site has the worst delinquency?”">
+      <button class="ai-btn" id="aiBtn" type="submit">Ask</button>
+    </form>
+    <div class="ai-hint">Natural-language search across every site and month in this dashboard.</div>
+    <div class="ai-results" id="aiResults" hidden></div>
+  </div>
 
   <!-- PANEL: OVERVIEW -->
   <div class="panel" data-section="overview">
@@ -1691,6 +1731,115 @@ function setLoc(k){ STATE.loc=k; STATE.month=null; render(); applySection(); }
 function setMonth(mk){ STATE.month=mk; render(); applySection(); }
 render();
 applySection();
+</script>
+<script>
+/* ===== AI SEARCH ===== reuses LOCATIONS, SECTIONS, setLoc/setMonth/setSection from the main script ===== */
+(function(){
+  const form = document.getElementById('aiForm');
+  const input = document.getElementById('aiInput');
+  const btn = document.getElementById('aiBtn');
+  const out = document.getElementById('aiResults');
+
+  const esc = s => String(s==null?'':s).replace(/[&<>"']/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
+  const fmt = (v, unit) => {
+    if(typeof v !== 'number' || !isFinite(v)) return esc(v);
+    if(unit === '$') return '$' + Math.round(v).toLocaleString();
+    if(unit === '%') return (Math.round(v*10)/10) + '%';
+    return Number.isInteger(v) ? v.toLocaleString() : (Math.round(v*100)/100).toLocaleString();
+  };
+
+  function renderVisual(v){
+    if(!v || !v.type) return '';
+    let inner = '';
+    if(v.type === 'kpis' && v.items && v.items.length){
+      inner = `<div class="ai-kpis">` + v.items.map(it =>
+        `<div class="stat alt"><div class="k">${esc(it.label)}</div><div class="v">${fmt(it.value, v.unit)}</div>${it.sub?`<div class="d">${esc(it.sub)}</div>`:''}</div>`
+      ).join('') + `</div>`;
+    } else if(v.type === 'bars' && v.items && v.items.length){
+      const max = Math.max.apply(null, v.items.map(i => Math.abs(i.value) || 0)) || 1;
+      inner = v.items.map(it =>
+        `<div class="bar-row"><span class="lab">${esc(it.label)}</span><div class="track"><div class="fill" style="width:${Math.max(2, 100*(Math.abs(it.value)||0)/max)}%"></div></div><span class="num">${fmt(it.value, v.unit)}</span></div>`
+      ).join('');
+    } else if(v.type === 'table' && v.columns && v.columns.length){
+      inner = `<table><thead><tr>` + v.columns.map((c,i)=>`<th${i?' class="r"':''}>${esc(c)}</th>`).join('') + `</tr></thead><tbody>` +
+        (v.rows||[]).map(row => `<tr>` + row.map((cell,i)=>`<td${i?' class="r"':''}>${esc(cell)}</td>`).join('') + `</tr>`).join('') +
+        `</tbody></table>`;
+    }
+    if(!inner) return '';
+    return `<div class="ai-visual">${v.title?`<div class="vtitle">${esc(v.title)}</div>`:''}${inner}</div>`;
+  }
+
+  function jumpTo(nav){
+    if(!nav) return;
+    const sec = (SECTIONS.find(s => s.id === nav.section) || {}).id;
+    if(nav.loc && LOCATIONS[nav.loc]) setLoc(nav.loc);
+    if(nav.loc && nav.month && LOCATIONS[nav.loc] && LOCATIONS[nav.loc].months[nav.month]) setMonth(nav.month);
+    if(sec) setSection(sec);
+  }
+
+  function sectionLabel(id){ const s = SECTIONS.find(x => x.id === id); return s ? s.label : id; }
+
+  function show(html){ out.innerHTML = html; out.hidden = false; }
+
+  function renderAnswer(d){
+    const conf = d.confidence ? `<span class="conf">· ${esc(d.confidence)} confidence</span>` : '';
+    let html = `<div class="ai-eyebrow">AI answer ${conf}</div>`;
+    html += `<div class="ai-summary">${esc(d.summary || '')}</div>`;
+    html += renderVisual(d.visual);
+    html += `<div class="ai-actions">`;
+    if(d.navigate && d.navigate.section && SECTIONS.find(s => s.id === d.navigate.section)){
+      const locName = d.navigate.loc && LOCATIONS[d.navigate.loc] ? LOCATIONS[d.navigate.loc].name.replace('Store All ','') + ' · ' : '';
+      html += `<button class="ai-jump" data-jump="1">Open ${esc(locName + sectionLabel(d.navigate.section))} →</button>`;
+    }
+    html += `<button class="ai-dismiss" data-dismiss="1">Clear</button></div>`;
+    show(html);
+    const jb = out.querySelector('[data-jump]');
+    if(jb) jb.addEventListener('click', () => jumpTo(d.navigate));
+    out.querySelector('[data-dismiss]').addEventListener('click', () => { out.hidden = true; out.innerHTML = ''; });
+  }
+
+  // Keyword fallback — used only if the AI endpoint is unavailable.
+  function keywordJump(q){
+    const t = q.toLowerCase();
+    const loc = Object.keys(LOCATIONS).find(k =>
+      t.includes(k) || t.includes(LOCATIONS[k].name.toLowerCase().replace('store all ','')));
+    const sec = SECTIONS.find(s => t.includes(s.label.toLowerCase()) || t.includes(s.id.replace('-',' ')));
+    if(loc || sec){
+      jumpTo({ loc: loc || STATE.loc, month: null, section: (sec || {}).id || STATE.section });
+      show(`<div class="ai-eyebrow">Best match</div><div class="ai-summary">Search is offline, so I jumped to the closest matching view.</div><div class="ai-actions"><button class="ai-dismiss" data-dismiss="1">Clear</button></div>`);
+      out.querySelector('[data-dismiss]').addEventListener('click', () => { out.hidden = true; out.innerHTML = ''; });
+      return true;
+    }
+    return false;
+  }
+
+  form.addEventListener('submit', async (e) => {
+    e.preventDefault();
+    const q = input.value.trim();
+    if(!q) return;
+    btn.disabled = true;
+    show(`<div class="ai-loading"><span class="ai-spinner"></span> Searching the data…</div>`);
+    try {
+      const r = await fetch('/api/ask', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ question: q, data: LOCATIONS })
+      });
+      const d = await r.json();
+      if(!r.ok || d.error){
+        if(!keywordJump(q)) show(`<div class="ai-eyebrow">Search unavailable</div><div class="ai-err">${esc((d && d.error) || 'Something went wrong.')}</div><div class="ai-actions"><button class="ai-dismiss" data-dismiss="1">Clear</button></div>`);
+      } else {
+        renderAnswer(d);
+      }
+    } catch(err){
+      if(!keywordJump(q)) show(`<div class="ai-eyebrow">Search unavailable</div><div class="ai-err">Could not reach the search service.</div><div class="ai-actions"><button class="ai-dismiss" data-dismiss="1">Clear</button></div>`);
+    } finally {
+      btn.disabled = false;
+      const dm = out.querySelector('[data-dismiss]');
+      if(dm && !dm._b){ dm._b = 1; dm.addEventListener('click', () => { out.hidden = true; out.innerHTML = ''; }); }
+    }
+  });
+})();
 </script>
 </body>
 </html>
