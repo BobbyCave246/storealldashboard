@@ -540,7 +540,139 @@ insight(s, ML + 7.55, cy, SW - ML - (ML + 7.55), 2.55, "A brochure, not a funnel
           "$41k/mo; the front of the site should work as hard as the back.", {})])
 footer(s, 7, "SiteLink InquirySource · occupied base; recent = move-ins in the last 12 months")
 
-# ================= SLIDE 8 — ACT 04: CUSTOMER PROFILE =================
+# ---------------- status pill helper (website slides) ----------------
+def status_pill(slide, x, y, kind):
+    styles = {
+        'done':  ("DONE",        RGBColor(0xE4, 0xF4, 0xEC), GOOD),
+        'wip':   ("IN PROGRESS", RGBColor(0xFF, 0xF5, 0xD6), WARN),
+        'next':  ("NEXT",        PAPER2, MUT),
+        'us':    ("OURS",        RGBColor(0xFD, 0xEA, 0xEA), ACCENT_D),
+    }
+    lab, bg, fg = styles[kind]
+    rect(slide, x, y, 1.0, 0.21, fill=bg, round_=0.5)
+    text(slide, x, y + 0.015, 1.0, 0.19, lab, size=7, font=HEAD, bold=True,
+         color=fg, align=PP_ALIGN.CENTER, spc=40, wrap=False)
+
+def track_row(slide, x, y, w, title, sub, kind):
+    status_pill(slide, x, y + 0.03, kind)
+    text(slide, x + 1.14, y - 0.03, w - 1.14, 0.24, title, size=10.5, bold=True, color=INK)
+    text(slide, x + 1.14, y + 0.19, w - 1.14, 0.22, sub, size=8.5, color=MUT)
+
+# ================= SLIDE 8 — WEBSITE STATUS 1: MOCKUPS =================
+s = prs.slides.add_slide(BLANK)
+y0 = header(s, "03", "Act 03 · The new website — status", "The fix is in flight: first mockups are in.",
+            "Store All Central homepage — desktop & mobile design mockups · received this week")
+iy = y0 + 0.10
+img_h = 4.62
+from PIL import Image as _Img
+def add_mock(path, x, y, h):
+    iw, ih = _Img.open(path).size
+    w = h * iw / ih
+    pic = s.shapes.add_picture(path, Inches(x), Inches(y), height=Inches(h))
+    pic.line.color.rgb = LINE; pic.line.width = Pt(1)
+    pic.shadow.inherit = False
+    return w
+dx = ML
+dw = add_mock("/home/user/storealldashboard/docs/website-mockup-desktop.png", dx, iy, img_h)
+mx = dx + dw + 0.22
+mw = add_mock("/home/user/storealldashboard/docs/website-mockup-mobile.png", mx, iy, img_h)
+cx = mx + mw + 0.28
+cwd_ = SW - ML - cx
+card(s, cx, iy, cwd_, img_h, "What this already fixes")
+fy = iy + 0.56
+fixes = [
+    ("Live pricing & availability", "the “check availability” widget Act 03 asked for"),
+    ("Reserve Now, online", "reserve in minutes, gate code on payment — no office visit"),
+    ("10% online discount", "a built-in reason to book (and pay) on the web"),
+    ("4-step online move-in", "size → reserve → sign & pay → gate code"),
+    ("Three countries, one site", "Barbados · Guyana · Suriname location picker"),
+]
+for t, d in fixes:
+    rect(s, cx + 0.22, fy + 0.045, 0.09, 0.09, fill=ACCENT, round_=0.5)
+    text(s, cx + 0.40, fy - 0.02, cwd_ - 0.6, 0.24, t, size=10.5, bold=True, color=INK)
+    text(s, cx + 0.40, fy + 0.20, cwd_ - 0.6, 0.4, d, size=8.5, color=MUT, line_spacing=1.05)
+    fy += 0.56
+text(s, cx + 0.22, iy + img_h - 0.66, cwd_ - 0.44, 0.6,
+     "Designed so far: Homepage, Locations, FAQ, Contact, About. The online-reservation "
+     "flow designs land early next week.", size=8.5, color=MUT, line_spacing=1.15)
+footer(s, 8, "Developer design mockups · client Figma share due tomorrow")
+
+# ================= SLIDE 9 — WEBSITE STATUS 2: TRACKS =================
+s = prs.slides.add_slide(BLANK)
+y0 = header(s, "03", "Act 03 · The new website — status", "Design is nearly done; the reservation flow is in build.",
+            "Developer status · week of 6 July 2026")
+cy = y0 + 0.06
+colw = (SW - 2 * ML - 0.24) / 2
+card(s, ML, cy, colw, 3.15, "Design track")
+ty = cy + 0.58
+for t, d, k in [
+    ("Core pages designed", "Homepage · Locations · FAQ · Contact · About", 'done'),
+    ("Client Figma share", "completed designs shared with us by tomorrow", 'wip'),
+    ("Reservation-flow designs", "early next week — being validated against the live API first", 'wip'),
+    ("Internal design review", "our team reviews mockups + reservation flow, returns feedback", 'us'),
+]:
+    track_row(s, ML + 0.22, ty, colw - 0.44, t, d, k)
+    ty += 0.60
+card(s, ML + colw + 0.24, cy, colw, 3.15, "Development track")
+ty = cy + 0.58
+for t, d, k in [
+    ("SiteLink API key", "delivered — integration work unblocked", 'done'),
+    ("PlugnPay test account", "secured from PlugnPay support — payments testable", 'done'),
+    ("API integration", "website functionality build underway", 'wip'),
+    ("Working reservation flow", "basic end-to-end version by the end of next week", 'next'),
+]:
+    track_row(s, ML + colw + 0.46, ty, colw - 0.44, t, d, k)
+    ty += 0.60
+insight(s, ML, cy + 3.35, SW - 2 * ML, 1.06, "The ball comes to us this week",
+        [("The only step on our side of the net: review the Figma designs and the reservation flow, "
+          "then return one consolidated round of feedback. The July 24 build date holds only if that "
+          "feedback doesn't sit — book the internal review session now.", {})])
+footer(s, 9, "Developer status email · design + development tracks")
+
+# ================= SLIDE 10 — WEBSITE STATUS 3: TIMELINE =================
+s = prs.slides.add_slide(BLANK)
+y0 = header(s, "03", "Act 03 · The new website — status", "Build done July 24. Live the week of August 10.",
+            "Phase 1 = 8 weeks from end of May · on track · go-live moved off month-end to the second week of August")
+ty = y0 + 0.42
+milestones = [
+    ("THIS WEEK", "Figma review &\nreservation designs", False),
+    ("NEXT WEEK", "Working reservation\nflow (end of week)", False),
+    ("JUL 24", "Phase 1 build\ncomplete — on track", False),
+    ("EARLY AUG", "Review, content\n& UAT window", False),
+    ("WEEK OF AUG 10", "GO-LIVE", True),
+]
+n = len(milestones)
+lane_x, lane_w = ML + 0.3, SW - 2 * ML - 0.6
+rect(s, lane_x, ty + 0.09, lane_w, 0.035, fill=LINE)
+step = lane_w / (n - 1)
+for i, (when, what, hot) in enumerate(milestones):
+    nx = lane_x + i * step
+    d = 0.30 if hot else 0.20
+    rect(s, nx - d / 2, ty + 0.105 - d / 2, d, d, fill=ACCENT if hot else CHAR, round_=0.5)
+    if hot:
+        rect(s, nx - 0.25, ty - 0.095, 0.5, 0.03, fill=ACCENT, round_=0.5)
+    text(s, nx - step / 2, ty + 0.34, step, 0.22, when, size=9, font=HEAD, bold=True,
+         color=ACCENT if hot else MUT, align=PP_ALIGN.CENTER, spc=80, wrap=False)
+    text(s, nx - step / 2, ty + 0.58, step, 0.5, what, size=9.5,
+         bold=hot, color=INK, align=PP_ALIGN.CENTER, line_spacing=1.05)
+py = ty + 1.42
+colw = (SW - 2 * ML - 0.24) / 2
+card(s, ML, py, colw, 1.92, "Phase 1 — what goes live in August")
+text(s, ML + 0.22, py + 0.56, colw - 0.44, 1.25,
+     [("Redesigned homepage and ancillary pages (Locations, FAQ, About, Contact), ", {}),
+      ("live unit availability, online reservation and online payment", {'bold': True, 'color': INK}),
+      (" — the booking funnel this deck's Act 03 called for, with a 10% book-online incentive.", {})],
+     size=10.5, color=MUT, line_spacing=1.25)
+card(s, ML + colw + 0.24, py, colw, 1.92, "Phase 2 — starts after Phase 1")
+text(s, ML + colw + 0.46, py + 0.56, colw - 0.44, 1.25,
+     [("Account management", {'bold': True, 'color': INK}),
+      (" — tenant self-service on top of the booking funnel. Some of it may be ready by go-live. ", {}),
+      ("Decision for us now:", {'bold': True, 'color': ACCENT_D}),
+      (" the developer asked which Phase 2 pages to build first — tell them this week.", {})],
+     size=10.5, color=MUT, line_spacing=1.25)
+footer(s, 10, "Developer phase breakdown (Google Doc) + status email · timeline as of 6 July 2026")
+
+# ================= SLIDE 11 — ACT 04: CUSTOMER PROFILE =================
 s = prs.slides.add_slide(BLANK)
 y0 = header(s, "04", "Act 04 · Customer profile", "Here for location — never for price.",
             "Local households in transition · SiteLink marketing summary · 978 active tenants, all sites")
@@ -576,9 +708,9 @@ insight(s, ML + 9.45, cy, SW - ML - (ML + 9.45), 2.55, "Back to Act 01",
          (", not discounting — and it is exactly why ", {}),
          ("new supply in the right catchment", {'bold': True, 'color': WHITE}),
          (" will fill.", {})])
-footer(s, 8, "SiteLink marketing summary · shares of tenants with the field recorded")
+footer(s, 11, "SiteLink marketing summary · shares of tenants with the field recorded")
 
-# ================= SLIDE 9 — CLOSING =================
+# ================= SLIDE 12 — CLOSING =================
 s = prs.slides.add_slide(BLANK)
 dark_bg(s)
 text(s, ML, 0.55, 12, 0.3, "THE STORY, IN ONE SLIDE", size=11, font=HEAD, bold=True,
@@ -595,9 +727,9 @@ asks = [
     ("03", "Pay for word of mouth", "Referrals + returning tenants: 39% of tenants, 41% of "
      "$12.5M lifetime value, $14.6k per referred tenant. Launch referral credits & move-out win-back.",
      "REFERRAL CREDIT"),
-    ("04", "Rebuild the website to book", "One web booking in 12 months while a third of "
-     "tenants discover us online. Live availability, pricing, Reserve Now, local search.",
-     "BOOKING FUNNEL"),
+    ("04", "Land the new website", "The rebuild is in flight: mockups in, reservation flow "
+     "next week, Phase 1 build done Jul 24. Review designs fast and pick Phase 2 priorities.",
+     "LIVE WK OF AUG 10"),
 ]
 ay = 1.62
 for n, t, d, tag in asks:
@@ -614,7 +746,7 @@ for n, t, d, tag in asks:
          bold=True, color=PINK, align=PP_ALIGN.CENTER, anchor=MSO_ANCHOR.MIDDLE,
          spc=40, wrap=False)
     ay += 1.30
-footer(s, 9, "Full detail in the Data Dashboard — occupancy, payments, acquisition, lead funnel & profile", dark=True)
+footer(s, 12, "Full detail in the Data Dashboard — occupancy, payments, acquisition, lead funnel & profile", dark=True)
 
 out = "/home/user/storealldashboard/docs/storeall-data-story-jul-2026.pptx"
 prs.save(out)
