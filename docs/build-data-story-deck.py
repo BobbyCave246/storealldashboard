@@ -49,7 +49,7 @@ BLANK = prs.slide_layouts[6]
 
 # ---------------- data (aggregated from index.html LOCATIONS et al.) ----------------
 # occupancy
-OCC = dict(total=985, occupied=976, rentable=982, vacant_rentable=6, oos=14,
+OCC = dict(total=996, occupied=976, rentable=982, vacant_rentable=6, oos=14,
            rent=273729, gross=283461, mi=34, mo=13, net=21)
 SITES_OCC = [  # name, occupied, rentable, vacant, note
     ("Central", 457, 461, 4,  "The Pine, St. Michael"),
@@ -296,7 +296,7 @@ text(s, ML, 3.05, 9.6, 0.6,
      "from the dashboard: occupancy, payments, acquisition and the customer.",
      size=13.5, color=RGBColor(0xD8, 0xD8, 0xD8), line_spacing=1.25)
 acts = [
-    ("01", "OCCUPANCY", "We are sold out — 6 units left across 985."),
+    ("01", "OCCUPANCY", "We are sold out — 6 units left across 996."),
     ("02", "PAYMENTS", "86% of payers are already digital; autopay is stuck."),
     ("03", "ACQUISITION", "Referrals carry the value; the phone carries the volume."),
     ("04", "CUSTOMER", "Local, residential, location-led — never price-led."),
@@ -321,7 +321,7 @@ s = prs.slides.add_slide(BLANK)
 y0 = header(s, "01", "Act 01 · Occupancy", "We are sold out.",
             "June 2026 month-end · 976 of 982 rentable units occupied across three sites (99.4%)")
 tiles = [
-    ("Rentable occupancy", "99.4", "%", "976 of 982 rentable units filled — physical occupancy 99.1% of all 985", True),
+    ("Rentable occupancy", "99.4", "%", "976 of 982 rentable units filled — 98.0% of all 996 (14 out of service)", True),
     ("Units left to sell", "6", "", "vacant rentable units in the whole portfolio: 4 Central · 1 South · 1 Lears", False),
     ("Monthly rent roll", "$274", "k", "96.6% of the $283k gross potential — near-zero discounting", False),
     ("Net absorption · June", "+21", "", "34 move-ins vs 13 move-outs — vacated units refill immediately", False),
