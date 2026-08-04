@@ -598,7 +598,7 @@ const LOCATIONS = {
         label:"August 2026", basis:"Rent-roll pull · 4 Aug 2026",
         totalUnits:461, occupied:459, vacant:2, physOcc:99.6, econOcc:98.5,
         grossPot:120422, occRent:118617, totalArea:28628, occArea:28547,
-        revpaf:4.14, revOccSqft:4.16, avgRentUnit:258.43, movedIn:null, movedOut:null, net:null,
+        revpaf:4.14, revOccSqft:4.16, avgRentUnit:258.43, movedIn:5, movedOut:3, net:2, transfers:2,
         byType:[{t:"Indoor Storage",units:199,occ:199,pct:100.0},{t:"Drive-Up Storage",units:189,occ:188,pct:99.5},{t:"Climate Controlled",units:56,occ:56,pct:100.0},{t:"Mailbox",units:16,occ:15,pct:93.8},{t:"Mobile Storage",units:1,occ:1,pct:100.0}],
         losMean:54.2, losMedian:39.7, losBands:{"<3 mo":20,"3–12 mo":64,"1–2 yr":69,"2–5 yr":130,"5 yr+":176},
         corpUnits:106, indivUnits:353, corpPct:23.1, corpRent:33294, indivRent:85324, corpRentPct:28.1,
@@ -1658,7 +1658,8 @@ function render(){
   document.getElementById('mo').textContent = hasMove ? CUR.movedOut : '—';
   document.getElementById('net').innerHTML = hasMove ? ((CUR.net>=0?'+':'')+CUR.net) : '—';
   document.getElementById('moveNote').textContent = hasMove
-    ? 'At ~99% occupancy, a small negative net is churn at the ceiling, not falling demand.'
+    ? ('At ~99% occupancy, a small negative net is churn at the ceiling, not falling demand.'
+       + (CUR.transfers ? ` A further ${CUR.transfers} unit${CUR.transfers===1?'':'s'} transferred between units in the period — counted separately from move-ins.` : ''))
     : 'Move-in / move-out activity isn\'t in a rent-roll snapshot — it needs the Rental Activity (move-in/move-out) report for the period.';
   document.getElementById('typebars').innerHTML = CUR.byType.map(r=>{
     const pill = r.pct>=99.9?'<span class="pill full">full</span>':'<span class="pill near">'+r.pct.toFixed(0)+'%</span>';
