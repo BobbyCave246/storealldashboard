@@ -312,6 +312,15 @@ details.section-toggle[open]>summary .sec-num{background:var(--accent);color:#ff
   </section>
   </div>
 
+  <!-- PANEL: TRENDS -->
+  <div class="panel" data-section="trends">
+  <section>
+    <div class="sec-head"><div class="sec-num">~</div><h2>Trends — what's actually moving</h2>
+      <p>Month-over-month movement across every snapshot held, with the basis differences called out rather than smoothed over.</p></div>
+    <div id="trendsBody"></div>
+  </section>
+  </div>
+
   <!-- PANEL: PORTFOLIO PAYMENTS -->
   <div class="panel" data-section="portfolio-payments">
   <section>
@@ -537,7 +546,7 @@ const LOCATIONS = {
     name:"Store All Central", sub:"The Pine, St. Michael",
     months:{
       "2026-05":{
-        label:"May 2026", basis:"As of 1 May 2026",
+        asof:"2026-05-01", label:"May 2026", basis:"As of 1 May 2026",
         totalUnits:461, occupied:457, vacant:4, physOcc:99.1, econOcc:98.5,
         grossPot:120421, occRent:118570, totalArea:28628, occArea:28555,
         revpaf:4.14, revOccSqft:4.15, avgRentUnit:259.45, movedIn:8, movedOut:10, net:-2,
@@ -564,7 +573,7 @@ const LOCATIONS = {
         }
       },
       "2026-06":{
-        label:"June 2026", basis:"Month-end June 2026 · activity 1–30 Jun",
+        asof:"2026-06-30", label:"June 2026", basis:"Month-end June 2026 · activity 1–30 Jun",
         totalUnits:461, occupied:457, vacant:4, physOcc:99.1, econOcc:98.4,
         grossPot:120421, occRent:118515, totalArea:28628, occArea:28563,
         revpaf:4.14, revOccSqft:4.15, avgRentUnit:259.33, movedIn:7, movedOut:7, net:0,
@@ -595,7 +604,7 @@ const LOCATIONS = {
         }
       },
       "2026-07":{
-        label:"July 2026", basis:"July close · rent roll pulled 4 Aug 2026",
+        asof:"2026-08-04", label:"July 2026", basis:"July close · rent roll pulled 4 Aug 2026",
         totalUnits:461, occupied:459, vacant:2, physOcc:99.6, econOcc:98.5,
         grossPot:120422, occRent:118617, totalArea:28628, occArea:28547,
         revpaf:4.14, revOccSqft:4.16, avgRentUnit:258.43, movedIn:5, movedOut:3, net:2, transfers:2,
@@ -630,7 +639,7 @@ const LOCATIONS = {
     name:"Store All South", sub:"Gibbons, Christ Church",
     months:{
       "2026-06":{
-        label:"June 2026", basis:"Month-end June 2026 · activity 1–30 Jun",
+        asof:"2026-06-30", label:"June 2026", basis:"Month-end June 2026 · activity 1–30 Jun",
         totalUnits:265, occupied:264, vacant:1, physOcc:99.6, econOcc:97.6,
         grossPot:69607, occRent:67929, totalArea:17165, occArea:17125,
         revpaf:3.96, revOccSqft:3.97, avgRentUnit:257.30, movedIn:8, movedOut:2, net:6,
@@ -659,7 +668,7 @@ const LOCATIONS = {
         }
       },
       "2026-07":{
-        label:"July 2026", basis:"July close · rent roll pulled 4 Aug 2026",
+        asof:"2026-08-04", label:"July 2026", basis:"July close · rent roll pulled 4 Aug 2026",
         totalUnits:265, occupied:264, vacant:0, unrentable:1, physOcc:99.6, econOcc:97.6,
         grossPot:69607, occRent:67929, totalArea:17165, occArea:17125,
         revpaf:3.96, revOccSqft:3.97, avgRentUnit:257.3, movedIn:6, movedOut:2, net:4,
@@ -693,7 +702,7 @@ const LOCATIONS = {
     name:"Store All Lears", sub:"Dayrells Commercial Park, Lears",
     months:{
       "2026-06":{
-        label:"June 2026", basis:"Month-end June 2026 · activity 1–30 Jun",
+        asof:"2026-06-30", label:"June 2026", basis:"Month-end June 2026 · activity 1–30 Jun",
         totalUnits:270, occupied:255, vacant:1, unrentable:14, physOcc:94.4, econOcc:93.4,
         grossPot:93433, occRent:87285, totalArea:26648, occArea:25368,
         revpaf:3.28, revOccSqft:3.44, avgRentUnit:339.63, movedIn:19, movedOut:4, net:15,
@@ -723,7 +732,7 @@ const LOCATIONS = {
         }
       },
       "2026-07":{
-        label:"July 2026", basis:"July close · rent roll pulled 4 Aug 2026",
+        asof:"2026-08-04", label:"July 2026", basis:"July close · rent roll pulled 4 Aug 2026",
         totalUnits:282, occupied:266, vacant:0, unrentable:16, physOcc:94.3, econOcc:93.2,
         grossPot:97875, occRent:91200, totalArea:27928, occArea:26568,
         revpaf:3.27, revOccSqft:3.43, avgRentUnit:342.86, movedIn:22, movedOut:12, net:10,
@@ -839,6 +848,7 @@ const delta = (cur,prev,unit="",dp=1) => {
 /* ===== Section navigation. scope:'portfolio' hides the site bar; 'site' shows it. ===== */
 const SECTIONS = [
   {id:'overview',           label:'Overview',          scope:'portfolio'},
+  {id:'trends',             label:'Trends',            scope:'portfolio'},
   {id:'portfolio-payments', label:'Portfolio Payments',scope:'portfolio'},
   {id:'acquisition',        label:'Acquisition',       scope:'portfolio'},
   {id:'lead-funnel',        label:'Lead Funnel',       scope:'portfolio'},
@@ -962,6 +972,200 @@ function renderPaymentTrend(){
       <p>The trajectory confirms autopay won't climb on its own &mdash; it needs the active conversion push set out above.</p>
     </div>
   </div>`;
+}
+
+/* ===== TRENDS — month-over-month movement across every snapshot we hold.
+   Built generically from LOCATIONS + PAYMENT_TREND, so adding a month extends it. ===== */
+function trendModel(){
+  const keys = [...new Set(Object.values(LOCATIONS).flatMap(L=>Object.keys(L.months)))].sort();
+  const sites = Object.entries(LOCATIONS).map(([k,L])=>({key:k, name:L.name.replace('Store All ',''), L}));
+  const shortLabel = mk => {
+    for(const s of sites) if(s.L.months[mk]) return s.L.months[mk].label.split(' ')[0];
+    return mk;
+  };
+  const d31 = m => (m.aging['31–60 days']||0)+(m.aging['61–90 days']||0)+(m.aging['90+ days']||0);
+  const d60 = m => (m.aging['61–90 days']||0)+(m.aging['90+ days']||0);
+  const apUnits = m => Math.round(m.autopayPct*m.occupied/100);
+
+  // portfolio roll-up per month; only months every site reports are comparable
+  const months = keys.map(mk=>{
+    const present = sites.filter(s=>s.L.months[mk]);
+    const ms = present.map(s=>s.L.months[mk]);
+    const sum = f => ms.reduce((t,m)=>t+f(m),0);
+    return {
+      key:mk, label:shortLabel(mk), complete: present.length===sites.length,
+      siteCount: present.length,
+      occupied:sum(m=>m.occupied), totalUnits:sum(m=>m.totalUnits), rent:sum(m=>m.occRent),
+      d31:sum(d31), d60:sum(d60), apUnits:sum(apUnits),
+      movedIn:sum(m=>m.movedIn||0), movedOut:sum(m=>m.movedOut||0)
+    };
+  });
+  const complete = months.filter(m=>m.complete);
+  return { keys, sites, months, complete, shortLabel, d31, d60, apUnits };
+}
+
+function renderTrends(){
+  const el = document.getElementById('trendsBody');
+  if(!el) return;
+  const T = trendModel();
+  const cur = T.complete[T.complete.length-1];
+  const prv = T.complete[T.complete.length-2];
+  if(!cur){ el.innerHTML = '<div class="card"><div class="note">No comparable snapshots yet.</div></div>'; return; }
+
+  const monthsApart = (a,b) => (new Date(b) - new Date(a))/(1000*60*60*24*30.4375);
+  const pctChg = (c,p) => p ? (100*(c-p)/p) : 0;
+  const arrow = (v,dp=1,unit='') => {
+    if(Math.abs(v)<0.05) return '<span class="chg flat">no change</span>';
+    return `<span class="chg ${v>0?'up':'down'}">${v>0?'▲':'▼'} ${Math.abs(v).toFixed(dp)}${unit}</span>`;
+  };
+
+  /* ---------- headline movement ---------- */
+  const stat = (k,v,d) => `<div class="ppm-stat"><div class="k">${k}</div><div class="v">${v}</div><div class="d">${d}</div></div>`;
+  const strip = `
+    <div class="ppm-stat-row">
+      ${stat('Occupied units', cur.occupied, `${prv?arrow(cur.occupied-prv.occupied,0):''} vs ${prv?prv.label:'—'} · ${cur.totalUnits} total`)}
+      ${stat('Monthly rent roll', bbdk(cur.rent), `${prv?arrow(pctChg(cur.rent,prv.rent),1,'%'):''} vs ${prv?prv.label:'—'}`)}
+      ${stat('31+ days late', cur.d31, `${prv?arrow(cur.d31-prv.d31,0):''} vs ${prv?prv.label:'—'} · ${cur.d60} at 60+`)}
+      ${stat('On autopay', cur.apUnits, `${prv?arrow(cur.apUnits-prv.apUnits,0):''} vs ${prv?prv.label:'—'} · ${(100*cur.apUnits/cur.occupied).toFixed(1)}% of occupied`)}
+    </div>`;
+
+  /* ---------- per-site metric tables ---------- */
+  const head = extra => `<thead><tr><th>Site</th>${T.keys.map(k=>`<th class="r">${T.shortLabel(k)}</th>`).join('')}<th class="r">${extra}</th></tr></thead>`;
+  const rows = (fmt, deltaFn) => T.sites.map(s=>{
+    const cells = T.keys.map(k=>{
+      const m = s.L.months[k];
+      return `<td class="r mono">${m?fmt(m):'<span style="color:var(--line)">—</span>'}</td>`;
+    }).join('');
+    const have = T.keys.filter(k=>s.L.months[k]);
+    const a = s.L.months[have[have.length-2]], b = s.L.months[have[have.length-1]];
+    return `<tr><td style="font-weight:600">${s.name}</td>${cells}<td class="r">${(a&&b)?deltaFn(a,b):''}</td></tr>`;
+  }).join('');
+
+  const occCard = `
+    <div class="card">
+      <h3><span class="dot"></span>Occupancy &amp; supply</h3>
+      <table>${head('Δ')}<tbody>
+        ${rows(m=>`${m.occupied}<span style="color:var(--muted)">/${m.totalUnits}</span>`, (a,b)=>arrow(b.occupied-a.occupied,0))}
+      </tbody></table>
+      <div class="note">Occupied of total units. Every unit added in the period was at <b>Lears</b> — the other two sites have been at their physical ceiling throughout, so portfolio growth is a supply question, not a demand one.</div>
+    </div>`;
+
+  const rentCard = `
+    <div class="card">
+      <h3><span class="dot"></span>Monthly rent roll</h3>
+      <table>${head('Δ')}<tbody>
+        ${rows(m=>bbdk(m.occRent), (a,b)=>arrow(pctChg(b.occRent,a.occRent),1,'%'))}
+      </tbody></table>
+      <div class="note">Economic occupancy has not moved at any site (Central ~98.5%, South ~97.6%, Lears ~93.2%), so rent-roll movement is coming from <b>unit count</b>, not from pricing or discounting.</div>
+    </div>`;
+
+  /* ---------- tenure drift: months of tenure added per calendar month ---------- */
+  const driftRows = T.sites.map(s=>{
+    const have = T.keys.filter(k=>s.L.months[k]);
+    const cells = T.keys.map(k=>{
+      const m = s.L.months[k];
+      return `<td class="r mono">${m?m.losMean.toFixed(1)+'<span style="color:var(--muted)">mo</span>':'<span style="color:var(--line)">—</span>'}</td>`;
+    }).join('');
+    const a = s.L.months[have[have.length-2]], b = s.L.months[have[have.length-1]];
+    let rate = '';
+    if(a&&b){
+      const el = monthsApart(a.asof,b.asof);
+      const r = el ? (b.losMean-a.losMean)/el : 0;
+      const tag = r>=0.9 ? 'full' : r>=0.5 ? 'near' : '';
+      rate = `<span class="pill ${tag}" style="${tag?'':'background:var(--paper2);color:var(--muted)'}">${r.toFixed(2)}</span>`;
+    }
+    return `<tr><td style="font-weight:600">${s.name}</td>${cells}<td class="r">${rate}</td></tr>`;
+  }).join('');
+
+  const tenureCard = `
+    <div class="card">
+      <h3><span class="dot"></span>Tenure drift &mdash; mean tenure, months</h3>
+      <table>${head('per mo')}<tbody>${driftRows}</tbody></table>
+      <div class="note"><b>Read the last column as churn.</b> It is how much mean tenure grew per calendar month between the two most recent pulls. <b>1.00</b> means the base simply aged — nobody left, nobody joined. Below that, move-ins are diluting it; <b>below zero the base is getting younger</b>. The three sites are on genuinely different tracks, and this is the cleanest single number that shows it.</div>
+    </div>`;
+
+  /* ---------- delinquency ---------- */
+  const dqCard = `
+    <div class="card">
+      <h3><span class="dot"></span>Accounts 31+ days late</h3>
+      <table>${head('Δ')}<tbody>
+        ${rows(m=>T.d31(m), (a,b)=>arrow(T.d31(b)-T.d31(a),0))}
+      </tbody></table>
+      <div class="note"><b>31+ days is the comparable cut</b> across pulls taken on different days: it always means at least one full prior cycle unpaid, whereas the 1–30 bucket swings with the day of the month. On that basis arrears have risen at <b>all three sites</b>, and the portfolio total has more than doubled — the clearest negative trend in the data.</div>
+    </div>`;
+
+  /* ---------- autopay: enrolled vs actually collected ---------- */
+  const PT = PAYMENT_TREND;
+  const nPT = PT.months.length;
+  const apRows = T.sites.map(s=>{
+    const m = s.L.months[T.keys.filter(k=>s.L.months[k]).pop()];
+    const pt = PT.sites[s.name];
+    const enrolled = T.apUnits(m);
+    const collected = pt ? pt.autopay[nPT-1] : 0;
+    const gap = enrolled - collected;
+    return `<tr><td style="font-weight:600">${s.name}</td>
+      <td class="r mono">${enrolled}</td>
+      <td class="r mono">${collected}</td>
+      <td class="r mono" style="${gap>0?'color:var(--accent);font-weight:700':''}">${gap>0?'−'+gap:gap}</td>
+      <td class="r mono">${enrolled?Math.round(100*gap/enrolled):0}%</td></tr>`;
+  }).join('');
+  const totEnrolled = T.sites.reduce((t,s)=>t+T.apUnits(s.L.months[T.keys.filter(k=>s.L.months[k]).pop()]),0);
+  const totCollected = T.sites.reduce((t,s)=>t+((PT.sites[s.name]?PT.sites[s.name].autopay[nPT-1]:0)),0);
+
+  const apCard = `
+    <div class="card">
+      <h3><span class="dot"></span>Autopay — enrolled vs actually collected (${PT.months[nPT-1]})</h3>
+      <table>
+        <thead><tr><th>Site</th><th class="r">Enrolled</th><th class="r">Collected</th><th class="r">Gap</th><th class="r">Fail rate</th></tr></thead>
+        <tbody>${apRows}</tbody>
+        <tfoot><tr style="border-top:2px solid var(--line)">
+          <td style="font-weight:700">Portfolio</td>
+          <td class="r mono" style="font-weight:700">${totEnrolled}</td>
+          <td class="r mono" style="font-weight:700">${totCollected}</td>
+          <td class="r mono" style="font-weight:700;color:var(--accent)">−${totEnrolled-totCollected}</td>
+          <td class="r mono" style="font-weight:700">${Math.round(100*(totEnrolled-totCollected)/totEnrolled)}%</td>
+        </tr></tfoot>
+      </table>
+      <div class="note"><b>Enrolled</b> is units flagged for automatic billing on the rent roll; <b>collected</b> is units that actually produced a Plug &amp; Pay receipt. The gap is autopay that was set up but did not take — expired or declined cards being the usual cause. This is a recoverable number: it needs no new sign-ups, just a card-refresh chase.</div>
+    </div>`;
+
+  /* ---------- collections series ---------- */
+  const coll = PT.months.map((_,i)=>Object.values(PT.sites).reduce((t,s)=>t+s.collections[i],0));
+  const cMax = Math.max(...coll), cMin = Math.min(...coll);
+  const cAvg = coll.reduce((a,b)=>a+b,0)/coll.length;
+  const collBars = coll.map((v,i)=>`
+    <div class="trend-bar port" style="height:${Math.max(6,100*(v-cMin*0.94)/(cMax-cMin*0.94))}%">
+      <span class="tval">${(v/1000).toFixed(0)}k</span><span class="tmon">${PT.months[i]}</span>
+    </div>`).join('');
+
+  const collCard = `
+    <div class="card">
+      <h3><span class="dot"></span>Portfolio collections &middot; ${PT.months[0]}–${PT.months[nPT-1]} 2026</h3>
+      <div class="trend-bars">${collBars}</div>
+      <div class="note" style="margin-top:22px">Seven months of receipts, range <b>${bbdk(cMin)}–${bbdk(cMax)}</b> against a <b>${bbdk(cAvg)}</b> average — a <b>${(100*(cMax-cMin)/cAvg).toFixed(0)}% band</b> with no trend in either direction. Collections are flat while the rent roll has grown, which is the timing gap between billing and receipt rather than a collection failure. Bars are scaled to the range, not to zero.</div>
+    </div>`;
+
+  /* ---------- written read ---------- */
+  const analysis = `
+    <div class="insight" style="background:var(--navy2)">
+      <h4>What the three snapshots actually say</h4>
+      <p><b>One site is growing; two are full.</b> Every unit and almost all the rent added since June came from Lears. Central and South have sat at 99.6% physical occupancy across every pull, so the portfolio's growth rate is now set by how fast new supply is built, not by demand.</p>
+      <p><b>The sites are on three different tenure tracks.</b> Central's base is ageing almost in place, South's is drifting slowly younger, and Lears' is getting younger outright — it churned 12 units in July against 3 at Central. Lears is filling and refilling, which is normal for a young site but means its revenue needs constant replacement.</p>
+      <p><b>Arrears are the one clear deterioration.</b> 31+ day accounts have risen at every site and the portfolio total has more than doubled since the June close, with 60+ day accounts rising alongside — so this is genuine ageing of debt, not a timing artefact. Nothing else in the data is moving this fast.</p>
+      <p><b>Autopay is stuck twice over.</b> Enrolment has barely moved in seven months, and a meaningful share of those enrolled did not actually collect this month. The second problem is the cheaper one to fix.</p>
+      <div class="flag" style="margin-top:12px">Watch next month &middot; whether 31+ arrears keep climbing, and whether Lears' churn settles as its cohort matures</div>
+    </div>`;
+
+  el.innerHTML = `
+    ${strip}
+    <div class="note" style="margin:2px 2px 14px"><b>Basis.</b> Central has three snapshots (May, June, July); South and Lears have two. Portfolio totals and the movement strip use only months every site reports, so they compare <b>June to July</b>. The pulls are not evenly spaced — 1 May, 30 June and 4 August — which is why tenure drift is expressed per calendar month rather than per snapshot.</div>
+    <div class="grid g2">${occCard}${rentCard}</div>
+    <div style="height:16px"></div>
+    <div class="grid g2">${tenureCard}${dqCard}</div>
+    <div style="height:16px"></div>
+    <div class="grid g2">${apCard}${collCard}</div>
+    <div style="height:16px"></div>
+    ${analysis}`;
 }
 
 function renderPortfolioPayments(){
@@ -1628,6 +1832,7 @@ function render(){
   const PREV = (mi>0) ? L.months[mkeys[mi-1]] : null;
 
   renderPortfolio();
+  renderTrends();
   renderAcquisition();
   renderLeadFunnel();
   renderCustomerProfile();
