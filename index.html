@@ -403,6 +403,11 @@ details.section-toggle[open]>summary .sec-num{background:var(--accent);color:#ff
     <div style="border-top:1px solid var(--line);margin:24px 0 6px"></div>
     <div style="font-family:'Montserrat';font-weight:800;text-transform:uppercase;letter-spacing:.1em;font-size:12px;color:var(--muted);margin:6px 0 12px">Pricing &amp; yield</div>
     <div class="grid g3" id="finrow"></div>
+    <div id="keyAccountsWrap" style="display:none">
+      <div style="border-top:1px solid var(--line);margin:24px 0 6px"></div>
+      <div style="font-family:'Montserrat';font-weight:800;text-transform:uppercase;letter-spacing:.1em;font-size:12px;color:var(--muted);margin:6px 0 12px">Key accounts &mdash; multi-unit tenants</div>
+      <div id="keyAccounts"></div>
+    </div>
   </section>
   </div>
 
@@ -617,6 +622,11 @@ const LOCATIONS = {
         agingNote:"<b>Basis:</b> the arrears position is as at the 4 Aug pull, three days into the August billing cycle — so the 1–30 bucket is overwhelmingly rent billed 1 Aug and not yet paid, not arrears. The 31+ buckets are the comparable delinquency measure.",
         age:{valid:290,pct:63,mean:48,median:51,min:20,max:87,bands:{"<25":39,"25–34":47,"35–44":28,"45–54":52,"55–64":71,"65+":53},female:264,male:185},
         marketing:{ "Internet":143,"Referral":122,"Previous Tenant":68,"Drive-by":27,"Yellow Pages":39,"Online Yellow Pages":1,"Brochure":5,"Facebook":2,"Other":51,"Unknown":1 },
+        keyAccounts:{ tenants:409, multi:44, units:94, rent:26885, siteRent:118617, rentPct:22.7,
+          avgMulti:611, avgSingle:251, tenureMulti:70.1, tenureSingle:35.0, arrMulti:4.5, arrSingle:5.8,
+          apMultiPct:35.1, apSinglePct:35.6, apFull:14, apPart:2, apNone:28, email:8,
+          newTen:3, newUnits:6, newRent:1796,
+          top:[{u:3,r:1238,los:26,ap:3,com:0,d31:0,em:0},{u:3,r:1221,los:39,ap:0,com:1,d31:0,em:0},{u:3,r:1136,los:124,ap:0,com:1,d31:0,em:0},{u:2,r:911,los:29,ap:0,com:1,d31:0,em:0},{u:2,r:911,los:137,ap:0,com:1,d31:0,em:0},{u:2,r:911,los:7,ap:0,com:1,d31:0,em:1},{u:3,r:885,los:88,ap:0,com:0,d31:0,em:0},{u:2,r:847,los:17,ap:0,com:0,d31:2,em:0},{u:2,r:847,los:39,ap:2,com:1,d31:0,em:1},{u:2,r:847,los:35,ap:0,com:0,d31:0,em:0},{u:2,r:783,los:86,ap:0,com:1,d31:0,em:0},{u:3,r:783,los:144,ap:3,com:0,d31:0,em:1}] },
         acquisition:{ channels:{"Phone":279,"Walk-in":59,"Email":24,"Web":7,"Not recorded":90}, recent:{n:84,"Phone":45,"Walk-in":19,"Email":8,"Web":1,"Not recorded":11} },
         paymentMethods:{
           period:"July 2026",
@@ -681,6 +691,11 @@ const LOCATIONS = {
         agingNote:"<b>Basis:</b> the arrears position is as at the 4 Aug pull, three days into the August billing cycle — so the 1–30 bucket is overwhelmingly rent billed 1 Aug and not yet paid, not arrears. The 31+ buckets are the comparable delinquency measure.",
         age:{valid:234,pct:89,mean:53,median:55,min:19,max:94,bands:{"<25":9,"25–34":13,"35–44":37,"45–54":56,"55–64":80,"65+":39},female:145,male:114},
         marketing:{ "Internet":79,"Referral":52,"Previous Tenant":44,"Drive-by":30,"Yellow Pages":7,"Online Yellow Pages":0,"Brochure":0,"Facebook":3,"Other":29,"Unknown":17 },
+        keyAccounts:{ tenants:234, multi:18, units:48, rent:12904, siteRent:67929, rentPct:19.0,
+          avgMulti:717, avgSingle:255, tenureMulti:40.4, tenureSingle:24.2, arrMulti:0.0, arrSingle:8.3,
+          apMultiPct:16.7, apSinglePct:32.9, apFull:4, apPart:0, apNone:14, email:1,
+          newTen:1, newUnits:2, newRent:51,
+          top:[{u:6,r:2281,los:30,ap:0,com:1,d31:0,em:0},{u:4,r:1677,los:41,ap:0,com:1,d31:0,em:0},{u:6,r:1481,los:77,ap:0,com:1,d31:0,em:0},{u:2,r:783,los:14,ap:0,com:0,d31:0,em:0},{u:3,r:783,los:40,ap:0,com:1,d31:0,em:0},{u:3,r:745,los:31,ap:0,com:1,d31:0,em:0},{u:2,r:702,los:12,ap:2,com:0,d31:0,em:0},{u:2,r:655,los:46,ap:0,com:1,d31:0,em:0},{u:2,r:557,los:22,ap:0,com:0,d31:0,em:0},{u:2,r:545,los:76,ap:0,com:0,d31:0,em:0},{u:2,r:500,los:75,ap:0,com:1,d31:0,em:0},{u:2,r:432,los:197,ap:0,com:0,d31:0,em:0}] },
         acquisition:{ channels:{"Phone":117,"Walk-in":82,"Email":14,"Web":6,"Not recorded":45}, recent:{n:61,"Phone":38,"Walk-in":10,"Email":9,"Web":0,"Not recorded":4} },
         paymentMethods:{
           period:"July 2026",
@@ -745,6 +760,11 @@ const LOCATIONS = {
         agingNote:"<b>Basis:</b> the arrears position is as at the 4 Aug pull, three days into the August billing cycle — so the 1–30 bucket is overwhelmingly rent billed 1 Aug and not yet paid, not arrears. The 31+ buckets are the comparable delinquency measure.",
         age:{valid:128,pct:48,mean:32,median:23,min:20,max:77,bands:{"<25":76,"25–34":8,"35–44":16,"45–54":8,"55–64":12,"65+":8},female:145,male:110},
         marketing:{ "Internet":103,"Referral":44,"Previous Tenant":54,"Drive-by":26,"Yellow Pages":9,"Online Yellow Pages":4,"Brochure":0,"Facebook":1,"Other":25,"Unknown":0 },
+        keyAccounts:{ tenants:227, multi:30, units:69, rent:23438, siteRent:91200, rentPct:25.7,
+          avgMulti:781, avgSingle:344, tenureMulti:20.4, tenureSingle:12.7, arrMulti:3.3, arrSingle:7.6,
+          apMultiPct:29.0, apSinglePct:28.4, apFull:6, apPart:4, apNone:20, email:0,
+          newTen:10, newUnits:24, newRent:8494,
+          top:[{u:4,r:1821,los:1,ap:2,com:0,d31:0,em:0},{u:3,r:1736,los:20,ap:0,com:1,d31:0,em:0},{u:4,r:1566,los:2,ap:4,com:1,d31:0,em:0},{u:4,r:1319,los:37,ap:2,com:0,d31:0,em:0},{u:2,r:1281,los:17,ap:0,com:1,d31:0,em:0},{u:3,r:911,los:41,ap:0,com:1,d31:0,em:0},{u:2,r:911,los:15,ap:0,com:0,d31:0,em:0},{u:2,r:911,los:25,ap:2,com:0,d31:0,em:0},{u:2,r:911,los:21,ap:1,com:0,d31:0,em:0},{u:2,r:911,los:5,ap:0,com:0,d31:0,em:0},{u:2,r:783,los:26,ap:1,com:1,d31:0,em:0},{u:2,r:783,los:22,ap:2,com:1,d31:0,em:0}] },
         acquisition:{ channels:{"Phone":217,"Walk-in":6,"Email":11,"Web":4,"Not recorded":28}, recent:{n:120,"Phone":101,"Walk-in":4,"Email":8,"Web":0,"Not recorded":7} },
         paymentMethods:{
           period:"July 2026",
@@ -1933,6 +1953,9 @@ function render(){
   document.getElementById('corridorNames').textContent = home.join(' / ');
   document.getElementById('overseaspct').textContent = Math.round(100*(CUR.geoIndiv["Overseas"]||0)/CUR.indivN)+'% (' + (CUR.geoIndiv["Overseas"]||0) + ' tenants)';
 
+  /* key accounts */
+  renderKeyAccounts(CUR);
+
   /* demographics */
   renderDemographics(CUR);
 
@@ -1957,6 +1980,86 @@ function render(){
     <div class="card"><h3><span class="dot"></span>RevPAF</h3><div class="bignum">$${CUR.revpaf.toFixed(2)}<small> /sf</small></div><div class="cap">Revenue per available sq ft — the blended performance metric</div></div>
     <div class="card"><h3><span class="dot"></span>Revenue / occupied sq ft</h3><div class="bignum">$${CUR.revOccSqft.toFixed(2)}<small> /sf</small></div><div class="cap">Pricing power, stripping out occupancy</div></div>
     <div class="card"><h3><span class="dot"></span>Avg rent / occupied unit</h3><div class="bignum">$${CUR.avgRentUnit.toFixed(0)}</div><div class="cap">Across ${CUR.occupied} occupied units &middot; ${bbd(CUR.occRent)}/mo total</div></div>`;
+}
+
+/* ===== Key accounts — multi-unit tenants at the selected site.
+   Anonymised to a site-local rank; SiteLink tenant IDs are site-scoped, so a customer
+   renting at two sites appears once per site and group exposure is understated. ===== */
+function renderKeyAccounts(CUR){
+  const wrap = document.getElementById('keyAccountsWrap');
+  const el   = document.getElementById('keyAccounts');
+  if(!wrap || !el) return;
+  const K = CUR.keyAccounts;
+  if(!K){ wrap.style.display='none'; el.innerHTML=''; return; }
+  wrap.style.display='';
+
+  const pctSite = r => (100*r/K.siteRent).toFixed(2);
+  const stat = (k,v,d) => `<div class="ppm-stat"><div class="k">${k}</div><div class="v">${v}</div><div class="d">${d}</div></div>`;
+
+  const rows = K.top.map((t,i)=>{
+    const flags = [];
+    if(t.ap===0)      flags.push('<span class="pill" style="background:#fdecec;color:#a3231b">manual</span>');
+    else if(t.ap<t.u) flags.push('<span class="pill near">part autopay</span>');
+    else              flags.push('<span class="pill full">autopay</span>');
+    if(!t.em)   flags.push('<span class="pill" style="background:var(--paper2);color:var(--muted)">no email</span>');
+    if(t.d31)   flags.push('<span class="pill" style="background:#fdecec;color:#a3231b">31+ late</span>');
+    if(t.los<12)flags.push('<span class="pill" style="background:#fff4e0;color:#8a6412">new</span>');
+    return `<tr>
+      <td class="mono" style="color:var(--muted)">#${i+1}</td>
+      <td class="r mono">${t.u}</td>
+      <td class="r mono" style="font-weight:600">${bbd(t.r)}</td>
+      <td class="r mono">${pctSite(t.r)}%</td>
+      <td>${t.com?'Commercial':'Individual'}</td>
+      <td class="r mono">${t.los} mo</td>
+      <td>${flags.join(' ')}</td></tr>`;
+  }).join('');
+
+  const apGap = K.apMultiPct - K.apSinglePct;
+
+  el.innerHTML = `
+    <div class="ppm-stat-row">
+      ${stat('Multi-unit tenants', K.multi, `of ${K.tenants} tenants &middot; ${K.units} units`)}
+      ${stat('Share of site rent', K.rentPct+'<small>%</small>', `${bbd(K.rent)} of ${bbd(K.siteRent)}/mo`)}
+      ${stat('Avg rent per tenant', bbd(K.avgMulti), `vs ${bbd(K.avgSingle)} single-unit &middot; ${(K.avgMulti/K.avgSingle).toFixed(1)}&times;`)}
+      ${stat('Median tenure', K.tenureMulti.toFixed(0)+'<small> mo</small>', `vs ${K.tenureSingle.toFixed(0)} mo single-unit`)}
+    </div>
+
+    <div class="grid g2">
+      <div class="card">
+        <h3><span class="dot"></span>Multi-unit vs single-unit</h3>
+        <table>
+          <thead><tr><th>Measure</th><th class="r">Multi-unit</th><th class="r">Single-unit</th></tr></thead>
+          <tbody>
+            <tr><td>Tenants</td><td class="r mono">${K.multi}</td><td class="r mono">${K.tenants-K.multi}</td></tr>
+            <tr><td>Avg rent / tenant</td><td class="r mono">${bbd(K.avgMulti)}</td><td class="r mono">${bbd(K.avgSingle)}</td></tr>
+            <tr><td>Median tenure</td><td class="r mono">${K.tenureMulti.toFixed(0)} mo</td><td class="r mono">${K.tenureSingle.toFixed(0)} mo</td></tr>
+            <tr><td>Tenants 31+ days late</td><td class="r mono">${K.arrMulti.toFixed(1)}%</td><td class="r mono">${K.arrSingle.toFixed(1)}%</td></tr>
+            <tr><td>Units on autopay</td><td class="r mono">${K.apMultiPct.toFixed(1)}%</td><td class="r mono">${K.apSinglePct.toFixed(1)}%</td></tr>
+          </tbody>
+        </table>
+        <div class="note">Multi-unit tenants pay <b>${(K.avgMulti/K.avgSingle).toFixed(1)}&times;</b> more, stay <b>${K.tenureSingle?Math.round(100*(K.tenureMulti/K.tenureSingle-1)):0}% longer</b> and fall behind ${K.arrMulti<K.arrSingle?'<b>less</b>':'<b>more</b>'} often — they are the strongest segment on the book, not a risk in themselves.</div>
+      </div>
+
+      <div class="card">
+        <h3><span class="dot"></span>Automation &amp; reach</h3>
+        <div class="ppm-stat-row" style="grid-template-columns:repeat(2,1fr);margin-bottom:12px">
+          <div class="ppm-stat"><div class="k">No autopay at all</div><div class="v">${K.apNone}<small> / ${K.multi}</small></div><div class="d">${K.apFull} fully enrolled &middot; ${K.apPart} partial</div></div>
+          <div class="ppm-stat"><div class="k">Email on file</div><div class="v">${K.email}<small> / ${K.multi}</small></div><div class="d">${Math.round(100*K.email/K.multi)}% reachable by email</div></div>
+        </div>
+        <div class="note"><b>This is the exposure.</b> ${K.apNone} of ${K.multi} multi-unit tenants are collected entirely by hand, and autopay penetration on their units (<b>${K.apMultiPct.toFixed(1)}%</b>) is ${Math.abs(apGap)<0.5?'no better than':(apGap<0?'<b>lower than</b>':'above')} the single-unit rate (${K.apSinglePct.toFixed(1)}%). The highest-value, longest-tenured relationships on the site are the least automated and the hardest to contact.</div>
+        ${K.newTen ? `<div class="flag" style="margin-top:12px">${K.newTen} multi-unit tenant${K.newTen===1?'':'s'} under 1 year &middot; ${K.newUnits} units &middot; ${bbd(K.newRent)}/mo unproven</div>` : ''}
+      </div>
+    </div>
+
+    <div style="height:16px"></div>
+    <div class="card">
+      <h3><span class="dot"></span>Retention worklist — largest multi-unit accounts</h3>
+      <table>
+        <thead><tr><th>Account</th><th class="r">Units</th><th class="r">Rent / mo</th><th class="r">% site rent</th><th>Type</th><th class="r">Tenure</th><th>Status</th></tr></thead>
+        <tbody>${rows}</tbody>
+      </table>
+      <div class="note">Ranked by rent, showing the top ${K.top.length} of ${K.multi}. Accounts are anonymised to a site-local rank — SiteLink tenant IDs are <b>site-scoped</b>, so a customer renting at more than one site appears separately at each and group-level exposure is understated here. Work the list top-down: <b>manual</b> plus <b>no email</b> on a large account is the combination worth fixing first.</div>
+    </div>`;
 }
 
 function renderDemographics(CUR){
