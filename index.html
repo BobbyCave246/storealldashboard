@@ -388,7 +388,7 @@ details.section-toggle[open]>summary .sec-num{background:var(--accent);color:#ff
           <tr><td>Move-outs</td><td class="r mono" id="mo"></td></tr>
           <tr><td>Net absorption</td><td class="r mono" id="net"></td></tr>
         </table>
-        <div class="note">At ~99% occupancy, a small negative net is churn at the ceiling, not falling demand.</div>
+        <div class="note" id="moveNote">At ~99% occupancy, a small negative net is churn at the ceiling, not falling demand.</div>
       </div>
     </div>
     <div style="border-top:1px solid var(--line);margin:24px 0 6px"></div>
@@ -516,6 +516,7 @@ details.section-toggle[open]>summary .sec-num{background:var(--accent);color:#ff
         <h3><span class="dot"></span>Aging — genuine delinquency</h3>
         <div id="agebars"></div>
         <div class="note" id="ageNote"></div>
+        <div class="note" id="agingBasisNote" style="display:none"></div>
       </div>
       <div class="card">
         <h3><span class="dot"></span>Auto-pay adoption</h3>
@@ -592,6 +593,21 @@ const LOCATIONS = {
             {label:"Republic (bank transfer)", units:2,   amount:805.00,   type:"online"}
           ]
         }
+      },
+      "2026-08":{
+        label:"August 2026", basis:"Rent-roll pull · 4 Aug 2026",
+        totalUnits:461, occupied:459, vacant:2, physOcc:99.6, econOcc:98.5,
+        grossPot:120422, occRent:118617, totalArea:28628, occArea:28547,
+        revpaf:4.14, revOccSqft:4.16, avgRentUnit:258.43, movedIn:null, movedOut:null, net:null,
+        byType:[{t:"Indoor Storage",units:199,occ:199,pct:100.0},{t:"Drive-Up Storage",units:189,occ:188,pct:99.5},{t:"Climate Controlled",units:56,occ:56,pct:100.0},{t:"Mailbox",units:16,occ:15,pct:93.8},{t:"Mobile Storage",units:1,occ:1,pct:100.0}],
+        losMean:54.2, losMedian:39.7, losBands:{"<3 mo":20,"3–12 mo":64,"1–2 yr":69,"2–5 yr":130,"5 yr+":176},
+        corpUnits:106, indivUnits:353, corpPct:23.1, corpRent:33294, indivRent:85324, corpRentPct:28.1,
+        corpArea:85, indivArea:55, corpLos:68, indivLos:50.1, top10:4.5,
+        geoIndiv:{"St. Michael":86,"Christ Church":57,"St. James":45,"St. Thomas":22,"St. Philip":19,"St. George":15,"Other Barbados":30,"Overseas":50,"Unknown":29}, indivN:353,
+        balUnits:286, balPct:62.3, balTotal:88079, aging:{"Current / ahead":177,"1–30 days":258,"31–60 days":12,"61–90 days":7,"90+ days":5}, autopayPct:35.5,
+        agingNote:"<b>Basis:</b> pulled 4 Aug, three days into the August billing cycle — the 1–30 bucket is overwhelmingly rent billed 1 Aug and not yet paid, not arrears. The 31+ buckets are the comparable delinquency measure.",
+        age:{valid:290,pct:63,mean:48,median:51,min:20,max:87,bands:{"<25":39,"25–34":47,"35–44":28,"45–54":52,"55–64":71,"65+":53},female:264,male:185},
+        acquisition:{ channels:{"Phone":279,"Walk-in":59,"Email":24,"Web":7,"Not recorded":90}, recent:{n:84,"Phone":45,"Walk-in":19,"Email":8,"Web":1,"Not recorded":11} }
       }
     }
   },
@@ -626,6 +642,21 @@ const LOCATIONS = {
             {label:"Master Card",   units:5,   amount:1874.37,  type:"card"}
           ]
         }
+      },
+      "2026-08":{
+        label:"August 2026", basis:"Rent-roll pull · 4 Aug 2026",
+        totalUnits:265, occupied:264, vacant:0, unrentable:1, physOcc:99.6, econOcc:97.6,
+        grossPot:69607, occRent:67929, totalArea:17165, occArea:17125,
+        revpaf:3.96, revOccSqft:3.97, avgRentUnit:257.3, movedIn:null, movedOut:null, net:null,
+        byType:[{t:"Drive-Up Storage",units:188,occ:187,pct:99.5},{t:"Indoor Storage",units:75,occ:75,pct:100.0},{t:"Box Storage",units:2,occ:2,pct:100.0}],
+        losMean:39.5, losMedian:26.8, losBands:{"<3 mo":18,"3–12 mo":43,"1–2 yr":57,"2–5 yr":101,"5 yr+":45},
+        corpUnits:57, indivUnits:207, corpPct:21.6, corpRent:18510, indivRent:49419, corpRentPct:27.2,
+        corpArea:92, indivArea:57, corpLos:52, indivLos:36.1, top10:7.9,
+        geoIndiv:{"St. Michael":27,"Christ Church":94,"St. James":13,"St. Thomas":3,"St. Philip":20,"St. George":3,"Other Barbados":10,"Overseas":30,"Unknown":7}, indivN:207,
+        balUnits:156, balPct:59.1, balTotal:48199, aging:{"Current / ahead":108,"1–30 days":138,"31–60 days":9,"61–90 days":6,"90+ days":3}, autopayPct:29.9,
+        agingNote:"<b>Basis:</b> pulled 4 Aug, three days into the August billing cycle — the 1–30 bucket is overwhelmingly rent billed 1 Aug and not yet paid, not arrears. The 31+ buckets are the comparable delinquency measure.",
+        age:{valid:234,pct:89,mean:53,median:55,min:19,max:94,bands:{"<25":9,"25–34":13,"35–44":37,"45–54":56,"55–64":80,"65+":39},female:145,male:114},
+        acquisition:{ channels:{"Phone":117,"Walk-in":82,"Email":14,"Web":6,"Not recorded":45}, recent:{n:61,"Phone":38,"Walk-in":10,"Email":9,"Web":0,"Not recorded":4} }
       }
     }
   },
@@ -661,6 +692,21 @@ const LOCATIONS = {
             {label:"Republic (bank transfer)", units:3,  amount:1405.00,  type:"online"}
           ]
         }
+      },
+      "2026-08":{
+        label:"August 2026", basis:"Rent-roll pull · 4 Aug 2026",
+        totalUnits:282, occupied:266, vacant:0, unrentable:16, physOcc:94.3, econOcc:93.2,
+        grossPot:97875, occRent:91200, totalArea:27928, occArea:26568,
+        revpaf:3.27, revOccSqft:3.43, avgRentUnit:342.86, movedIn:null, movedOut:null, net:null,
+        byType:[{t:"10x8",units:129,occ:114,pct:88.4},{t:"20x8",units:79,occ:78,pct:98.7},{t:"5x8",units:49,occ:49,pct:100.0},{t:"8x8",units:8,occ:8,pct:100.0},{t:"40x8",units:6,occ:6,pct:100.0},{t:"Other",units:5,occ:5,pct:100.0},{t:"8x10",units:4,occ:4,pct:100.0},{t:"8x16",units:2,occ:2,pct:100.0}],
+        losMean:18.3, losMedian:13.9, losBands:{"<3 mo":61,"3–12 mo":59,"1–2 yr":66,"2–5 yr":79,"5 yr+":1},
+        corpUnits:66, indivUnits:200, corpPct:24.8, corpRent:25128, indivRent:66072, corpRentPct:27.6,
+        corpArea:123, indivArea:92, corpLos:21.9, indivLos:17.1, top10:7.4,
+        geoIndiv:{"St. Michael":50,"Christ Church":24,"St. James":36,"St. Thomas":15,"St. Philip":13,"St. George":16,"Other Barbados":18,"Overseas":23,"Unknown":5}, indivN:200,
+        balUnits:176, balPct:66.2, balTotal:67962, aging:{"Current / ahead":91,"1–30 days":159,"31–60 days":11,"61–90 days":2,"90+ days":3}, autopayPct:28.6,
+        agingNote:"<b>Basis:</b> pulled 4 Aug, three days into the August billing cycle — the 1–30 bucket is overwhelmingly rent billed 1 Aug and not yet paid, not arrears. The 31+ buckets are the comparable delinquency measure.",
+        age:{valid:128,pct:48,mean:32,median:23,min:20,max:77,bands:{"<25":76,"25–34":8,"35–44":16,"45–54":8,"55–64":12,"65+":8},female:145,male:110},
+        acquisition:{ channels:{"Phone":217,"Walk-in":6,"Email":11,"Web":4,"Not recorded":28}, recent:{n:120,"Phone":101,"Walk-in":4,"Email":8,"Web":0,"Not recorded":7} }
       }
     }
   }
@@ -729,11 +775,11 @@ const CUSTOMER_PROFILE = {
 
 /* ===== Delinquency watch — rolling 31+ days-past-due tracker (update on each rent-roll pull) ===== */
 const DELINQUENCY = {
-  asof:"latest pull · Jul 2026", prev:45, occupied:973,
+  asof:"rent-roll pull · 4 Aug 2026", prev:44, occupied:989,
   sites:[
-    {name:"Central", n:18, severe:9, amt:12531},
-    {name:"South",   n:15, severe:9, amt:9176},
-    {name:"Lears",   n:11, severe:6, amt:9078}
+    {name:"Central", n:24, severe:12, amt:18050},
+    {name:"South",   n:18, severe:9,  amt:11293},
+    {name:"Lears",   n:16, severe:5,  amt:11227}
   ]
 };
 
@@ -766,6 +812,17 @@ function latestSnapshot(L){
   const keys = Object.keys(L.months).sort();
   const key = keys[keys.length-1];
   return { key, data:L.months[key] };
+}
+
+/* Latest month that actually carries `field`. Occupancy comes from the newest rent-roll
+   pull; receipts- and marketing-derived blocks fall back to the newest month that has
+   them, so a rent-roll-only refresh never blanks those sections. */
+function latestWith(L, field){
+  const keys = Object.keys(L.months).sort();
+  for(let i=keys.length-1; i>=0; i--){
+    if(L.months[keys[i]][field]) return { key:keys[i], data:L.months[keys[i]] };
+  }
+  return null;
 }
 
 function portfolioSummary(){
@@ -879,12 +936,14 @@ function renderPortfolioPayments(){
   let totalOccupied = 0;
   const siteSummaries = [];
 
+  let pmPeriod = '';
   Object.entries(LOCATIONS).forEach(([key, L]) => {
-    const snap = latestSnapshot(L);
+    const snap = latestWith(L, 'paymentMethods');
+    if(!snap) return;
     const d = snap.data;
     totalOccupied += d.occupied;
-    if(!d.paymentMethods) return;
     const pm = d.paymentMethods;
+    pmPeriod = pm.period;
     const siteTotal = pm.methods.reduce((s,m)=>s+m.units,0);
     const siteAmt   = pm.methods.reduce((s,m)=>s+m.amount,0);
     const siteAP    = pm.methods.filter(m=>m.type==='autopay').reduce((s,m)=>s+m.units,0);
@@ -914,7 +973,9 @@ function renderPortfolioPayments(){
   let paidCurrent = 0, prepaid = 0, offCycle = 0, behind = 0, behindNone = 0, severeUnits = 0, overdueAmt = 0;
   const collBySite = [];
   Object.entries(LOCATIONS).forEach(([key, L]) => {
-    const d = latestSnapshot(L).data;
+    const cSnap = latestWith(L, 'collStatus');
+    if(!cSnap) return;
+    const d = cSnap.data;
     const cs = d.collStatus || {};
     const ag = d.aging || {};
     const beh = (d.balUnits != null) ? d.balUnits : 0;
@@ -969,7 +1030,7 @@ function renderPortfolioPayments(){
 
     <div class="ppm-grid">
       <div class="card">
-        <h3><span class="dot"></span>Payment method breakdown — portfolio (June 2026)</h3>
+        <h3><span class="dot"></span>Payment method breakdown — portfolio (${pmPeriod})</h3>
         <table>
           <thead><tr><th>Method</th><th>Type</th><th class="r">Units</th><th class="r">% occupied</th><th class="r">Amount / mo</th><th class="r">% of revenue</th></tr></thead>
           <tbody>${aggArr.map(m=>`
@@ -1044,7 +1105,7 @@ function renderPortfolioPayments(){
       </div>
     </div>
     <div class="card" style="margin:16px 0">
-      <h3><span class="dot"></span>Collections status — where the ${totalOccupied} occupied units stand (June 2026 · arrears as of 2 Jul)</h3>
+      <h3><span class="dot"></span>Collections status — where the ${totalOccupied} occupied units stand (${pmPeriod} · latest receipts export)</h3>
       <div style="display:flex;height:30px;border-radius:8px;overflow:hidden;margin:6px 0 14px">
         ${seg.map(s=>`<div title="${s.label}: ${s.units}" style="width:${100*s.units/totalOccupied}%;background:${s.color};min-width:2px"></div>`).join('')}
       </div>
@@ -1096,7 +1157,8 @@ function renderAcquisition(){
   const agg = {}, recAgg = {}; ORDER.forEach(k=>{agg[k]=0;recAgg[k]=0;});
   let recN = 0; const bySite = [];
   Object.entries(LOCATIONS).forEach(([key,L])=>{
-    const a = latestSnapshot(L).data.acquisition; if(!a) return;
+    const aSnap = latestWith(L, 'acquisition'); if(!aSnap) return;
+    const a = aSnap.data.acquisition;
     const ch = a.channels||{}, r = a.recent||{};
     const tot = ORDER.reduce((s,k)=>s+(ch[k]||0),0);
     ORDER.forEach(k=>{ agg[k]+=(ch[k]||0); recAgg[k]+=(r[k]||0); });
@@ -1120,13 +1182,15 @@ function renderAcquisition(){
   const mAgg = {}, mVal = {}; MKT_ORDER.forEach(k=>{mAgg[k]=0;mVal[k]=0;});
   const mBySite = [];
   Object.entries(LOCATIONS).forEach(([key,L])=>{
-    const m = latestSnapshot(L).data.marketing; if(!m) return;
-    const mv = latestSnapshot(L).data.marketingValue || {};
+    const mSnap = latestWith(L, 'marketing'); if(!mSnap) return;
+    const m = mSnap.data.marketing;
+    const mv = mSnap.data.marketingValue || {};
     const tot = MKT_ORDER.reduce((s,k)=>s+(m[k]||0),0);
     MKT_ORDER.forEach(k=>{mAgg[k]+=(m[k]||0); mVal[k]+=(mv[k]||0);});
-    mBySite.push({ name:L.name.replace('Store All ',''), total:tot, m });
+    mBySite.push({ name:L.name.replace('Store All ',''), total:tot, m, period:mSnap.data.label });
   });
   const mTotal = MKT_ORDER.reduce((s,k)=>s+mAgg[k],0) || 1;
+  const mPeriod = mBySite.length ? mBySite[0].period : '';
   const mValTotal = MKT_ORDER.reduce((s,k)=>s+mVal[k],0) || 1;
   const mpct = n => (100*n/mTotal).toFixed(1);
   const foundOnline = mAgg["Internet"]+mAgg["Facebook"];
@@ -1165,7 +1229,7 @@ function renderAcquisition(){
 
   el.innerHTML = `
     <div class="card" style="margin-bottom:16px">
-      <h3><span class="dot"></span>How customers found us — marketing source (${mTotal} occupied tenants)</h3>
+      <h3><span class="dot"></span>How customers found us — marketing source (${mTotal} occupied tenants &middot; ${mPeriod})</h3>
       <div style="display:flex;height:30px;border-radius:8px;overflow:hidden;margin:6px 0 14px">
         ${MKT_ORDER.map(k=>`<div title="${k}: ${mAgg[k]} (${mpct(mAgg[k])}%)" style="width:${100*mAgg[k]/mTotal}%;background:${mktColor[k]};min-width:2px"></div>`).join('')}
       </div>
@@ -1539,13 +1603,17 @@ function render(){
     const rentable = CUR.totalUnits - CUR.unrentable;
     const rentableOcc = (100*CUR.occupied/rentable).toFixed(1);
     unNote.style.display = '';
-    unNote.innerHTML = `<b>${CUR.unrentable} units currently unrentable</b> (out of service) — excluded from rentable stock. Of the ${rentable} rentable units, ${CUR.occupied} are filled (<b>${rentableOcc}%</b>). As of 2 Jul 2026.`;
+    unNote.innerHTML = `<b>${CUR.unrentable} units currently unrentable</b> (out of service) — excluded from rentable stock. Of the ${rentable} rentable units, ${CUR.occupied} are filled (<b>${rentableOcc}%</b>). ${CUR.basis}.`;
   } else {
     unNote.style.display = 'none';
   }
-  document.getElementById('mi').textContent = CUR.movedIn;
-  document.getElementById('mo').textContent = CUR.movedOut;
-  document.getElementById('net').innerHTML = (CUR.net>=0?'+':'')+CUR.net;
+  const hasMove = CUR.movedIn != null && CUR.movedOut != null;
+  document.getElementById('mi').textContent = hasMove ? CUR.movedIn : '—';
+  document.getElementById('mo').textContent = hasMove ? CUR.movedOut : '—';
+  document.getElementById('net').innerHTML = hasMove ? ((CUR.net>=0?'+':'')+CUR.net) : '—';
+  document.getElementById('moveNote').textContent = hasMove
+    ? 'At ~99% occupancy, a small negative net is churn at the ceiling, not falling demand.'
+    : 'Move-in / move-out activity isn\'t in a rent-roll snapshot — it needs the Rental Activity (move-in/move-out) report for the period.';
   document.getElementById('typebars').innerHTML = CUR.byType.map(r=>{
     const pill = r.pct>=99.9?'<span class="pill full">full</span>':'<span class="pill near">'+r.pct.toFixed(0)+'%</span>';
     return `<div class="bar-row"><span class="lab">${r.t.replace(' Storage','')}</span><div class="track"><div class="fill teal" style="width:${r.pct}%"></div></div><span class="num">${pill}</span></div>`;
@@ -1554,7 +1622,7 @@ function render(){
   document.getElementById('typeNote').textContent = (vacancyDrivers.length
     ? 'Vacancy is concentrated in ' + vacancyDrivers.slice(0,2).map(r => `${r.t.replace(' Storage','')} (${r.units-r.occ})`).join(' and ') + '.'
     : 'All displayed unit groups are full.')
-    + (CUR.unrentable ? ` Note: ${CUR.unrentable} of these units are out of service (unrentable) as of 2 Jul — only ${CUR.vacant} rentable unit${CUR.vacant===1?' is':'s are'} actually vacant.` : '');
+    + (CUR.unrentable ? ` Note: ${CUR.unrentable} of these units are out of service (unrentable) — only ${CUR.vacant} rentable unit${CUR.vacant===1?' is':'s are'} actually vacant.` : '');
 
   /* tenure */
   document.getElementById('losmean').innerHTML = CUR.losMean.toFixed(0)+'<small> mo &middot; '+(CUR.losMean/12).toFixed(1)+' yr</small>';
@@ -1611,6 +1679,9 @@ function render(){
   }).join('');
   const late60 = CUR.aging['61–90 days']+CUR.aging['90+ days'];
   document.getElementById('ageNote').textContent = (CUR.aging['31–60 days']+late60)+' accounts meaningfully late (60+ days: '+late60+').';
+  const agBasis = document.getElementById('agingBasisNote');
+  if(CUR.agingNote){ agBasis.style.display=''; agBasis.innerHTML = CUR.agingNote; }
+  else { agBasis.style.display='none'; }
   document.getElementById('autopay').innerHTML = CUR.autopayPct.toFixed(0)+'<small>%</small>';
   renderPaymentMethods(CUR);
 
