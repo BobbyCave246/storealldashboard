@@ -884,21 +884,43 @@ const DELINQUENCY = {
 
 /* Latest reading, plus the most recent earlier pull taken at the same point in the billing
    cycle. `prev` is null when nothing comparable exists yet — callers must handle that and
-   must not fall back to the previous pull regardless of cycleDay. */
+   must not fall back to the previous pull regardless of basis.
+
+   Comparability is keyed on `basisKey`, not on cycleDay directly, because month-end
+   closes land on different cycle days: 30 Jun is day 30, 31 Jul is day 31, 28 Feb is
+   day 28. They are all the same measurement — a full cycle collected — so they compare
+   with each other. Mid-cycle pulls only compare when the day matches exactly. */
+function isMonthEnd(iso){
+  const d = new Date(iso+"T00:00:00Z");
+  return new Date(Date.UTC(d.getUTCFullYear(), d.getUTCMonth()+1, 0)).getUTCDate() === d.getUTCDate();
+}
+function basisKey(p){ return isMonthEnd(p.asof) ? "month-end" : "day-"+p.cycleDay; }
+
+/* The headline tracks the latest MONTH-END close, not simply the latest pull. A mid-cycle
+   pull cannot measure genuine delinquency — its ladder is shifted — so headlining it would
+   put a number on the card that the card's own note tells you not to trust. Mid-cycle pulls
+   stay in the history table, flagged, as reference points. Falls back to the latest pull of
+   any basis only when no month-end close exists at all. */
 function delinquencyModel(){
   const pulls = [...DELINQUENCY.pulls].sort((a,b)=>a.asof<b.asof?-1:1);
-  const cur = pulls[pulls.length-1];
-  const prev = pulls.slice(0,-1).reverse().find(p=>p.cycleDay===cur.cycleDay) || null;
+  const monthEnds = pulls.filter(p=>isMonthEnd(p.asof));
+  const cur = monthEnds.length ? monthEnds[monthEnds.length-1] : pulls[pulls.length-1];
+  const curKey = basisKey(cur);
+  const earlier = pulls.slice(0, pulls.indexOf(cur));
+  const prev = earlier.reverse().find(p=>basisKey(p)===curKey) || null;
+  const later = pulls.slice(pulls.indexOf(cur)+1);
+  const liver = later.length ? later[later.length-1] : null;  // newer, non-comparable read
   const tot = p => p.sites.reduce((s,x)=>s+x.n,0);
   const sev = p => p.sites.reduce((s,x)=>s+x.severe,0);
   // null if any site is missing its aged-dollar split — a partial sum would understate.
   const amt = p => p.sites.some(x=>x.amt==null) ? null : p.sites.reduce((s,x)=>s+x.amt,0);
   return {
-    pulls, cur, prev,
+    pulls, cur, prev, liver,
+    liverTotal: liver?tot(liver):null,
     total:tot(cur), severe:sev(cur), amount:amt(cur),
     prevTotal: prev?tot(prev):null,
     delta: prev?tot(cur)-tot(prev):null,
-    incomparable: prev ? null : pulls.slice(0,-1).reverse()[0] || null
+    incomparable: prev ? null : earlier[0] || null
   };
 }
 
@@ -1322,10 +1344,11 @@ function renderPortfolioPayments(){
     : `no comparable prior pull${DQ.incomparable?` — ${DQ.incomparable.label} was taken at a different point in the cycle`:''}`;
   const dqPulls = DQ.pulls.map(p=>{
     const t = p.sites.reduce((s,x)=>s+x.n,0), s60 = p.sites.reduce((s,x)=>s+x.severe,0);
-    const isCur = p===DQ.cur, comp = p.cycleDay===DQ.cur.cycleDay;
-    const tag = isCur ? '<span class="pill full">current pull &middot; day '+p.cycleDay+'</span>'
-              : comp  ? '<span class="pill near">comparable &middot; day '+p.cycleDay+'</span>'
-                      : '<span class="pill">day '+p.cycleDay+' of cycle — not comparable</span>';
+    const isCur = p===DQ.cur, comp = basisKey(p)===basisKey(DQ.cur);
+    const basis = isMonthEnd(p.asof) ? 'month-end' : 'day '+p.cycleDay+' of cycle';
+    const tag = isCur ? '<span class="pill full">current pull &middot; '+basis+'</span>'
+              : comp  ? '<span class="pill near">comparable &middot; '+basis+'</span>'
+                      : '<span class="pill">'+basis+' — not comparable</span>';
     return `<tr${comp?'':' style="color:var(--muted)"'}><td>${p.label}</td><td>${p.basis}</td><td class="r mono">${t}</td><td class="r mono">${s60}</td><td class="r mono">${(100*t/p.occupied).toFixed(1)}%</td><td>${tag}</td></tr>`;
   }).join('');
 
@@ -1473,7 +1496,7 @@ function renderPortfolioPayments(){
         <thead><tr><th>Pull</th><th>Basis</th><th class="r">31+</th><th class="r">60+</th><th class="r">% occupied</th><th>Comparability</th></tr></thead>
         <tbody>${dqPulls}</tbody>
       </table>
-      <div class="note"><b>Read the pull history with the cycle day, not just the date.</b> Rent bills on the 1st, so the aging ladder is measured from that date and slides a full billing period between a month-end pull and one taken a few days into the next month — rent that was 29 days old (1–30) becomes 34 days old (31–60) with no tenant paying any later. That is why 31+ reads 26 at the 30 Jun close and 58 at the 4 Aug pull across all three sites simultaneously: <b>the two are not comparable, and the jump is a measurement artifact rather than deterioration.</b> The headline movement above is therefore blank until a second month-end pull exists. Standardising on month-end will build a comparable run; expect the next such pull to read far below 58 as the artifact unwinds.</div>
+      <div class="note"><b>The headline tracks the latest month-end close, not the latest pull.</b> Rent bills on the 1st, so the aging ladder is measured from that date and slides a full billing period between a month-end pull and one taken a few days into the next month — rent that was 29 days old (1–30) becomes 34 days old (31–60) with no tenant paying any later. Only closes taken at the same point in the cycle can be compared, which is why mid-cycle pulls appear greyed in the history above and never drive the headline.${DQ.liver?` The <b>${DQ.liver.label}</b> pull is more recent but mid-cycle: its ${DQ.liverTotal} accounts at 31+ are inflated by that shift and are not a delinquency reading.`:''}${DQ.prev?'':' Movement is blank until a second month-end close exists — standardising on month-end will build a comparable run.'}</div>
     </div>
 
     ${renderPaymentTrend()}`;
