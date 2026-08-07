@@ -847,15 +847,60 @@ const CUSTOMER_PROFILE = {
   ]
 };
 
-/* ===== Delinquency watch — rolling 31+ days-past-due tracker (update on each rent-roll pull) ===== */
+/* ===== Delinquency watch — dated series of 31+ days-past-due readings, one entry per
+   rent-roll pull. Newest last; add to the end.
+
+   `cycleDay` is what makes readings comparable, and it is the easy thing to get wrong.
+   Rent bills on the 1st, so the whole aging ladder is measured from that date: a pull
+   taken at month-end sits ~30 days into the cycle it is closing, while a pull taken on
+   the 4th of the next month sits 4 days into a new one. Between those two the entire
+   ladder slides by a full billing period — rent that was 29 days old (1–30) becomes 34
+   days old (31–60) without a single tenant paying any later. The 30 Jun and 4 Aug pulls
+   below differ exactly that way, which is why 31+ appears to jump 26 → 58 across all
+   three sites at once. It is a measurement artifact, not deterioration.
+
+   So: only compare pulls with a matching cycleDay. The card enforces this and shows no
+   delta rather than a misleading one. Standardise future pulls on month-end (cycleDay 30)
+   to build a comparable run.
+
+   `amt` is the balance 31+ days past due. Leave it null when the pull didn't capture the
+   aged dollar split — the card degrades to unit counts rather than showing a wrong total. ===== */
 const DELINQUENCY = {
-  asof:"rent-roll pull · 4 Aug 2026", prev:44, occupied:989,
-  sites:[
-    {name:"Central", n:24, severe:12, amt:18050},
-    {name:"South",   n:18, severe:9,  amt:11293},
-    {name:"Lears",   n:16, severe:5,  amt:11227}
+  pulls:[
+    { asof:"2026-06-30", label:"30 Jun 2026", basis:"month-end close", cycleDay:30, occupied:976,
+      sites:[
+        {name:"Central", n:10, severe:4, amt:null},
+        {name:"South",   n:10, severe:3, amt:null},
+        {name:"Lears",   n:6,  severe:3, amt:null}
+      ] },
+    { asof:"2026-08-04", label:"4 Aug 2026", basis:"rent-roll pull, 4 days into the Aug cycle", cycleDay:4, occupied:989,
+      sites:[
+        {name:"Central", n:24, severe:12, amt:18050},
+        {name:"South",   n:18, severe:9,  amt:11293},
+        {name:"Lears",   n:16, severe:5,  amt:11227}
+      ] }
   ]
 };
+
+/* Latest reading, plus the most recent earlier pull taken at the same point in the billing
+   cycle. `prev` is null when nothing comparable exists yet — callers must handle that and
+   must not fall back to the previous pull regardless of cycleDay. */
+function delinquencyModel(){
+  const pulls = [...DELINQUENCY.pulls].sort((a,b)=>a.asof<b.asof?-1:1);
+  const cur = pulls[pulls.length-1];
+  const prev = pulls.slice(0,-1).reverse().find(p=>p.cycleDay===cur.cycleDay) || null;
+  const tot = p => p.sites.reduce((s,x)=>s+x.n,0);
+  const sev = p => p.sites.reduce((s,x)=>s+x.severe,0);
+  // null if any site is missing its aged-dollar split — a partial sum would understate.
+  const amt = p => p.sites.some(x=>x.amt==null) ? null : p.sites.reduce((s,x)=>s+x.amt,0);
+  return {
+    pulls, cur, prev,
+    total:tot(cur), severe:sev(cur), amount:amt(cur),
+    prevTotal: prev?tot(prev):null,
+    delta: prev?tot(cur)-tot(prev):null,
+    incomparable: prev ? null : pulls.slice(0,-1).reverse()[0] || null
+  };
+}
 
 const bbd = n => "$"+Math.round(n).toLocaleString();
 const bbdk = n => "$"+(n/1000).toFixed(0)+"k";
@@ -1268,12 +1313,21 @@ function renderPortfolioPayments(){
     { label:'Behind (overdue)',        units:behind,      color:'var(--accent)' }
   ];
 
-  const DQ = DELINQUENCY;
-  const dqTotal = DQ.sites.reduce((s,x)=>s+x.n,0);
-  const dqSevere = DQ.sites.reduce((s,x)=>s+x.severe,0);
-  const dqAmt = DQ.sites.reduce((s,x)=>s+x.amt,0);
-  const dqDelta = dqTotal - DQ.prev;
-  const dqRows = DQ.sites.map(x=>`<tr><td style="font-weight:600">${x.name}</td><td class="r mono">${x.n}</td><td class="r mono">${x.severe}</td><td class="r mono">${bbd(x.amt)}</td></tr>`).join('');
+  const DQ = delinquencyModel();
+  const dqTotal = DQ.total, dqSevere = DQ.severe, dqAmt = DQ.amount;
+  const dqRows = DQ.cur.sites.map(x=>`<tr><td style="font-weight:600">${x.name}</td><td class="r mono">${x.n}</td><td class="r mono">${x.severe}</td><td class="r mono">${x.amt==null?'<span style="color:var(--muted)">n/a</span>':bbd(x.amt)}</td></tr>`).join('');
+  // Movement only means something against a pull taken at the same point in the cycle.
+  const dqMove = DQ.prev
+    ? `${DQ.delta===0?'no change vs':(DQ.delta>0?'▲ '+DQ.delta+' vs':'▼ '+Math.abs(DQ.delta)+' vs')} ${DQ.prev.label} (${DQ.prevTotal})`
+    : `no comparable prior pull${DQ.incomparable?` — ${DQ.incomparable.label} was taken at a different point in the cycle`:''}`;
+  const dqPulls = DQ.pulls.map(p=>{
+    const t = p.sites.reduce((s,x)=>s+x.n,0), s60 = p.sites.reduce((s,x)=>s+x.severe,0);
+    const isCur = p===DQ.cur, comp = p.cycleDay===DQ.cur.cycleDay;
+    const tag = isCur ? '<span class="pill full">current pull &middot; day '+p.cycleDay+'</span>'
+              : comp  ? '<span class="pill near">comparable &middot; day '+p.cycleDay+'</span>'
+                      : '<span class="pill">day '+p.cycleDay+' of cycle — not comparable</span>';
+    return `<tr${comp?'':' style="color:var(--muted)"'}><td>${p.label}</td><td>${p.basis}</td><td class="r mono">${t}</td><td class="r mono">${s60}</td><td class="r mono">${(100*t/p.occupied).toFixed(1)}%</td><td>${tag}</td></tr>`;
+  }).join('');
 
   el.innerHTML = `
     <div class="ppm-stat-row">
@@ -1404,18 +1458,22 @@ function renderPortfolioPayments(){
     </div>
 
     <div class="card" style="margin-bottom:0">
-      <h3><span class="dot"></span>Delinquency watch — genuinely overdue (31+ days) &middot; ${DQ.asof}</h3>
+      <h3><span class="dot"></span>Delinquency watch — genuinely overdue (31+ days) &middot; ${DQ.cur.label}</h3>
       <div class="ppm-stat-row">
-        <div class="ppm-stat"><div class="k">Accounts 31+ days late</div><div class="v">${dqTotal}<small> of ${DQ.occupied}</small></div><div class="d">${dqDelta===0?'no change vs':(dqDelta>0?'▲ '+dqDelta+' vs':'▼ '+Math.abs(dqDelta)+' vs')} previous check (${DQ.prev})</div></div>
-        <div class="ppm-stat"><div class="k">Seriously late (60+ days)</div><div class="v">${dqSevere}</div><div class="d">${(100*dqSevere/DQ.occupied).toFixed(1)}% of occupied — genuine delinquency</div></div>
-        <div class="ppm-stat"><div class="k">Overdue balance</div><div class="v" style="font-size:20px">${bbd(dqAmt)}</div><div class="d">rent 31+ days past due</div></div>
-        <div class="ppm-stat"><div class="k">Share of occupied</div><div class="v">${(100*dqTotal/DQ.occupied).toFixed(1)}<small>%</small></div><div class="d">${dqTotal} of ${DQ.occupied} units</div></div>
+        <div class="ppm-stat"><div class="k">Accounts 31+ days late</div><div class="v">${dqTotal}<small> of ${DQ.cur.occupied}</small></div><div class="d">${dqMove}</div></div>
+        <div class="ppm-stat"><div class="k">Seriously late (60+ days)</div><div class="v">${dqSevere}</div><div class="d">${(100*dqSevere/DQ.cur.occupied).toFixed(1)}% of occupied — genuine delinquency</div></div>
+        <div class="ppm-stat"><div class="k">Overdue balance</div><div class="v" style="font-size:20px">${dqAmt==null?'<span style="color:var(--muted);font-size:15px">not captured</span>':bbd(dqAmt)}</div><div class="d">rent 31+ days past due</div></div>
+        <div class="ppm-stat"><div class="k">Share of occupied</div><div class="v">${(100*dqTotal/DQ.cur.occupied).toFixed(1)}<small>%</small></div><div class="d">${dqTotal} of ${DQ.cur.occupied} units</div></div>
       </div>
       <table style="margin-top:4px">
         <thead><tr><th>Site</th><th class="r">31+ days</th><th class="r">60+ days</th><th class="r">Overdue $</th></tr></thead>
         <tbody>${dqRows}</tbody>
       </table>
-      <div class="note"><b>31+ days past due</b> excludes current-cycle rent, so it's comparable pull-to-pull regardless of the day of the month (the raw "any days late" count balloons early in the month). Updated from the latest rent-roll pull — a rolling tracker, separate from the June month-end snapshot below.</div>
+      <table style="margin-top:14px">
+        <thead><tr><th>Pull</th><th>Basis</th><th class="r">31+</th><th class="r">60+</th><th class="r">% occupied</th><th>Comparability</th></tr></thead>
+        <tbody>${dqPulls}</tbody>
+      </table>
+      <div class="note"><b>Read the pull history with the cycle day, not just the date.</b> Rent bills on the 1st, so the aging ladder is measured from that date and slides a full billing period between a month-end pull and one taken a few days into the next month — rent that was 29 days old (1–30) becomes 34 days old (31–60) with no tenant paying any later. That is why 31+ reads 26 at the 30 Jun close and 58 at the 4 Aug pull across all three sites simultaneously: <b>the two are not comparable, and the jump is a measurement artifact rather than deterioration.</b> The headline movement above is therefore blank until a second month-end pull exists. Standardising on month-end will build a comparable run; expect the next such pull to read far below 58 as the artifact unwinds.</div>
     </div>
 
     ${renderPaymentTrend()}`;
