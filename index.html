@@ -257,6 +257,29 @@ details.section-toggle[open]>summary .sec-num{background:var(--accent);color:#ff
 .ai-spinner{width:16px;height:16px;border:2px solid var(--line);border-top-color:var(--accent);border-radius:50%;animation:aispin .7s linear infinite}
 @keyframes aispin{to{transform:rotate(360deg)}}
 .ai-err{color:var(--bad);font-size:14px}
+
+/* ---- CSV export (header) ---- */
+/* The header clips its decorative gradients, which would also clip this menu —
+   release the clip only while the menu is open. */
+header:has(.csv-menu.open){overflow:visible}
+.mb-export{margin-left:auto;position:relative;display:flex;align-items:flex-start}
+.csv-btn{font-family:'Montserrat';font-weight:700;font-size:12.5px;color:#fff;cursor:pointer;
+  background:rgba(255,255,255,.12);border:1px solid rgba(255,255,255,.28);padding:9px 15px;transition:all .15s}
+.csv-btn:hover{background:rgba(255,255,255,.24);border-color:rgba(255,255,255,.5)}
+.csv-btn.main{border-radius:9px 0 0 9px;border-right-width:0}
+.csv-btn.caret{border-radius:0 9px 9px 0;padding:9px 11px}
+.csv-menu{position:absolute;top:calc(100% + 8px);right:0;z-index:60;min-width:300px;display:none;
+  background:var(--card);border:1px solid var(--line);border-radius:12px;padding:6px;
+  box-shadow:0 22px 44px -22px rgba(0,0,0,.55)}
+.csv-menu.open{display:block}
+.csv-menu button{display:block;width:100%;text-align:left;background:none;border:0;cursor:pointer;
+  padding:9px 12px;border-radius:8px;font-family:'Montserrat';font-weight:700;font-size:12.5px;color:var(--navy2)}
+.csv-menu button:hover{background:var(--paper2);color:var(--accent)}
+.csv-menu small{display:block;font-family:'Source Sans 3',Arial,sans-serif;font-weight:400;
+  font-size:11.5px;color:var(--muted);margin-top:2px;line-height:1.35}
+.csv-menu button:hover small{color:var(--muted)}
+.csv-sep{border-top:1px solid var(--line);margin:5px 8px}
+@media(max-width:760px){.mb-export{margin-left:0}.csv-menu{right:auto;left:0}}
 </style>
 </head>
 <body>
@@ -280,6 +303,13 @@ details.section-toggle[open]>summary .sec-num{background:var(--accent);color:#ff
       <div>Total units<b id="portfolioHeaderUnits">985</b></div>
       <div>Sites covered<b>Central · South · Lears</b></div>
       <div>Data source<b>SiteLink rent roll + rental activity</b></div>
+      <div class="mb-export">
+        <button class="csv-btn main" type="button" onclick="runExport('revenue-summary')"
+                title="Download the revenue summary for every site and month">&#10515; Revenue CSV</button>
+        <button class="csv-btn caret" type="button" id="csvCaret" aria-haspopup="true" aria-expanded="false"
+                onclick="toggleCsvMenu(event)" title="Other exports">&#9662;</button>
+        <div class="csv-menu" id="csvMenu"></div>
+      </div>
     </div>
     <nav class="section-nav tabbar" id="sectionNav"></nav>
   </div>
@@ -788,6 +818,7 @@ const LOCATIONS = {
 /* ===== Payment trend (from SiteLink receipts, Jan–Jul 2026 — complete months for all sites).
    Occupied is the current (4 Aug) base, used as a fixed denominator across the series. ===== */
 const PAYMENT_TREND = {
+  year: 2026,
   months: ["Jan","Feb","Mar","Apr","May","Jun","Jul"],
   sites: {
     "Central": { occupied:459, autopay:[148,152,153,156,151,148,151], collections:[151228,155737,141049,150283,147142,146896,147819] },
@@ -2170,6 +2201,185 @@ function applySection(){
 function setSection(id){ STATE.section=id; applySection(); window.scrollTo({top:0,behavior:'smooth'}); }
 function setLoc(k){ STATE.loc=k; STATE.month=null; render(); applySection(); }
 function setMonth(mk){ STATE.month=mk; render(); applySection(); }
+
+/* ===== CSV EXPORT =====
+   Every analysis block that reduces to a table is downloadable. Revenue is the primary
+   case and gets the one-click button: the rent-roll summary, the receipts trend and the
+   tender mix are three different revenue questions, so they're three separate files
+   rather than one wide sheet nobody can pivot. */
+
+const csvCell = v => {
+  if(v === null || v === undefined) return '';
+  const s = String(v);
+  return /[",\r\n]/.test(s) ? '"'+s.replace(/"/g,'""')+'"' : s;
+};
+const csvJoin  = rows => rows.map(r => r.map(csvCell).join(',')).join('\r\n');
+/* Money and ratios are fixed to 2dp so Excel doesn't render 47447 as 4.74E+04. */
+const csv2 = n => (n === null || n === undefined || n === '') ? '' : Number(n).toFixed(2);
+const shortSite = n => n.replace('Store All ','');
+
+function downloadCSV(name, rows){
+  /* BOM keeps Excel on UTF-8 — site notes and band labels carry en-dashes. */
+  const blob = new Blob(['\uFEFF'+csvJoin(rows)], {type:'text/csv;charset=utf-8'});
+  const url  = URL.createObjectURL(blob);
+  const a = document.createElement('a');
+  a.href = url;
+  a.download = `storeall-${name}-${new Date().toISOString().slice(0,10)}.csv`;
+  document.body.appendChild(a); a.click(); a.remove();
+  setTimeout(()=>URL.revokeObjectURL(url), 4000);
+}
+
+/* Every site × month snapshot, oldest month first. */
+function snapshots(){
+  const out = [];
+  Object.values(LOCATIONS).forEach(L=>{
+    Object.keys(L.months).sort().forEach(mk=>
+      out.push({ site:shortSite(L.name), monthKey:mk, d:L.months[mk] }));
+  });
+  return out;
+}
+
+/* Wide sheets are built from objects so a month missing a block just leaves blanks
+   rather than shifting every column after it. */
+function recordsToRows(recs){
+  const cols = [];
+  recs.forEach(r => Object.keys(r).forEach(k => { if(!cols.includes(k)) cols.push(k); }));
+  return [cols, ...recs.map(r => cols.map(k => r[k] === undefined ? '' : r[k]))];
+}
+
+function csvRevenueSummary(){
+  const rows = [[
+    'Site','Month','Period','Basis','Occupied units','Total units','Physical occupancy %','Economic occupancy %',
+    'Gross potential rent (BBD)','Occupied rent (BBD)','Rent gap vs potential (BBD)','Avg rent per occupied unit (BBD)',
+    'RevPAF (BBD per sq ft)','Revenue per occupied sq ft (BBD)','Total area (sq ft)','Occupied area (sq ft)',
+    'Corporate units','Corporate rent (BBD)','Corporate % of rent','Individual units','Individual rent (BBD)',
+    'Individual % of rent','Top 10 accounts % of rent','Receipts period','Collections in window (BBD)','Units paying in window'
+  ]];
+  snapshots().forEach(({site,monthKey,d})=>{
+    const pm    = d.paymentMethods;
+    const coll  = pm ? pm.methods.reduce((s,m)=>s+m.amount,0) : null;
+    const payU  = pm ? pm.methods.reduce((s,m)=>s+m.units,0)  : null;
+    rows.push([
+      site, monthKey, d.label, d.basis, d.occupied, d.totalUnits, d.physOcc, d.econOcc,
+      csv2(d.grossPot), csv2(d.occRent), csv2(d.grossPot - d.occRent), csv2(d.avgRentUnit),
+      csv2(d.revpaf), csv2(d.revOccSqft), d.totalArea, d.occArea,
+      d.corpUnits, csv2(d.corpRent), d.corpRentPct, d.indivUnits, csv2(d.indivRent),
+      csv2(100 - d.corpRentPct), d.top10, pm ? pm.period : '', csv2(coll), payU === null ? '' : payU
+    ]);
+  });
+  return rows;
+}
+
+function csvCollectionsByMonth(){
+  const T = PAYMENT_TREND;
+  const rows = [['Site','Month','Collections (BBD)','Autopay units','Occupied units','Autopay % of occupied','Collections per occupied unit (BBD)']];
+  const line = (site,i,coll,ap,occ) =>
+    [site, T.months[i]+' '+T.year, csv2(coll), ap, occ, csv2(100*ap/occ), csv2(coll/occ)];
+  Object.entries(T.sites).forEach(([site,s])=>
+    T.months.forEach((m,i)=> rows.push(line(site, i, s.collections[i], s.autopay[i], s.occupied))));
+  /* Portfolio row per month, so the file totals without a pivot. */
+  const all = Object.values(T.sites);
+  T.months.forEach((m,i)=> rows.push(line('Portfolio', i,
+    all.reduce((t,s)=>t+s.collections[i],0),
+    all.reduce((t,s)=>t+s.autopay[i],0),
+    all.reduce((t,s)=>t+s.occupied,0))));
+  return rows;
+}
+
+function csvRevenueByMethod(){
+  const rows = [['Site','Month','Receipts period','Method','Type','Units paying','Amount (BBD)','% of site collections','% of occupied units']];
+  snapshots().forEach(({site,monthKey,d})=>{
+    if(!d.paymentMethods) return;
+    const ms    = d.paymentMethods.methods;
+    const total = ms.reduce((s,m)=>s+m.amount,0);
+    ms.forEach(m => rows.push([site, monthKey, d.paymentMethods.period, m.label, m.type, m.units,
+      csv2(m.amount), csv2(100*m.amount/total), csv2(100*m.units/d.occupied)]));
+  });
+  return rows;
+}
+
+function csvUnitTypes(){
+  const rows = [['Site','Month','Period','Unit type','Units','Occupied','Occupancy %']];
+  snapshots().forEach(({site,monthKey,d})=>
+    (d.byType||[]).forEach(t => rows.push([site, monthKey, d.label, t.t, t.units, t.occ, t.pct])));
+  return rows;
+}
+
+function csvSnapshotMetrics(){
+  return recordsToRows(snapshots().map(({site,monthKey,d})=>{
+    const r = {
+      'Site':site, 'Month':monthKey, 'Period':d.label, 'As of':d.asof, 'Basis':d.basis,
+      'Total units':d.totalUnits, 'Occupied units':d.occupied, 'Vacant units':d.vacant,
+      'Unrentable units':d.unrentable || 0,
+      'Physical occupancy %':d.physOcc, 'Economic occupancy %':d.econOcc,
+      'Gross potential rent (BBD)':csv2(d.grossPot), 'Occupied rent (BBD)':csv2(d.occRent),
+      'Avg rent per unit (BBD)':csv2(d.avgRentUnit), 'RevPAF (BBD per sq ft)':csv2(d.revpaf),
+      'Revenue per occupied sq ft (BBD)':csv2(d.revOccSqft),
+      'Total area (sq ft)':d.totalArea, 'Occupied area (sq ft)':d.occArea,
+      'Move-ins':d.movedIn, 'Move-outs':d.movedOut, 'Net absorption':d.net,
+      'Mean tenure (months)':d.losMean, 'Median tenure (months)':d.losMedian,
+      'Corporate units':d.corpUnits, 'Individual units':d.indivUnits, 'Corporate % of units':d.corpPct,
+      'Corporate rent (BBD)':csv2(d.corpRent), 'Individual rent (BBD)':csv2(d.indivRent),
+      'Corporate % of rent':d.corpRentPct,
+      'Avg corporate unit (sq ft)':d.corpArea, 'Avg individual unit (sq ft)':d.indivArea,
+      'Corporate mean tenure (months)':d.corpLos, 'Individual mean tenure (months)':d.indivLos,
+      'Top 10 accounts % of rent':d.top10,
+      'Accounts carrying a balance':d.balUnits, 'Balance carried (BBD)':csv2(d.balTotal),
+      'Autopay % of accounts':d.autopayPct
+    };
+    if(d.age){
+      r['Median tenant age']  = d.age.median;
+      r['Mean tenant age']    = d.age.mean;
+      r['Age coverage %']     = d.age.pct;
+      r['Tenants female']     = d.age.female;
+      r['Tenants male']       = d.age.male;
+      Object.entries(d.age.bands).forEach(([k,v]) => r['Age '+k] = v);
+    }
+    if(d.losBands) Object.entries(d.losBands).forEach(([k,v]) => r['Tenure '+k] = v);
+    if(d.aging)    Object.entries(d.aging).forEach(([k,v])    => r['Aging: '+k] = v);
+    if(d.geoIndiv) Object.entries(d.geoIndiv).forEach(([k,v]) => r['Individuals: '+k] = v);
+    return r;
+  }));
+}
+
+const CSV_EXPORTS = [
+  {id:'revenue-summary',     label:'Revenue summary',            hint:'Rent roll, yield and segment split — one row per site & month', build:csvRevenueSummary},
+  {id:'collections-by-month',label:'Collections by month',       hint:'Receipts trend by site, with autopay units and portfolio totals', build:csvCollectionsByMonth},
+  {id:'revenue-by-method',   label:'Revenue by payment method',  hint:'Tender mix — amount and units behind every method', build:csvRevenueByMethod},
+  {id:'occupancy-by-type',   label:'Occupancy by unit type',     hint:'Units, occupied and fill rate for each unit type', build:csvUnitTypes},
+  {id:'snapshot-metrics',    label:'Full analysis snapshot',     hint:'Every headline metric on the site pages, wide format', build:csvSnapshotMetrics}
+];
+
+function runExport(id){
+  const e = CSV_EXPORTS.find(x => x.id === id);
+  if(!e) return;
+  downloadCSV(e.id, e.build());
+  closeCsvMenu();
+}
+/* Browsers drop downloads fired in the same tick, so stagger the bundle. */
+function exportAllCSV(){
+  CSV_EXPORTS.forEach((e,i) => setTimeout(() => downloadCSV(e.id, e.build()), i*300));
+  closeCsvMenu();
+}
+
+function renderCsvMenu(){
+  document.getElementById('csvMenu').innerHTML =
+    CSV_EXPORTS.map(e => `<button type="button" onclick="runExport('${e.id}')">${e.label}<small>${e.hint}</small></button>`).join('')
+    + `<div class="csv-sep"></div><button type="button" onclick="exportAllCSV()">Download all ${CSV_EXPORTS.length}<small>One CSV per dataset</small></button>`;
+}
+function setCsvMenu(open){
+  document.getElementById('csvMenu').classList.toggle('open', open);
+  document.getElementById('csvCaret').setAttribute('aria-expanded', open ? 'true' : 'false');
+}
+function closeCsvMenu(){ setCsvMenu(false); }
+function toggleCsvMenu(ev){
+  ev.stopPropagation();
+  setCsvMenu(!document.getElementById('csvMenu').classList.contains('open'));
+}
+document.addEventListener('click', e => { if(!e.target.closest('.mb-export')) closeCsvMenu(); });
+document.addEventListener('keydown', e => { if(e.key === 'Escape') closeCsvMenu(); });
+
+renderCsvMenu();
 render();
 applySection();
 </script>
