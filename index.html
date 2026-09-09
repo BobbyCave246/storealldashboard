@@ -373,7 +373,7 @@ header:has(.csv-menu.open){overflow:visible}
   <div class="panel" data-section="lead-funnel">
   <section>
     <div class="sec-head"><div class="sec-num">↳</div><h2>Lead Funnel — inquiry → move-in conversion</h2>
-      <p>Where inquiries come from and how well they convert, across all three sites (SiteLink inquiry tracking · leads placed Jan–Jun 2026).</p></div>
+      <p>Where inquiries come from and how well they convert, across all three sites (SiteLink inquiry tracking · leads placed Jan–Jun 2026). <b>Not yet refreshed for July–August</b> — the rest of the dashboard is on the 8 Sep pull.</p></div>
     <div id="leadFunnelBody"></div>
   </section>
   </div>
@@ -382,7 +382,7 @@ header:has(.csv-menu.open){overflow:visible}
   <div class="panel" data-section="profile">
   <section>
     <div class="sec-head"><div class="sec-num">◎</div><h2>Customer Profile — who rents and why</h2>
-      <p>Decision drivers, catchment, use-case and seasonality across the active base (SiteLink Marketing Summary &middot; July 2026).</p></div>
+      <p>Decision drivers, catchment, use-case and seasonality across the active base (SiteLink Marketing Summary &middot; July 2026, base of 986). <b>Not yet refreshed</b> — the current base is 1,002.</p></div>
     <div id="profileBody"></div>
   </section>
   </div>
@@ -903,17 +903,19 @@ const PAYMENT_TREND = {
   }
 };
 
-/* ===== Acquisition channel × move-in year (portfolio occupied base; 2026 = Jan–Jun) ===== */
+/* ===== Acquisition channel × move-in year (portfolio occupied base at the 8 Sep pull;
+   2026 = Jan–Aug) ===== */
 const ACQ_COHORTS = {
   years:["≤2019","2020","2021","2022","2023","2024","2025","2026"],
+  partYear:"Jan–Aug",
   byChannel:{
-    "Phone":       [40,32,33,59,91,104,139,104],
-    "Walk-in":     [26,11,7,6,25,16,38,19],
-    "Email":       [3,4,1,1,3,5,15,15],
+    "Phone":       [40,32,33,59,88,98,130,141],
+    "Walk-in":     [26,11,6,6,25,15,34,29],
+    "Email":       [3,4,1,1,3,5,13,20],
     "Web":         [5,0,0,1,4,5,1,1],
-    "Not recorded":[72,3,5,15,10,22,25,13]
+    "Not recorded":[71,3,5,15,10,22,22,14]
   },
-  medianTenure:{ "Phone":2.5,"Walk-in":3.5,"Email":1.5,"Web":3.5,"Not recorded":4.5 }
+  medianTenure:{ "Phone":2.0,"Walk-in":2.6,"Email":1.0,"Web":3.5,"Not recorded":4.6 }
 };
 
 /* ===== Lead funnel (SiteLink inquiry tracking; leads placed Jan–Jun 2026) ===== */
@@ -1776,7 +1778,7 @@ function renderAcquisition(){
           </tr>`).join('')}
         </tbody>
       </table>
-      <div class="note">The base skews recent — <b>${Math.round(100*since2024/cohortTotal)}%</b> of current tenants moved in since 2024. Digital's share of move-ins climbed from <b>~2%</b> (2021–22) to <b>~${Math.round(100*yDig[CY.length-1]/yTot[CY.length-1])}%</b> in 2026 — but almost entirely via <b>email</b>; the website takes almost no <i>bookings</i> (most of its ${agg["Web"]} sign-ups predate 2020), even though its Pay Now feature now handles a meaningful share of rent collection. "Not recorded" is largely legacy — ${ACQ_COHORTS.byChannel["Not recorded"][0]} of ${notrec} blanks are pre-2020. Cohorts count the <b>currently-occupied</b> base only (past movers excluded), so earlier years are thinned by churn. <b>2026 is Jan–Jun only.</b></div>
+      <div class="note">The base skews recent — <b>${Math.round(100*since2024/cohortTotal)}%</b> of current tenants moved in since 2024. Digital's share of move-ins climbed from <b>~2%</b> (2021–22) to <b>~${Math.round(100*yDig[CY.length-1]/yTot[CY.length-1])}%</b> in 2026 — but almost entirely via <b>email</b>; the website takes almost no <i>bookings</i> — just <b>${agg["Web"]}</b> of the whole occupied base, ${ACQ_COHORTS.byChannel["Web"][ACQ_COHORTS.years.length-1]} of them this year — even though its Pay Now feature now handles a meaningful share of rent collection. "Not recorded" is largely legacy — ${ACQ_COHORTS.byChannel["Not recorded"][0]} of ${notrec} blanks are pre-2020. Cohorts count the <b>currently-occupied</b> base only (past movers excluded), so earlier years are thinned by churn. <b>${ACQ_COHORTS.years[ACQ_COHORTS.years.length-1]} is ${ACQ_COHORTS.partYear} only.</b></div>
     </div>`;
 }
 
