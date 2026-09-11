@@ -373,7 +373,7 @@ header:has(.csv-menu.open){overflow:visible}
   <div class="panel" data-section="lead-funnel">
   <section>
     <div class="sec-head"><div class="sec-num">↳</div><h2>Lead Funnel — inquiry → move-in conversion</h2>
-      <p>Where inquiries come from and how well they convert, across all three sites (SiteLink inquiry tracking · leads placed Jan–Jun 2026). <b>Not yet refreshed for July–August</b> — the rest of the dashboard is on the 8 Sep pull.</p></div>
+      <p>Where inquiries come from and how well they convert, across all three sites (SiteLink inquiry tracking &middot; <span id="funnelPeriod"></span>).</p></div>
     <div id="leadFunnelBody"></div>
   </section>
   </div>
@@ -928,27 +928,36 @@ const ACQ_COHORTS = {
   medianTenure:{ "Phone":2.0,"Walk-in":2.6,"Email":1.0,"Web":3.5,"Not recorded":4.6 }
 };
 
-/* ===== Lead funnel (SiteLink inquiry tracking; leads placed Jan–Jun 2026) ===== */
+/* ===== Lead funnel (SiteLink Mgmt_InquiryTracking export, one workbook per site).
+   Every figure is built from the lead-level detail sheet filtered to leads PLACED
+   1 Jun – 31 Aug 2026, so site, channel and source breakdowns all share one denominator
+   and sum exactly to the portfolio total. Leads placed before the window that were still
+   open in it (42 across the three sites) are excluded — counting them would inflate the
+   denominator with leads the period didn't generate. ===== */
 const LEAD_FUNNEL = {
-  period:"leads placed Jan–Jun 2026",
+  period:"leads placed Jun–Aug 2026",
   sites:{
-    "Central":{ inquiries:74,  converted:22, fuSched:61,  fuMade:6  },
-    "South":  { inquiries:102, converted:37, fuSched:100, fuMade:4  },
-    "Lears":  { inquiries:185, converted:79, fuSched:160, fuMade:41 }
+    "Central":{ inquiries:55,  converted:18, fuSched:55,  fuMade:2  },
+    "South":  { inquiries:42,  converted:18, fuSched:42,  fuMade:1  },
+    "Lears":  { inquiries:104, converted:60, fuSched:104, fuMade:27 }
   },
   byChannel:[
-    { c:"Phone",   inq:298, conv:105 },
-    { c:"Walk-in", inq:34,  conv:13  },
-    { c:"Email",   inq:26,  conv:18  },
-    { c:"Web",     inq:3,   conv:2   }
+    { c:"Phone",   inq:159, conv:73 },
+    { c:"Walk-in", inq:26,  conv:14 },
+    { c:"Email",   inq:12,  conv:8  },
+    { c:"Web",     inq:4,   conv:1  }
   ],
   bySource:[
-    { s:"Internet",        inq:153, conv:53 },
-    { s:"Other",           inq:75,  conv:25 },
-    { s:"Previous Tenant", inq:56,  conv:27 },
-    { s:"Referral",        inq:47,  conv:24 },
-    { s:"Drive-by",        inq:26,  conv:7  }
-  ]
+    { s:"Internet",            inq:93, conv:38 },
+    { s:"Other",               inq:34, conv:15 },
+    { s:"Previous Tenant",     inq:32, conv:16 },
+    { s:"Referral",            inq:21, conv:18 },
+    { s:"Drive-by",            inq:11, conv:5  },
+    { s:"Yellow Pages",        inq:7,  conv:3  },
+    { s:"Online Yellow Pages", inq:3,  conv:1  }
+  ],
+  byMonth:[ {m:"Jun", inq:65, conv:37}, {m:"Jul", inq:76, conv:33}, {m:"Aug", inq:60, conv:26} ],
+  basis:"Leads placed 1 Jun – 31 Aug 2026, counted at the 8 Sep pull. Conversion is a closed-cohort rate: the same leads form both the numerator and the denominator. The August cohort is young but substantially mature — the median lead converts the same day it is placed, 88% of conversions land within 14 days and 94% within 30 — so it is not materially understated. The previous panel covered Jan–Jun on a different window, so treat the two as separate cohorts rather than a trend."
 };
 
 /* ===== Customer profile (SiteLink Marketing Summary, August 2026 pull; current active base,
@@ -1865,6 +1874,10 @@ function renderLeadFunnel(){
   const worstSite = byConv[0], bestSite = byConv[byConv.length-1];
   const byFu = [...sites].sort((a,b)=>(a[1].fuMade/a[1].fuSched)-(b[1].fuMade/b[1].fuSched));
   const lowFu = byFu[0], topFu = byFu[byFu.length-1];
+  const fuAlsoBest = topFu[0]===bestSite[0];
+  const bestChan = [...F.byChannel].filter(c=>c.inq).sort((a,b)=>(b.conv/b.inq)-(a.conv/a.inq))[0];
+  const fp = document.getElementById('funnelPeriod');
+  if(fp) fp.textContent = F.period;
   const poss = n => n + (/s$/i.test(n) ? "'" : "'s");   // "Lears'" not "Lears's"
   const chanRows = F.byChannel.map(c=>`
     <tr>
@@ -1909,18 +1922,31 @@ function renderLeadFunnel(){
           <thead><tr><th>Source</th><th class="r">Inquiries</th><th class="r">Rate</th><th class="r">&nbsp;</th></tr></thead>
           <tbody>${srcRows}</tbody>
         </table>
+        ${F.byMonth && F.byMonth.length ? `
+        <h3 style="margin-top:16px"><span class="dot"></span>Conversion by month placed</h3>
+        <table>
+          <thead><tr><th>Month placed</th><th class="r">Inquiries</th><th class="r">Move-ins</th><th class="r">Rate</th><th class="r">&nbsp;</th></tr></thead>
+          <tbody>${F.byMonth.map(m=>`
+            <tr><td style="font-weight:600">${m.m}</td>
+            <td class="r mono">${m.inq}</td>
+            <td class="r mono">${m.conv}</td>
+            <td class="r mono" style="font-weight:700">${rate(m.conv,m.inq)}%</td>
+            <td class="r"><div class="track" style="width:60px;display:inline-block;vertical-align:middle"><div class="fill navy" style="width:${100*m.conv/m.inq}%"></div></div></td></tr>`).join('')}
+          </tbody>
+        </table>` : ''}
         <h3 style="margin-top:16px"><span class="dot"></span>Funnel by site</h3>
         <table>
           <thead><tr><th>Site</th><th class="r">Inquiries</th><th class="r">Move-ins</th><th class="r">Rate</th><th class="r">Follow-ups</th></tr></thead>
           <tbody>${siteRows}</tbody>
         </table>
-        <div class="note">Email inquiries convert best (<b>${rate(email.conv,email.inq)}%</b>) but are rare; phone is <b>${rate(phone.inq,inq)}%</b> of volume at <b>${rate(phone.conv,phone.inq)}%</b>. "Follow-ups" = completed vs scheduled. A single pull (~${inq} leads), so treat site/source splits as directional.</div>
+        <div class="note"><b>${bestChan.c}</b> inquiries convert best (<b>${rate(bestChan.conv,bestChan.inq)}%</b>)${bestChan.inq < inq*0.15 ? ' but are rare' : ''}; phone is <b>${rate(phone.inq,inq)}%</b> of volume at <b>${rate(phone.conv,phone.inq)}%</b>. "Follow-ups" = completed vs scheduled. A single pull (${inq} leads), so treat site/source splits as directional.</div>
+        ${F.basis ? `<div class="note"><b>Basis.</b> ${F.basis}</div>` : ''}
       </div>
 
       <div>
         <div class="insight" style="background:var(--navy2);margin-bottom:16px">
           <h4>The gap is follow-up, not leads</h4>
-          <p>Only <b>${fuM} of ${fuS}</b> scheduled follow-ups were actually completed (<b>${rate(fuM,fuS)}%</b>). The site that follows up most — <b>${topFu[0]} (${topFu[1].fuMade} of ${topFu[1].fuSched})</b> — also converts best (<b>${rate(topFu[1].converted,topFu[1].inquiries)}%</b>), while ${lowFu[0]} completed just <b>${lowFu[1].fuMade}</b> of ${lowFu[1].fuSched}. Automated follow-up (SMS / email / WhatsApp) after every inquiry is the clearest conversion lever.</p>
+          <p>Only <b>${fuM} of ${fuS}</b> scheduled follow-ups were actually completed (<b>${rate(fuM,fuS)}%</b>). The site that follows up most — <b>${topFu[0]} (${topFu[1].fuMade} of ${topFu[1].fuSched})</b> — ${fuAlsoBest?'also converts best':`converts at ${rate(topFu[1].converted,topFu[1].inquiries)}%, while the best converter is ${bestSite[0]}`} (<b>${rate((fuAlsoBest?topFu:bestSite)[1].converted,(fuAlsoBest?topFu:bestSite)[1].inquiries)}%</b>), while ${lowFu[0]} completed just <b>${lowFu[1].fuMade}</b> of ${lowFu[1].fuSched}. Automated follow-up (SMS / email / WhatsApp) after every inquiry is the clearest conversion lever.</p>
         </div>
         <div class="insight" style="background:var(--navy2);margin-bottom:16px">
           <h4>Online drives demand — the phone closes it</h4>
