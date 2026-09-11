@@ -158,6 +158,17 @@ td.r,th.r{text-align:right}
 /* overview headline cards */
 .headline-grid{margin-bottom:16px;position:relative;z-index:3}
 .headline h3 .when{margin-left:auto;font-weight:600;letter-spacing:.02em;text-transform:none;color:var(--muted)}
+details.headline{padding:0;align-self:start}
+details.headline>summary{list-style:none;cursor:pointer;padding:18px 22px;user-select:none}
+details.headline>summary::-webkit-details-marker{display:none}
+details.headline>summary h3{margin-bottom:0}
+details.headline>summary h3::after{content:"▾";font-size:12px;color:var(--accent);margin-left:8px;transition:transform .2s}
+details.headline[open]>summary h3::after{transform:rotate(180deg)}
+details.headline>summary:hover h3{color:var(--accent)}
+details.headline .teaser{font-size:13px;color:var(--muted);margin-top:6px;line-height:1.45}
+details.headline[open] .teaser{display:none}
+details.headline .hl-list{padding:0 22px 20px}
+details.headline .hl-empty{padding:0 22px 20px}
 .hl-list{list-style:none;display:grid;gap:8px}
 .hl-list li{display:flex;align-items:flex-start;gap:10px;font-size:13.5px;line-height:1.45}
 .hl-list li .chg{margin:2px 0 0;flex:none;min-width:70px;text-align:center}
@@ -371,8 +382,8 @@ header:has(.csv-menu.open){overflow:visible}
   <div class="panel" data-section="overview">
   <section class="portfolio-overview">
     <div class="grid g2 headline-grid">
-      <div class="card headline" id="whatChanged"></div>
-      <div class="card headline" id="attention"></div>
+      <details class="card headline" id="whatChanged"></details>
+      <details class="card headline" id="attention"></details>
     </div>
     <div class="hero portfolio-hero" id="portfolioHero"></div>
 
@@ -1148,9 +1159,10 @@ function go(section, loc){
 /* ===== What changed — auto-written bullets from the last two comparable months ===== */
 function renderWhatChanged(T, cur, prv){
   const el = document.getElementById('whatChanged'); if(!el) return;
+  const wasOpen = el.open;
   if(!cur || !prv){
-    el.innerHTML = `<h3><span class="dot"></span>What changed</h3><div class="hl-empty">Two comparable months are needed before movement can be shown.</div>`;
-    return;
+    el.innerHTML = `<summary><h3><span class="dot"></span>What changed</h3></summary><div class="hl-empty">Two comparable months are needed before movement can be shown.</div>`;
+    el.open = wasOpen; return;
   }
   const items = [];
   const link = (txt, sec, loc) => `<a onclick="go('${sec}'${loc?`,'${loc}'`:''})">${txt}</a>`;
@@ -1187,12 +1199,16 @@ function renderWhatChanged(T, cur, prv){
   const note = T.sites.map(s=>s.L.months[cur.key]).find(m=>m&&m.agingNote);
   if(note) items.push(`<span class="chg flat">basis</span> <span>The 1–30 day bucket is not comparable across pulls; read 31+ only. ${link('Why','portfolio-payments')}</span>`);
 
-  el.innerHTML = `<h3><span class="dot"></span>What changed <span class="when">${prv.label} → ${cur.label}</span></h3><ul class="hl-list">${items.map(i=>`<li>${i}</li>`).join('')}</ul>`;
+  const sgn = v => (v>0?'+':'')+v;
+  const teaser = `Units ${sgn(dUnits)} · rent ${sgn(+dRent.toFixed(1))}% · 31+ late ${sgn(d31)} · autopay ${dAp===0?'flat':sgn(dAp)}. Click to expand.`;
+  el.innerHTML = `<summary><h3><span class="dot"></span>What changed <span class="when">${prv.label} → ${cur.label}</span></h3><div class="teaser">${teaser}</div></summary><ul class="hl-list">${items.map(i=>`<li>${i}</li>`).join('')}</ul>`;
+  el.open = wasOpen;
 }
 
 /* ===== Needs attention — threshold checks over the latest data ===== */
 function renderAttention(P, T, cur){
   const el = document.getElementById('attention'); if(!el) return;
+  const wasOpen = el.open;
   const items = [];
   const add = (sev, txt, sec, loc) => items.push({sev, txt, sec, loc});
   const latestLabel = P.sites.map(s=>s.data.label).sort().pop();
@@ -1221,11 +1237,15 @@ function renderAttention(P, T, cur){
 
   const order = {high:0, med:1, low:2};
   items.sort((a,b)=>order[a.sev]-order[b.sev]);
-  const n = {high:items.filter(i=>i.sev==='high').length, med:items.filter(i=>i.sev==='med').length};
-  el.innerHTML = `<h3><span class="dot"></span>Needs attention <span class="when">${n.high} high · ${n.med} medium</span></h3>` +
+  const n = {high:items.filter(i=>i.sev==='high').length, med:items.filter(i=>i.sev==='med').length, low:items.filter(i=>i.sev==='low').length};
+  const strip = s => s.replace(/<[^>]+>/g,'');
+  const top = items.slice(0,2).map(i=>strip(i.txt).replace(/\.$/,'')).join(' · ');
+  const teaser = items.length ? `${top}${items.length>2?` · and ${items.length-2} more`:''}. Click to expand.` : '';
+  el.innerHTML = `<summary><h3><span class="dot"></span>Needs attention <span class="when">${n.high} high · ${n.med} medium · ${n.low} low</span></h3>${teaser?`<div class="teaser">${teaser}</div>`:''}</summary>` +
     (items.length
       ? `<ul class="hl-list">${items.map(i=>`<li><span class="sev ${i.sev}">${i.sev}</span><span>${i.txt} <a onclick="go('${i.sec}'${i.loc?`,'${i.loc}'`:''})">Open</a></span></li>`).join('')}</ul>`
       : `<div class="hl-empty">Nothing over threshold this month.</div>`);
+  el.open = wasOpen;
 }
 
 function renderPortfolio(){
