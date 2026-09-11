@@ -293,7 +293,7 @@ header:has(.csv-menu.open){overflow:visible}
       <form class="ai-form" id="aiForm" autocomplete="off">
         <span class="ai-ico">🔎</span>
         <input class="ai-input" id="aiInput" name="q"
-               placeholder="Ask the data — e.g. “latest payment numbers for June”">
+               placeholder="Ask the data — e.g. “latest payment numbers for August”">
         <button class="ai-btn" id="aiBtn" type="submit">Ask</button>
       </form>
       <div class="ai-hint">Natural-language search across every site and month in this dashboard.</div>
@@ -419,6 +419,7 @@ header:has(.csv-menu.open){overflow:visible}
         <div class="bignum" id="econ"></div><div class="cap">Economic occupancy — rent vs gross potential</div>
         <div class="note">Near-identical figures mean almost no discounting; rent collected is close to full list price.</div>
         <div class="note" id="unrentableNote" style="display:none"></div>
+        <div class="note" id="reconcileNote" style="display:none"></div>
       </div>
       <div class="card">
         <h3><span class="dot"></span>Monthly movement</h3>
@@ -457,7 +458,7 @@ header:has(.csv-menu.open){overflow:visible}
       <div class="card" style="grid-column:span 2">
         <h3><span class="dot"></span>Tenure distribution</h3>
         <div id="losbars"></div>
-        <div class="note">Heavily skewed to long stays — the earliest active tenancy dates to 2008.</div>
+        <div class="note" id="tenureNote"></div>
       </div>
     </div>
   </section>
@@ -485,6 +486,7 @@ header:has(.csv-menu.open){overflow:visible}
         </table>
         <div class="note">Corporate tenants take larger units and stay longer — as expected. Revenue concentration is low: top 10 accounts are only <span id="conc"></span> of rent.</div>
         <div class="note" id="corpBasisNote" style="display:none"></div>
+        <div class="note" id="top10BasisNote" style="display:none"></div>
       </div>
     </div>
   </section>
@@ -565,7 +567,7 @@ header:has(.csv-menu.open){overflow:visible}
       </div>
       <div class="card">
         <h3><span class="dot"></span>Auto-pay adoption</h3>
-        <div class="bignum" id="autopay"></div><div class="cap">of accounts on auto-pay</div>
+        <div class="bignum" id="autopay"></div><div class="cap">of accounts <b>enrolled</b> in auto-pay (rent-roll flag) — see the receipts table below for how many actually collected</div>
         <div class="flag">Lever &middot; raising this directly reduces carried balances</div>
       </div>
     </div>
@@ -583,6 +585,7 @@ const LOCATIONS = {
     months:{
       "2026-05":{
         asof:"2026-05-01", label:"May 2026", basis:"As of 1 May 2026",
+        reconcileNote:"<b>Known mismatch.</b> The headline 457 occupied is confirmed twice over — by the unit-type table and by average rent ($118,570 ÷ 457 = $259.45) — but the tenure bands, the aging buckets and the corporate/individual split each cover 459 rows, two more than the occupied count, and those two rent lines total $118,920 against a $118,570 rent roll. The extra rows sit in the May export and have not been traced; treat the May distributions as ±2 units. June onward reconciles exactly.",
         totalUnits:461, occupied:457, vacant:4, physOcc:99.1, econOcc:98.5,
         grossPot:120421, occRent:118570, totalArea:28628, occArea:28555,
         revpaf:4.14, revOccSqft:4.15, avgRentUnit:259.45, movedIn:8, movedOut:10, net:-2,
@@ -688,9 +691,10 @@ const LOCATIONS = {
         agingNote:"<b>Basis:</b> this pull is 8 Sep, a week into the September cycle, so most September rent is billed <i>and</i> collected — the 1–30 bucket is far smaller than the 4 Aug pull, which was three days in. Compare <b>31+</b> across months, not 1–30.",
         age:{valid:290,pct:63,mean:48,median:52,min:20,max:87,bands:{"<25":38,"25–34":46,"35–44":29,"45–54":50,"55–64":71,"65+":56},female:262,male:186},
         acquisition:{channels:{Phone:280,"Walk-in":59,Email:26,Web:7,"Not recorded":87},recent:{n:86,Phone:50,"Walk-in":15,Email:10,Web:1,"Not recorded":10}},
-        keyAccounts:{ tenants:407, multi:46, units:98, rent:28183, siteRent:118183, rentPct:23.8, avgMulti:613, avgSingle:249, tenureMulti:85.9, tenureSingle:36.1, arrMulti:2.2, arrSingle:4.4, apMultiPct:33.7, apSinglePct:35.7, apFull:13, apPart:3, apNone:30, email:45, newTen:4, newUnits:8, newRent:2451,
+        keyAccounts:{ tenants:407, multi:46, units:98, rent:28183, siteRent:118183, rentPct:23.8, avgMulti:613, avgSingle:249, tenureMulti:85.9, tenureSingle:36.1, arrMulti:2.2, arrSingle:4.4, apMultiPct:33.7, apSinglePct:35.7, apFull:13, apPart:3, apNone:30, email:45, emailBasis:"Email-on-file is read from the tenant contact record in the August export, where it is populated for effectively every account. Months to July 2026 read it from the rent-roll extract, which carried it for only a handful — the jump at August is the change of source, not a contact-capture drive.", newTen:4, newUnits:8, newRent:2451,
           top:[{u:4,r:1694,los:27,ap:3,com:0,d31:0,em:1},{u:3,r:1221,los:46,ap:0,com:1,d31:0,em:1},{u:3,r:1136,los:126,ap:0,com:1,d31:0,em:1},{u:2,r:911,los:38,ap:0,com:1,d31:0,em:1},{u:2,r:911,los:159,ap:0,com:1,d31:0,em:1},{u:2,r:911,los:9,ap:0,com:1,d31:0,em:1},{u:2,r:847,los:18,ap:0,com:1,d31:2,em:1},{u:2,r:847,los:40,ap:2,com:1,d31:0,em:1},{u:2,r:847,los:61,ap:0,com:0,d31:0,em:1},{u:2,r:783,los:127,ap:0,com:0,d31:0,em:1},{u:3,r:783,los:145,ap:3,com:0,d31:0,em:1},{u:2,r:783,los:81,ap:0,com:1,d31:0,em:1}] },
         corpBasis:"Corporate is flagged by a company name on the account. SiteLink's corporate flag is unset throughout the August export, so months to July 2026 use that flag and August uses the company name — the step up at August is the change of basis, not new corporate business.",
+        top10Basis:"Top-10 concentration is measured per <b>tenant</b> from August, summing every unit a tenant holds. Months to July 2026 measured it per <b>unit</b>, which splits multi-unit tenants across separate rows and roughly halves the figure — the step up at August is the change of basis, not new concentration. The August number reconciles with the retention worklist below it; the earlier ones do not.",
         paymentMethods:{
           period:"August 2026",
           note:"Tender types follow the June convention: SiteLink <b>Money Order</b> is the bank-app transfer bucket (CIBC), <b>Bank Transfer</b> (system-posted) is the website's Pay Now, and <b>Internet</b> is Republic. Account credits and applied refunds are excluded — they are not money collected.",
@@ -781,9 +785,10 @@ const LOCATIONS = {
         agingNote:"<b>Basis:</b> this pull is 8 Sep, a week into the September cycle, so most September rent is billed <i>and</i> collected — the 1–30 bucket is far smaller than the 4 Aug pull, which was three days in. Compare <b>31+</b> across months, not 1–30.",
         age:{valid:234,pct:89,mean:54,median:55,min:20,max:94,bands:{"<25":9,"25–34":13,"35–44":30,"45–54":55,"55–64":85,"65+":42},female:146,male:112},
         acquisition:{channels:{Phone:112,"Walk-in":85,Email:14,Web:6,"Not recorded":46},recent:{n:59,Phone:31,"Walk-in":14,Email:9,Web:0,"Not recorded":5}},
-        keyAccounts:{ tenants:232, multi:19, units:50, rent:13551, siteRent:67788, rentPct:20.0, avgMulti:713, avgSingle:255, tenureMulti:43.0, tenureSingle:25.5, arrMulti:0.0, arrSingle:7.0, apMultiPct:16.0, apSinglePct:32.4, apFull:4, apPart:0, apNone:15, email:19, newTen:1, newUnits:2, newRent:647,
+        keyAccounts:{ tenants:232, multi:19, units:50, rent:13551, siteRent:67788, rentPct:20.0, avgMulti:713, avgSingle:255, tenureMulti:43.0, tenureSingle:25.5, arrMulti:0.0, arrSingle:7.0, apMultiPct:16.0, apSinglePct:32.4, apFull:4, apPart:0, apNone:15, email:19, emailBasis:"Email-on-file is read from the tenant contact record in the August export, where it is populated for effectively every account. Months to July 2026 read it from the rent-roll extract, which carried it for only a handful — the jump at August is the change of source, not a contact-capture drive.", newTen:1, newUnits:2, newRent:647,
           top:[{u:6,r:2281,los:39,ap:0,com:1,d31:0,em:1},{u:4,r:1677,los:43,ap:0,com:0,d31:0,em:1},{u:6,r:1481,los:78,ap:0,com:1,d31:0,em:1},{u:2,r:783,los:16,ap:0,com:1,d31:0,em:1},{u:3,r:783,los:41,ap:0,com:1,d31:0,em:1},{u:3,r:745,los:57,ap:0,com:1,d31:0,em:1},{u:2,r:702,los:14,ap:2,com:0,d31:0,em:1},{u:2,r:655,los:60,ap:0,com:1,d31:0,em:1},{u:2,r:647,los:5,ap:0,com:0,d31:0,em:1},{u:2,r:557,los:24,ap:0,com:0,d31:0,em:1},{u:2,r:545,los:117,ap:0,com:0,d31:0,em:1},{u:2,r:500,los:76,ap:0,com:1,d31:0,em:1}] },
         corpBasis:"Corporate is flagged by a company name on the account. SiteLink's corporate flag is unset throughout the August export, so months to July 2026 use that flag and August uses the company name — the step up at August is the change of basis, not new corporate business.",
+        top10Basis:"Top-10 concentration is measured per <b>tenant</b> from August, summing every unit a tenant holds. Months to July 2026 measured it per <b>unit</b>, which splits multi-unit tenants across separate rows and roughly halves the figure — the step up at August is the change of basis, not new concentration. The August number reconciles with the retention worklist below it; the earlier ones do not.",
         paymentMethods:{
           period:"August 2026",
           note:"Tender types follow the June convention: SiteLink <b>Money Order</b> is the bank-app transfer bucket (CIBC), <b>Bank Transfer</b> (system-posted) is the website's Pay Now, and <b>Internet</b> is Republic. Account credits and applied refunds are excluded — they are not money collected.",
@@ -799,12 +804,13 @@ const LOCATIONS = {
     months:{
       "2026-06":{
         asof:"2026-06-30", label:"June 2026", basis:"Month-end June 2026 · activity 1–30 Jun",
-        totalUnits:270, occupied:255, vacant:1, unrentable:14, physOcc:94.4, econOcc:93.4,
+        totalUnits:270, occupied:257, vacant:1, unrentable:12, physOcc:95.2, econOcc:93.4,
         grossPot:93433, occRent:87285, totalArea:26648, occArea:25368,
         revpaf:3.28, revOccSqft:3.44, avgRentUnit:339.63, movedIn:19, movedOut:4, net:15,
+        reconcileNote:"<b>Corrected.</b> This snapshot originally recorded 257 occupied units in every breakdown (unit type, aging, tenure bands) and in the average-rent calculation ($87,285 ÷ 257 = $339.63), but 255 in the headline. The headline, physical occupancy and the out-of-service count have been restated to 257 / 95.2% / 12. The corporate and individual rent lines still total $87,612 against an $87,285 rent roll — a $327 difference carried from the source export.",
         byType:[{t:"10x8",units:121,occ:111,pct:91.7},{t:"20x8",units:75,occ:72,pct:96.0},{t:"5x8",units:49,occ:49,pct:100.0},{t:"8x8",units:8,occ:8,pct:100.0},{t:"40x8",units:6,occ:6,pct:100.0},{t:"8x10",units:4,occ:4,pct:100.0},{t:"8x16",units:2,occ:2,pct:100.0},{t:"Other",units:5,occ:5,pct:100.0}],
         losMean:18.5, losMedian:14.9, losBands:{"<3 mo":50,"3–12 mo":63,"1–2 yr":74,"2–5 yr":69,"5 yr+":1},
-        corpUnits:66, indivUnits:192, corpPct:25.6, corpRent:25374, indivRent:62238, corpRentPct:29.0,
+        corpUnits:65, indivUnits:192, corpPct:25.3, corpRent:25374, indivRent:62238, corpRentPct:29.0,
         corpArea:124, indivArea:90, corpLos:21.4, indivLos:17.4, top10:7.7,
         geoIndiv:{"St. Michael":43,"Christ Church":21,"St. James":37,"St. Thomas":17,"St. Philip":8,"St. George":16,"Other Barbados":19,"Overseas":20,"Unknown":11}, indivN:192,
         balUnits:11, balPct:4.3, balTotal:9078, aging:{"Current / ahead":246,"1–30 days":5,"31–60 days":3,"61–90 days":3,"90+ days":0}, autopayPct:26.5,
@@ -876,9 +882,10 @@ const LOCATIONS = {
         agingNote:"<b>Basis:</b> this pull is 8 Sep, a week into the September cycle, so most September rent is billed <i>and</i> collected — the 1–30 bucket is far smaller than the 4 Aug pull, which was three days in. Compare <b>31+</b> across months, not 1–30.",
         age:{valid:138,pct:49,mean:32,median:22,min:19,max:77,bands:{"<25":81,"25–34":10,"35–44":17,"45–54":9,"55–64":12,"65+":9},female:157,male:112},
         acquisition:{channels:{Phone:229,"Walk-in":8,Email:10,Web:4,"Not recorded":29},recent:{n:130,Phone:109,"Walk-in":7,Email:6,Web:0,"Not recorded":8}},
-        keyAccounts:{ tenants:241, multi:30, units:69, rent:23311, siteRent:96034, rentPct:24.3, avgMulti:777, avgSingle:345, tenureMulti:23.1, tenureSingle:13.0, arrMulti:3.3, arrSingle:4.7, apMultiPct:30.4, apSinglePct:27.5, apFull:8, apPart:2, apNone:20, email:30, newTen:9, newUnits:22, newRent:7702,
+        keyAccounts:{ tenants:241, multi:30, units:69, rent:23311, siteRent:96034, rentPct:24.3, avgMulti:777, avgSingle:345, tenureMulti:23.1, tenureSingle:13.0, arrMulti:3.3, arrSingle:4.7, apMultiPct:30.4, apSinglePct:27.5, apFull:8, apPart:2, apNone:20, email:30, emailBasis:"Email-on-file is read from the tenant contact record in the August export, where it is populated for effectively every account. Months to July 2026 read it from the rent-roll extract, which carried it for only a handful — the jump at August is the change of source, not a contact-capture drive.", newTen:9, newUnits:22, newRent:7702,
           top:[{u:4,r:1821,los:2,ap:0,com:0,d31:0,em:1},{u:3,r:1736,los:42,ap:0,com:1,d31:0,em:1},{u:4,r:1566,los:3,ap:4,com:1,d31:0,em:1},{u:4,r:1319,los:61,ap:2,com:1,d31:0,em:1},{u:2,r:1281,los:19,ap:0,com:1,d31:0,em:1},{u:3,r:911,los:47,ap:0,com:1,d31:0,em:1},{u:2,r:911,los:27,ap:0,com:1,d31:0,em:1},{u:2,r:911,los:26,ap:2,com:0,d31:0,em:1},{u:2,r:911,los:22,ap:1,com:0,d31:0,em:1},{u:2,r:911,los:7,ap:0,com:0,d31:0,em:1},{u:2,r:783,los:53,ap:2,com:1,d31:0,em:1},{u:2,r:783,los:23,ap:2,com:1,d31:0,em:1}] },
         corpBasis:"Corporate is flagged by a company name on the account. SiteLink's corporate flag is unset throughout the August export, so months to July 2026 use that flag and August uses the company name — the step up at August is the change of basis, not new corporate business.",
+        top10Basis:"Top-10 concentration is measured per <b>tenant</b> from August, summing every unit a tenant holds. Months to July 2026 measured it per <b>unit</b>, which splits multi-unit tenants across separate rows and roughly halves the figure — the step up at August is the change of basis, not new concentration. The August number reconciles with the retention worklist below it; the earlier ones do not.",
         paymentMethods:{
           period:"August 2026",
           note:"Tender types follow the June convention: SiteLink <b>Money Order</b> is the bank-app transfer bucket (CIBC), <b>Bank Transfer</b> (system-posted) is the website's Pay Now, and <b>Internet</b> is Republic. Account credits and applied refunds are excluded — they are not money collected.",
@@ -1055,7 +1062,7 @@ function renderPortfolio(){
   const mostFull = [...P.sites].sort((a,b)=>b.data.physOcc-a.data.physOcc)[0];
   document.getElementById('portfolioRead').innerHTML = `
     <h4>Portfolio read</h4>
-    <p>The portfolio is effectively full at <b>${P.rentableOcc.toFixed(1)}% of rentable stock</b> (${P.physOcc.toFixed(1)}% of all units — ${P.unrentable||0} are out of service at Lears), with <b>${bbd(P.occRent)}/mo</b> in current rent roll and <b>${P.econOcc.toFixed(1)}%</b> economic occupancy.</p>
+    <p>The portfolio is effectively full at <b>${P.rentableOcc.toFixed(1)}% of rentable stock</b> (${P.physOcc.toFixed(1)}% of all units — ${P.unrentable||0} are out of service${P.unrentable?': '+P.sites.filter(s=>s.data.unrentable).map(s=>`${s.data.unrentable} at ${s.name}`).join(', '):''}), with <b>${bbd(P.occRent)}/mo</b> in current rent roll and <b>${P.econOcc.toFixed(1)}%</b> economic occupancy.</p>
     <p><b>${mostFull.name}</b> is the most capacity-constrained site; <b>${topRent.name}</b> contributes the largest rent roll; <b>${youngest.name}</b> has the youngest tenant base and the clearest room to mature.</p>
     <p>The split is still mostly individual-led: <b>${P.indivUnits}</b> individual units versus <b>${P.corpUnits}</b> corporate units, while corporate customers contribute a higher share of rent than units.</p>`;
 
@@ -1097,7 +1104,7 @@ function renderPaymentTrend(){
     </div>
     <div class="insight" style="background:var(--navy2)">
       <h4>Organic autopay growth is slow</h4>
-      <p>Over six months, portfolio autopay moved from <b>${pFirst.toFixed(1)}%</b> to <b>${pLast.toFixed(1)}%</b> &mdash; just <b>${pChg>=0?'+':''}${pChg.toFixed(1)}pp</b> of organic growth. At this pace it would take years to materially shift the mix.</p>
+      <p>Over ${n} months, portfolio autopay moved from <b>${pFirst.toFixed(1)}%</b> to <b>${pLast.toFixed(1)}%</b> &mdash; just <b>${pChg>=0?'+':''}${pChg.toFixed(1)}pp</b> of organic growth. At this pace it would take years to materially shift the mix.</p>
       <p>The trajectory confirms autopay won't climb on its own &mdash; it needs the active conversion push set out above.</p>
     </div>
   </div>`;
@@ -1185,7 +1192,10 @@ function renderTrends(){
       <table>${head('Δ')}<tbody>
         ${rows(m=>bbdk(m.occRent), (a,b)=>arrow(pctChg(b.occRent,a.occRent),1,'%'))}
       </tbody></table>
-      <div class="note">Economic occupancy has not moved at any site (Central ~98.5%, South ~97.6%, Lears ~93.2%), so rent-roll movement is coming from <b>unit count</b>, not from pricing or discounting.</div>
+      <div class="note">Economic occupancy on the latest pull is ${T.sites.map(s=>{
+        const last = s.L.months[T.keys.filter(k=>s.L.months[k]).pop()];
+        return `${s.name} ${last.econOcc.toFixed(1)}%`;
+      }).join(', ')} — every site is collecting close to full list price, so rent-roll movement is coming from <b>unit count</b>, not from pricing or discounting.</div>
     </div>`;
 
   /* ---------- tenure drift: months of tenure added per calendar month ---------- */
@@ -1214,13 +1224,27 @@ function renderTrends(){
     </div>`;
 
   /* ---------- delinquency ---------- */
+  /* Arrears direction is read from the data rather than asserted, so the note can never
+     contradict the Δ column beside it. */
+  const dqFirst = T.complete[0], dqPrev = prv, dqCur = cur;
+  const dqMoves = T.sites.map(s=>{
+    const have = T.keys.filter(k=>s.L.months[k]);
+    const a = s.L.months[have[have.length-2]], b = s.L.months[have[have.length-1]];
+    return (a&&b) ? T.d31(b)-T.d31(a) : 0;
+  });
+  const dqUp = dqMoves.filter(v=>v>0).length, dqDown = dqMoves.filter(v=>v<0).length;
+  const dqSiteWord = dqDown===T.sites.length ? 'fallen at <b>all three sites</b>'
+    : dqUp===T.sites.length ? 'risen at <b>all three sites</b>'
+    : `moved both ways across the sites (${dqUp} up, ${dqDown} down)`;
+  const dqMoM = dqPrev ? dqCur.d31-dqPrev.d31 : 0;
+  const dqBaseChg = dqFirst && dqFirst!==dqCur ? (100*(dqCur.d31-dqFirst.d31)/dqFirst.d31) : null;
   const dqCard = `
     <div class="card">
       <h3><span class="dot"></span>Accounts 31+ days late</h3>
       <table>${head('Δ')}<tbody>
         ${rows(m=>T.d31(m), (a,b)=>arrow(T.d31(b)-T.d31(a),0))}
       </tbody></table>
-      <div class="note"><b>31+ days is the comparable cut</b> across pulls taken on different days: it always means at least one full prior cycle unpaid, whereas the 1–30 bucket swings with the day of the month. On that basis arrears have risen at <b>all three sites</b>, and the portfolio total has more than doubled — the clearest negative trend in the data.</div>
+      <div class="note"><b>31+ days is the comparable cut</b> across pulls taken on different days: it always means at least one full prior cycle unpaid, whereas the 1–30 bucket swings with the day of the month. On that basis arrears have ${dqSiteWord} since ${dqPrev?dqPrev.label:'the previous pull'}, taking the portfolio from <b>${dqPrev?dqPrev.d31:'—'}</b> to <b>${dqCur.d31}</b> accounts${dqMoM?` (${dqMoM>0?'+':''}${dqMoM})`:''}. Against the ${dqFirst?dqFirst.label:'first'} close the level is still ${dqBaseChg===null?'unchanged':(dqBaseChg>0?`<b>${Math.round(dqBaseChg)}% higher</b>`:`<b>${Math.round(-dqBaseChg)}% lower</b>`)} — so the level remains the thing to watch even where the latest month moved the right way.</div>
     </div>`;
 
   /* ---------- autopay: enrolled vs actually collected ---------- */
@@ -1271,18 +1295,32 @@ function renderTrends(){
     <div class="card">
       <h3><span class="dot"></span>Portfolio collections &middot; ${PT.months[0]}–${PT.months[nPT-1]} 2026</h3>
       <div class="trend-bars">${collBars}</div>
-      <div class="note" style="margin-top:22px">Seven months of receipts, range <b>${bbdk(cMin)}–${bbdk(cMax)}</b> against a <b>${bbdk(cAvg)}</b> average — a <b>${(100*(cMax-cMin)/cAvg).toFixed(0)}% band</b> with no trend in either direction. Collections are flat while the rent roll has grown, which is the timing gap between billing and receipt rather than a collection failure. Bars are scaled to the range, not to zero.</div>
+      <div class="note" style="margin-top:22px">${nPT} months of receipts, range <b>${bbdk(cMin)}–${bbdk(cMax)}</b> against a <b>${bbdk(cAvg)}</b> average — a <b>${(100*(cMax-cMin)/cAvg).toFixed(0)}% band</b>. The high and low months are <b>${PT.months[coll.indexOf(cMax)]}</b> and <b>${PT.months[coll.indexOf(cMin)]}</b>, so month-to-month swing is still larger than any underlying direction; read the level, not the slope. Bars are scaled to the range, not to zero.</div>
     </div>`;
 
   /* ---------- written read ---------- */
+  const lastOf = s => s.L.months[T.keys.filter(k=>s.L.months[k]).pop()];
+  const fullSites = T.sites.filter(s=>{
+    const have = T.keys.filter(k=>s.L.months[k]);
+    return s.L.months[have[0]].totalUnits === lastOf(s).totalUnits;
+  });
+  const fullRange = fullSites.map(s=>{
+    const ps = T.keys.filter(k=>s.L.months[k]).map(k=>s.L.months[k].physOcc);
+    return `${s.name} ${Math.min(...ps).toFixed(1)}–${Math.max(...ps).toFixed(1)}%`;
+  }).join(' and ');
+  const churnLine = T.sites.map(s=>`${s.name} ${lastOf(s).movedOut??'—'}`).join(', ');
+  const d60Cur = cur.d60, d60Prev = prv?prv.d60:null;
+  const d60Word = d60Prev===null ? '' : d60Cur>d60Prev ? 'rising alongside' : d60Cur<d60Prev ? `easing alongside (${d60Prev}→${d60Cur})` : `flat alongside (${d60Cur})`;
+  const apFirstPct = 100*PAYMENT_TREND.months.map((_,i)=>Object.values(PAYMENT_TREND.sites).reduce((s,d)=>s+d.autopay[i],0))[0]/Object.values(PAYMENT_TREND.sites).reduce((s,d)=>s+d.occupied,0);
+  const apLastPct  = 100*Object.values(PAYMENT_TREND.sites).reduce((s,d)=>s+d.autopay[nPT-1],0)/Object.values(PAYMENT_TREND.sites).reduce((s,d)=>s+d.occupied,0);
   const analysis = `
     <div class="insight" style="background:var(--navy2)">
-      <h4>What the three snapshots actually say</h4>
-      <p><b>One site is growing; two are full.</b> Every unit and almost all the rent added since June came from Lears. Central and South have sat at 99.6% physical occupancy across every pull, so the portfolio's growth rate is now set by how fast new supply is built, not by demand.</p>
-      <p><b>The sites are on three different tenure tracks.</b> Central's base is ageing almost in place, South's is drifting slowly younger, and Lears' is getting younger outright — it churned 12 units in July against 3 at Central. Lears is filling and refilling, which is normal for a young site but means its revenue needs constant replacement.</p>
-      <p><b>Arrears are the one clear deterioration.</b> 31+ day accounts have risen at every site and the portfolio total has more than doubled since the June close, with 60+ day accounts rising alongside — so this is genuine ageing of debt, not a timing artefact. Nothing else in the data is moving this fast.</p>
-      <p><b>Autopay is stuck twice over.</b> Enrolment has barely moved in seven months, and a meaningful share of those enrolled did not actually collect this month. The second problem is the cheaper one to fix.</p>
-      <div class="flag" style="margin-top:12px">Watch next month &middot; whether 31+ arrears keep climbing, and whether Lears' churn settles as its cohort matures</div>
+      <h4>What the snapshots actually say</h4>
+      <p><b>One site is growing; two are full.</b> Every unit and almost all the rent added over the period came from Lears. ${fullRange ? `${fullRange} across every pull` : 'The other sites have not added stock'}, so the portfolio's growth rate is now set by how fast new supply is built, not by demand.</p>
+      <p><b>The sites are on three different tenure tracks.</b> Central's base is ageing almost in place, South's is drifting slowly younger, and Lears' is getting younger outright. Move-outs in ${cur.label}: ${churnLine}. Lears is filling and refilling, which is normal for a young site but means its revenue needs constant replacement.</p>
+      <p><b>Arrears remain the level to watch.</b> 31+ day accounts have ${dqSiteWord} since ${prv?prv.label:'the previous pull'} (${prv?prv.d31:'—'}→${cur.d31}), with 60+ day accounts ${d60Word}. ${dqBaseChg!==null && dqBaseChg>0 ? `The level is still <b>${Math.round(dqBaseChg)}% above</b> the ${dqFirst.label} close, so one good month is not yet a trend.` : `The level is now at or below the ${dqFirst?dqFirst.label:'first'} close.`}</p>
+      <p><b>Autopay is stuck twice over.</b> Enrolment moved only from ${apFirstPct.toFixed(1)}% to ${apLastPct.toFixed(1)}% across ${nPT} months of receipts, and a meaningful share of those enrolled did not actually collect this month. The second problem is the cheaper one to fix.</p>
+      <div class="flag" style="margin-top:12px">Watch next month &middot; whether the ${cur.d31} accounts at 31+ keep falling, and whether Lears' churn settles as its cohort matures</div>
     </div>`;
 
   el.innerHTML = `
@@ -1377,6 +1415,16 @@ function renderPortfolioPayments(){
     { label:'Behind (overdue)',        units:behind,      color:'var(--accent)' }
   ];
 
+  /* Two different autopay numbers exist and are not interchangeable: units flagged for
+     automatic billing on the rent roll (enrolled) and units that produced a Plug & Pay
+     receipt (collected). The tile shows collected; enrolled is stated beside it so this
+     card and the per-site Payments tab can't be read as contradicting each other. */
+  let enrolledAP = 0;
+  Object.values(LOCATIONS).forEach(L=>{
+    const s = latestSnapshot(L);
+    if(s && s.data.autopayPct != null) enrolledAP += Math.round(s.data.autopayPct*s.data.occupied/100);
+  });
+
   const DQ = DELINQUENCY;
   const dqTotal = DQ.sites.reduce((s,x)=>s+x.n,0);
   const dqSevere = DQ.sites.reduce((s,x)=>s+x.severe,0);
@@ -1387,9 +1435,9 @@ function renderPortfolioPayments(){
   el.innerHTML = `
     <div class="ppm-stat-row">
       <div class="ppm-stat">
-        <div class="k">Autopay (Plug &amp; Pay)</div>
+        <div class="k">Autopay collected</div>
         <div class="v">${pct(autopayU)}<small>%</small></div>
-        <div class="d">${autopayU} units &middot; <b>${bbdk(autopayA)}/mo</b> (${rpct(autopayA)}% of $)</div>
+        <div class="d">${autopayU} units paid by Plug &amp; Pay &middot; <b>${bbdk(autopayA)}/mo</b> (${rpct(autopayA)}% of $)<br><span style="color:var(--muted)">${enrolledAP} enrolled (${(100*enrolledAP/totalOccupied).toFixed(1)}%) — gap is autopay that didn't take</span></div>
       </div>
       <div class="ppm-stat">
         <div class="k">Bank transfer / online</div>
@@ -1449,7 +1497,7 @@ function renderPortfolioPayments(){
       <div>
         <div class="insight" style="background:var(--navy2);margin-bottom:16px">
           <h4>Where the opportunity is</h4>
-          <p>Autopay stands at <b>${pct(autopayU)}%</b> of the portfolio. The remaining <b>${(100-parseFloat(pct(autopayU))).toFixed(1)}%</b> splits into three conversion tiers — each needing a different approach.</p>
+          <p>Autopay collected on <b>${pct(autopayU)}%</b> of the portfolio this period (${enrolledAP} units are enrolled). The remaining <b>${(100-parseFloat(pct(autopayU))).toFixed(1)}%</b> splits into three conversion tiers — each needing a different approach.</p>
           <p><b>${onlineU} units</b> already pay digitally — bank-app transfers (CIBC, Republic) or the website's Pay Now. This is now the largest non-autopay tier: a single targeted message offering to switch to recurring is likely enough.</p>
           <p><b>${cardU} units</b> pay by card manually each month. They have a card on file — the friction is one click.</p>
           <p><b>${manualU} units</b> pay by cash or cheque — the genuinely hard-to-convert group, needing a longer-term incentive strategy.</p>
@@ -1509,7 +1557,7 @@ function renderPortfolioPayments(){
           <td class="r mono">${s.behind} (${s.severe})</td></tr>`).join('')}
         </tbody>
       </table>
-      <div class="note"><b>${paidInPeriod} units paid in ${collPeriod}</b> (${paidCurrent} now current + ${behindPartial} behind who paid partially). The <b>${prepaid+offCycle}</b> current units with no ${collPeriod.split(' ')[0]} payment aren't missing — <b>${prepaid}</b> are prepaid / paid ahead and <b>${offCycle}</b> are billed on another date that month. Only <b>${behind} are overdue</b> (${bbd(overdueAmt)}); of those <b>${severeUnits} are 60+ days late</b> and <b>${behindNone} paid nothing at all</b>. This card is the last full month-end close — the live arrears position is the delinquency watch above.</div>
+      <div class="note"><b>${paidInPeriod} units paid in ${collPeriod}</b> (${paidCurrent} now current + ${behindPartial} behind who paid partially). The <b>${prepaid+offCycle}</b> current units with no ${collPeriod.split(' ')[0]} payment aren't missing — <b>${prepaid}</b> are prepaid / paid ahead and <b>${offCycle}</b> are billed on another date that month. Only <b>${behind} are overdue</b> (${bbd(overdueAmt)}); of those <b>${severeUnits} are 60+ days late</b> and <b>${behindNone} paid nothing at all</b>. This card is the last full month-end close — the live arrears position is the delinquency watch below.</div>
     </div>
 
     <div class="card" style="margin-bottom:0">
@@ -1524,7 +1572,7 @@ function renderPortfolioPayments(){
         <thead><tr><th>Site</th><th class="r">31+ days</th><th class="r">60+ days</th><th class="r">Overdue $</th></tr></thead>
         <tbody>${dqRows}</tbody>
       </table>
-      <div class="note"><b>31+ days past due</b> excludes current-cycle rent, so it's comparable pull-to-pull regardless of the day of the month (the raw "any days late" count balloons early in the month). Updated from the latest rent-roll pull — a rolling tracker, separate from the June month-end snapshot below.</div>
+      <div class="note"><b>31+ days past due</b> excludes current-cycle rent, so it's comparable pull-to-pull regardless of the day of the month (the raw "any days late" count balloons early in the month). Updated from the latest rent-roll pull — a rolling tracker, separate from the ${collPeriod} month-end snapshot above.</div>
     </div>
 
     ${renderPaymentTrend()}`;
@@ -1795,6 +1843,11 @@ function renderLeadFunnel(){
   const phone = F.byChannel.find(c=>c.c==='Phone');
   const email = F.byChannel.find(c=>c.c==='Email');
   const internet = F.bySource.find(s=>s.s==='Internet');
+  const byConv = [...sites].sort((a,b)=>(a[1].converted/a[1].inquiries)-(b[1].converted/b[1].inquiries));
+  const worstSite = byConv[0], bestSite = byConv[byConv.length-1];
+  const byFu = [...sites].sort((a,b)=>(a[1].fuMade/a[1].fuSched)-(b[1].fuMade/b[1].fuSched));
+  const lowFu = byFu[0], topFu = byFu[byFu.length-1];
+  const poss = n => n + (/s$/i.test(n) ? "'" : "'s");   // "Lears'" not "Lears's"
   const chanRows = F.byChannel.map(c=>`
     <tr>
       <td style="font-weight:600"><span style="display:inline-block;width:9px;height:9px;border-radius:2px;background:${CH[c.c]||'#999'};margin-right:7px;vertical-align:middle"></span>${c.c}</td>
@@ -1849,11 +1902,11 @@ function renderLeadFunnel(){
       <div>
         <div class="insight" style="background:var(--navy2);margin-bottom:16px">
           <h4>The gap is follow-up, not leads</h4>
-          <p>Only <b>${fuM} of ${fuS}</b> scheduled follow-ups were actually completed (<b>${rate(fuM,fuS)}%</b>). The site that follows up most — <b>Lears (${F.sites.Lears.fuMade})</b> — also converts best (<b>${rate(F.sites.Lears.converted,F.sites.Lears.inquiries)}%</b>), while South completed just <b>${F.sites.South.fuMade}</b>. Automated follow-up (SMS / email / WhatsApp) after every inquiry is the clearest conversion lever.</p>
+          <p>Only <b>${fuM} of ${fuS}</b> scheduled follow-ups were actually completed (<b>${rate(fuM,fuS)}%</b>). The site that follows up most — <b>${topFu[0]} (${topFu[1].fuMade} of ${topFu[1].fuSched})</b> — also converts best (<b>${rate(topFu[1].converted,topFu[1].inquiries)}%</b>), while ${lowFu[0]} completed just <b>${lowFu[1].fuMade}</b> of ${lowFu[1].fuSched}. Automated follow-up (SMS / email / WhatsApp) after every inquiry is the clearest conversion lever.</p>
         </div>
         <div class="insight" style="background:var(--navy2);margin-bottom:16px">
           <h4>Online drives demand — the phone closes it</h4>
-          <p><b>Internet</b> is the single biggest inquiry source (<b>${internet.inq} leads</b>), yet almost no one rents through the website itself — prospects find you online and then <b>call</b>. Two moves: make the website a <b>booking channel</b>, and lift Central's phone conversion (14%) toward Lears' (42%).</p>
+          <p><b>Internet</b> is the single biggest inquiry source (<b>${internet.inq} leads</b>), yet almost no one rents through the website itself — prospects find you online and then <b>call</b>. Two moves: make the website a <b>booking channel</b>, and lift ${poss(worstSite[0])} overall conversion (${rate(worstSite[1].converted,worstSite[1].inquiries)}%) toward ${poss(bestSite[0])} (${rate(bestSite[1].converted,bestSite[1].inquiries)}%). <span style="color:#b9b9b9">Channel-level conversion isn't split by site in this pull, so these are all-channel rates.</span></p>
         </div>
         <details class="action-plan">
           <summary>Conversion action plan <span class="badge">2 actions</span></summary>
@@ -1929,7 +1982,7 @@ function renderCustomerProfile(){
       <div>
         <div class="insight" style="background:var(--navy2);margin-bottom:16px">
           <h4>Location-led demand</h4>
-          <p><b>${pctT(loc)}%</b> rent because of <b>location</b> — and effectively no one for price, so the lever is <b>visibility and proximity</b> (Google Business Profile, local SEO, signage), not discounting. On a 14×21-mile island the mile bands are coarse — "within 10 miles" is most of Barbados — so the sharper local read is the <b>Geography</b> tab's parish view (South is ~43% Christ Church, its own parish).</p>
+          <p><b>${pctT(loc)}%</b> rent because of <b>location</b> — and effectively no one for price, so the lever is <b>visibility and proximity</b> (Google Business Profile, local SEO, signage), not discounting. On a 14×21-mile island the mile bands are coarse — "within 10 miles" is most of Barbados — so the sharper local read is the <b>Geography</b> tab's parish view, where each site's individual tenants cluster in its own parish.</p>
         </div>
         <div class="insight" style="background:var(--navy2);margin-bottom:16px">
           <h4>On-island vs overseas</h4>
@@ -1998,16 +2051,20 @@ function render(){
     const rentable = CUR.totalUnits - CUR.unrentable;
     const rentableOcc = (100*CUR.occupied/rentable).toFixed(1);
     unNote.style.display = '';
-    unNote.innerHTML = `<b>${CUR.unrentable} units currently unrentable</b> (out of service) — excluded from rentable stock. Of the ${rentable} rentable units, ${CUR.occupied} are filled (<b>${rentableOcc}%</b>). ${CUR.basis}.`;
+    unNote.innerHTML = `<b>${CUR.unrentable} unit${CUR.unrentable===1?'':'s'} currently unrentable</b> (out of service) — excluded from rentable stock. Of the ${rentable} rentable units, ${CUR.occupied} are filled (<b>${rentableOcc}%</b>). ${CUR.basis}.`;
   } else {
     unNote.style.display = 'none';
   }
+  const rec = document.getElementById('reconcileNote');
+  if(rec){ rec.innerHTML = CUR.reconcileNote || ''; rec.style.display = CUR.reconcileNote ? '' : 'none'; }
   const hasMove = CUR.movedIn != null && CUR.movedOut != null;
   document.getElementById('mi').textContent = hasMove ? CUR.movedIn : '—';
   document.getElementById('mo').textContent = hasMove ? CUR.movedOut : '—';
   document.getElementById('net').innerHTML = hasMove ? ((CUR.net>=0?'+':'')+CUR.net) : '—';
   document.getElementById('moveNote').textContent = hasMove
-    ? ('At ~99% occupancy, a small negative net is churn at the ceiling, not falling demand.'
+    ? ((CUR.physOcc >= 98
+        ? `At ${CUR.physOcc.toFixed(1)}% occupancy, a small negative net is churn at the ceiling, not falling demand.`
+        : `At ${CUR.physOcc.toFixed(1)}% occupancy there is still rentable headroom, so net absorption here reflects demand rather than a physical ceiling.`)
        + (CUR.transfers ? ` A further ${CUR.transfers} unit${CUR.transfers===1?'':'s'} transferred between units in the period — counted separately from move-ins.` : ''))
     : 'Move-in / move-out activity isn\'t in a rent-roll snapshot — it needs the Rental Activity (move-in/move-out) report for the period.';
   document.getElementById('typebars').innerHTML = CUR.byType.map(r=>{
@@ -2023,6 +2080,12 @@ function render(){
   /* tenure */
   document.getElementById('losmean').innerHTML = CUR.losMean.toFixed(0)+'<small> mo &middot; '+(CUR.losMean/12).toFixed(1)+' yr</small>';
   document.getElementById('losmed').innerHTML = CUR.losMedian.toFixed(0)+'<small> mo &middot; '+(CUR.losMedian/12).toFixed(1)+' yr</small>';
+  const losTotal = Object.values(CUR.losBands).reduce((a,b)=>a+b,0);
+  const long = CUR.losBands['5 yr+']||0;
+  const longPct = losTotal ? Math.round(100*long/losTotal) : 0;
+  document.getElementById('tenureNote').innerHTML = longPct >= 25
+    ? `Heavily skewed to long stays — <b>${long} of ${losTotal}</b> occupied units (${longPct}%) have been in place five years or more.`
+    : `A young base — only <b>${long} of ${losTotal}</b> occupied units (${longPct}%) have been in place five years or more, so the distribution sits in the short and middle bands.`;
   const losMax = Math.max(...Object.values(CUR.losBands));
   document.getElementById('losbars').innerHTML = Object.entries(CUR.losBands).map(([k,v])=>
     `<div class="bar-row"><span class="lab">${k}</span><div class="track"><div class="fill" style="width:${100*v/losMax}%"></div></div><span class="num">${v}</span></div>`).join('');
@@ -2049,6 +2112,8 @@ function render(){
   document.getElementById('conc').textContent = CUR.top10.toFixed(1)+'%';
   const cb = document.getElementById('corpBasisNote');
   if(cb){ cb.innerHTML = CUR.corpBasis ? '<b>Basis.</b> '+CUR.corpBasis : ''; cb.style.display = CUR.corpBasis ? '' : 'none'; }
+  const tb = document.getElementById('top10BasisNote');
+  if(tb){ tb.innerHTML = CUR.top10Basis ? '<b>Concentration basis.</b> '+CUR.top10Basis : ''; tb.style.display = CUR.top10Basis ? '' : 'none'; }
 
   /* geography */
   const geoSorted = Object.entries(CUR.geoIndiv).sort((a,b)=>b[1]-a[1]);
@@ -2161,6 +2226,7 @@ function renderKeyAccounts(CUR){
         <div class="note"><b>This is the exposure.</b> ${K.apNone} of ${K.multi} multi-unit tenants are collected entirely by hand, and autopay penetration on their units (<b>${K.apMultiPct.toFixed(1)}%</b>) is ${Math.abs(apGap)<0.5?'no better than':(apGap<0?'<b>lower than</b>':'above')} the single-unit rate (${K.apSinglePct.toFixed(1)}%). ${emailReach>=90
           ? `Email reach is not the constraint — <b>${emailReach}%</b> of these accounts have an address on file — so the fix is enrolment, not contact details.`
           : `Only <b>${emailReach}%</b> carry an email address, so the highest-value, longest-tenured relationships on the site are both the least automated and the hardest to contact.`}</div>
+        ${K.emailBasis ? `<div class="note"><b>Email basis.</b> ${K.emailBasis}</div>` : ''}
         ${K.newTen ? `<div class="flag" style="margin-top:12px">${K.newTen} multi-unit tenant${K.newTen===1?'':'s'} under 1 year &middot; ${K.newUnits} units &middot; ${bbd(K.newRent)}/mo unproven</div>` : ''}
       </div>
     </div>
@@ -2583,7 +2649,20 @@ applySection();
       r = await fetch('/api/ask', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ question: q, data: LOCATIONS })
+        /* The per-site snapshots are only part of the dashboard. Send the portfolio-level
+           datasets too, or the assistant answers "not in the data" for anything on the
+           Trends, Lead Funnel, Customer Profile or delinquency cards. */
+        body: JSON.stringify({
+          question: q,
+          data: LOCATIONS,
+          portfolio: {
+            paymentTrend: PAYMENT_TREND,
+            acquisitionCohorts: ACQ_COHORTS,
+            leadFunnel: LEAD_FUNNEL,
+            customerProfile: CUSTOMER_PROFILE,
+            delinquency: DELINQUENCY
+          }
+        })
       });
       raw = await r.text();
       try { d = JSON.parse(raw); } catch(_){ /* non-JSON body (e.g. an auth or crash page) */ }

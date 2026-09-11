@@ -15,7 +15,7 @@
 import Anthropic from '@anthropic-ai/sdk';
 
 // Cheap + fast, and plenty for lookup/summarise over a few KB of data.
-// Swap to 'claude-sonnet-5' or 'claude-opus-4-8' for deeper analytical answers.
+// Swap to 'claude-sonnet-5' or 'claude-opus-5' for deeper analytical answers.
 const MODEL = 'claude-haiku-4-5';
 
 // The dashboard's sections (from SECTIONS in index.html). The model picks one of
@@ -23,6 +23,7 @@ const MODEL = 'claude-haiku-4-5';
 const SECTIONS = `
 Portfolio-wide sections (scope: portfolio — shown across all three sites):
   overview            — Portfolio summary: occupancy, rent, tenure, corp mix across all sites
+  trends              — Month-over-month movement across every snapshot: occupancy, rent roll, tenure drift, 31+ arrears, autopay enrolled vs collected, collections series
   portfolio-payments  — Payment methods, autopay trend, collections status & delinquency watch (31+ days)
   acquisition         — How tenants were acquired: marketing source & contact channel
   lead-funnel         — Lead funnel / conversion
@@ -97,7 +98,7 @@ const SCHEMA = {
   }
 };
 
-function systemPrompt(data) {
+function systemPrompt(data, portfolio) {
   const locKeys = Object.keys(data || {});
   const locLines = locKeys.map(k => {
     const L = data[k];
@@ -122,9 +123,19 @@ function systemPrompt(data) {
     '- Add a `visual` when it helps the reader see the answer: kpis for 1-4 headline numbers; bars to compare values across sites/categories/methods; table for a small grid. Keep visuals to the data actually asked about. Set visual to null when the summary alone is enough.',
     '- For bars/kpis, `unit` is "$" for money, "%" for percentages, or "" otherwise. Put comparison values in `items` (value is numeric, no symbols). For a table, fill `columns` and `rows` and leave `items` as [].',
     '- "Latest" means the most recent month present for that site.',
+    '- Not every block is refreshed on the same pull. Some months carry no `marketing`, `marketingValue` or `collStatus` — the dashboard falls back to the newest month that has them, so state the period a figure comes from when it is not the latest month.',
+    '- Autopay has two distinct measures: `autopayPct` is units ENROLLED for automatic billing on the rent roll; the Plug & Pay row in `paymentMethods` and `paymentTrend.autopay` are units that actually COLLECTED. They differ. Never present one as the other.',
+    '- Compare arrears using the 31+ day buckets (`31–60`, `61–90`, `90+`). The `1–30` bucket swings with the day of the month the rent roll was pulled and is not comparable across months.',
+    '- Where a month carries `corpBasis`, `top10Basis`, `reconcileNote` or `keyAccounts.emailBasis`, that field explains a change of basis or a known mismatch. Read it before comparing that metric across months, and mention it if the comparison is affected.',
     '',
-    'DATA (JSON):',
-    JSON.stringify(data)
+    'PER-SITE SNAPSHOT DATA (JSON):',
+    JSON.stringify(data),
+    '',
+    'PORTFOLIO-LEVEL DATA (JSON) — paymentTrend is the monthly receipts and autopay series;',
+    'acquisitionCohorts is contact channel by move-in year; leadFunnel is inquiry-to-move-in',
+    'conversion; customerProfile is the SiteLink marketing summary; delinquency is the rolling',
+    '31+ day tracker:',
+    JSON.stringify(portfolio || {})
   ].join('\n');
 }
 
@@ -151,6 +162,7 @@ export default async function handler(req, res) {
   const body = typeof req.body === 'string' ? JSON.parse(req.body || '{}') : (req.body || {});
   const question = (body.question || '').toString().trim();
   const data = body.data;
+  const portfolio = body.portfolio && typeof body.portfolio === 'object' ? body.portfolio : null;
 
   if (!question) { res.status(400).json({ error: 'No question provided.' }); return; }
   if (!data || typeof data !== 'object') { res.status(400).json({ error: 'No data provided.' }); return; }
@@ -162,7 +174,7 @@ export default async function handler(req, res) {
       model: MODEL,
       max_tokens: 1500,
       system: [
-        { type: 'text', text: systemPrompt(data), cache_control: { type: 'ephemeral' } }
+        { type: 'text', text: systemPrompt(data, portfolio), cache_control: { type: 'ephemeral' } }
       ],
       output_config: { format: { type: 'json_schema', schema: SCHEMA } },
       messages: [{ role: 'user', content: question }]
