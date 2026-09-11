@@ -155,6 +155,31 @@ td.r,th.r{text-align:right}
 .site-ctl .mswitch{margin-left:4px;padding-left:10px;border-left:1px solid var(--line)}
 @media(max-width:760px){.site-ctl{margin-left:0}}
 .site-meta{display:flex;flex-wrap:wrap;gap:24px;margin-top:14px;background:var(--card);border:1px solid var(--line);border-radius:12px;padding:14px 16px;box-shadow:0 8px 24px -26px rgba(0,0,0,.30)}
+/* trend charts */
+.chart{position:relative;margin:4px 0 2px}
+.chart svg{width:100%;height:auto;display:block;font-family:'Source Sans 3',sans-serif;overflow:visible}
+.chart svg text{font-variant-numeric:tabular-nums}
+.chart .tip{position:absolute;top:8px;background:var(--navy2);color:#fff;border-radius:8px;padding:8px 10px;font-size:12px;pointer-events:none;z-index:5;min-width:130px;box-shadow:0 8px 20px -10px rgba(0,0,0,.5)}
+.chart .tip b{display:block;font-family:'Montserrat';font-size:11px;margin-bottom:4px;color:#ffd9d9}
+.chart .tip div{display:flex;align-items:center;gap:6px;padding:1px 0}
+.chart .tip div span{margin-left:auto;font-weight:700;font-variant-numeric:tabular-nums;padding-left:10px}
+.chart .tip i,.legend-row i,.pb-lab i{display:inline-block;width:9px;height:9px;border-radius:2px;flex:none}
+.legend-row{display:flex;flex-wrap:wrap;gap:14px;margin-top:8px;font-size:12px;color:var(--muted)}
+.legend-row .lg{display:inline-flex;align-items:center;gap:6px;font-weight:600}
+details.tbl{margin-top:10px}
+details.tbl summary{font-family:'Montserrat';font-weight:700;font-size:11px;letter-spacing:.06em;text-transform:uppercase;color:var(--muted);cursor:pointer;list-style:none;display:inline-flex;align-items:center;gap:6px}
+details.tbl summary::-webkit-details-marker{display:none}
+details.tbl summary::before{content:"▸";color:var(--accent)}
+details.tbl[open] summary::before{content:"▾"}
+details.tbl table{margin-top:8px}
+.pbars{margin-top:6px}
+.pb-row{display:grid;grid-template-columns:86px 1fr 54px;align-items:center;gap:10px;margin:8px 0}
+.pb-lab{display:inline-flex;align-items:center;gap:7px;font-weight:700;font-size:13px}
+.pb-tracks{display:grid;gap:3px}
+.pb-track{position:relative;height:14px;background:var(--paper2);border-radius:0 4px 4px 0;margin-right:40px}
+.pb-fill{height:100%;border-radius:0 4px 4px 0}
+.pb-val{position:absolute;left:calc(100% + 8px);top:-1px;font-size:11px;font-weight:700;color:var(--ink);font-variant-numeric:tabular-nums}
+.pb-gap{font-family:'Montserrat';font-weight:800;font-size:12px;text-align:right;color:var(--bad);font-variant-numeric:tabular-nums}
 /* overview headline cards */
 .headline-grid{margin-bottom:16px;position:relative;z-index:3}
 .headline h3 .when{margin-left:auto;font-weight:600;letter-spacing:.02em;text-transform:none;color:var(--muted)}
@@ -1360,6 +1385,104 @@ function trendModel(){
   return { keys, sites, months, complete, shortLabel, d31, d60, apUnits };
 }
 
+/* ===== Small SVG charts for the Trends tab.
+   Site colours are fixed per site (never by row order) and validated for colour-blind
+   separation: Central red, South blue, Lears amber. Every chart carries a legend, an
+   end label per series, a hover tooltip, and a collapsible table twin. ===== */
+const SITE_COLOR = { Central:'#E30613', South:'#2a7fa8', Lears:'#b88620' };
+const CHART_HOVER = {};   // chart id → series data for the tooltip
+
+function niceTicks(min, max, n=4){
+  if(max===min){ max = min+1; }
+  const span = max-min, raw = span/n, mag = Math.pow(10, Math.floor(Math.log10(raw)));
+  const step = [1,2,2.5,5,10].map(s=>s*mag).find(s=>s>=raw);
+  const lo = Math.floor(min/step)*step, hi = Math.ceil(max/step)*step;
+  const t = []; for(let v=lo; v<=hi+step/2; v+=step) t.push(+v.toFixed(6));
+  return { lo, hi, ticks:t };
+}
+
+/* series: [{name, color, values:[number|null per x]}] ; xLabels: [] ; yFmt: fn ; zero: force zero baseline */
+function lineChart(id, series, xLabels, yFmt, opts={}){
+  const W = 520, H = opts.height||190, padL = 46, padR = 78, padT = 14, padB = 26;
+  const all = series.flatMap(s=>s.values).filter(v=>v!=null);
+  let { lo, hi, ticks } = niceTicks(opts.zero?0:Math.min(...all), Math.max(...all));
+  const n = xLabels.length;
+  const x = i => padL + (n>1 ? i*(W-padL-padR)/(n-1) : (W-padL-padR)/2);
+  const y = v => padT + (H-padT-padB)*(1-(v-lo)/(hi-lo||1));
+  const grid = ticks.map(t=>`<line x1="${padL}" x2="${W-padR}" y1="${y(t)}" y2="${y(t)}" stroke="var(--line)" stroke-width="1"/><text x="${padL-8}" y="${y(t)+3.5}" text-anchor="end" font-size="10" fill="var(--muted)">${yFmt(t)}</text>`).join('');
+  const xs = xLabels.map((l,i)=>`<text x="${x(i)}" y="${H-8}" text-anchor="middle" font-size="10" fill="var(--muted)">${l}</text>`).join('');
+  const paths = series.map(s=>{
+    const pts = s.values.map((v,i)=>v==null?null:[x(i),y(v)]).filter(Boolean);
+    if(!pts.length) return '';
+    const d = pts.map((p,i)=>`${i?'L':'M'}${p[0].toFixed(1)},${p[1].toFixed(1)}`).join(' ');
+    const last = pts[pts.length-1];
+    const lastV = s.values.filter(v=>v!=null).pop();
+    return `<path d="${d}" fill="none" stroke="${s.color}" stroke-width="2" stroke-linejoin="round" stroke-linecap="round"/>
+      <circle cx="${last[0]}" cy="${last[1]}" r="5.5" fill="var(--card)"/><circle cx="${last[0]}" cy="${last[1]}" r="4" fill="${s.color}"/>
+      <text x="${last[0]+10}" y="${last[1]+3.5}" font-size="10.5" font-weight="700" fill="var(--ink)" font-family="Montserrat">${s.name} ${yFmt(lastV)}</text>`;
+  }).join('');
+  CHART_HOVER[id] = { series, xLabels, yFmt, padL, padR, W, n };
+  const legend = series.map(s=>`<span class="lg"><i style="background:${s.color}"></i>${s.name}</span>`).join('');
+  return `<div class="chart" data-chart="${id}">
+    <svg viewBox="0 0 ${W} ${H}" onmousemove="chartHover(event,'${id}')" onmouseleave="chartLeave('${id}')">
+      ${grid}${xs}<line class="xh" x1="0" x2="0" y1="${padT}" y2="${H-padB}" stroke="var(--muted)" stroke-width="1" style="display:none"/>${paths}
+    </svg>
+    <div class="tip" id="tip-${id}" hidden></div>
+    <div class="legend-row">${legend}</div>
+  </div>`;
+}
+
+function chartHover(ev, id){
+  const C = CHART_HOVER[id]; if(!C) return;
+  const svg = ev.currentTarget, r = svg.getBoundingClientRect();
+  const px = (ev.clientX - r.left) * C.W / r.width;
+  const i = Math.max(0, Math.min(C.n-1, Math.round((px - C.padL) / ((C.W-C.padL-C.padR)/(C.n-1||1)))));
+  const xh = svg.querySelector('.xh'); const xx = C.padL + i*((C.W-C.padL-C.padR)/(C.n-1||1));
+  xh.setAttribute('x1', xx); xh.setAttribute('x2', xx); xh.style.display='';
+  const tip = document.getElementById('tip-'+id);
+  tip.innerHTML = `<b>${C.xLabels[i]}</b>` + C.series.map(s=>s.values[i]==null?'':`<div><i style="background:${s.color}"></i>${s.name} <span>${C.yFmt(s.values[i])}</span></div>`).join('');
+  tip.hidden = false;
+  const left = (ev.clientX - r.left);
+  const flip = left > r.width*0.55;
+  tip.style.left = flip ? Math.max(0, left - tip.offsetWidth - 12)+'px' : (left+12)+'px';
+}
+function chartLeave(id){
+  const tip = document.getElementById('tip-'+id); if(tip) tip.hidden = true;
+  const svg = document.querySelector(`[data-chart="${id}"] svg .xh`); if(svg) svg.style.display='none';
+}
+
+/* Horizontal paired bars: rows [{name, color, a, b}], labels [aName, bName] */
+function pairBars(rows, labels, fmt){
+  const max = Math.max(...rows.flatMap(r=>[r.a,r.b]))||1;
+  return `<div class="pbars">${rows.map(r=>`
+    <div class="pb-row"><span class="pb-lab"><i style="background:${r.color}"></i>${r.name}</span>
+      <div class="pb-tracks">
+        <div class="pb-track"><div class="pb-fill" style="width:${100*r.a/max}%;background:${r.color}"></div><span class="pb-val">${fmt(r.a)}</span></div>
+        <div class="pb-track"><div class="pb-fill" style="width:${100*r.b/max}%;background:${r.color};opacity:.42"></div><span class="pb-val">${fmt(r.b)}</span></div>
+      </div>
+      <span class="pb-gap">${r.b-r.a>=0?'+':'−'}${Math.abs(r.b-r.a)}</span></div>`).join('')}
+    <div class="legend-row"><span class="lg"><i style="background:var(--navy2)"></i>${labels[0]}</span><span class="lg"><i style="background:var(--navy2);opacity:.42"></i>${labels[1]}</span><span class="lg" style="margin-left:auto">gap = ${labels[1]} − ${labels[0]}</span></div>
+  </div>`;
+}
+
+/* Vertical columns from a zero baseline: values [], labels [] */
+function colChart(id, values, labels, yFmt, color){
+  const W = 520, H = 190, padL = 46, padR = 12, padT = 18, padB = 26;
+  const { lo, hi, ticks } = niceTicks(0, Math.max(...values));
+  const y = v => padT + (H-padT-padB)*(1-(v-lo)/(hi-lo||1));
+  const n = values.length, slot = (W-padL-padR)/n, bw = Math.min(24, slot*0.6);
+  const grid = ticks.map(t=>`<line x1="${padL}" x2="${W-padR}" y1="${y(t)}" y2="${y(t)}" stroke="var(--line)"/><text x="${padL-8}" y="${y(t)+3.5}" text-anchor="end" font-size="10" fill="var(--muted)">${yFmt(t)}</text>`).join('');
+  const maxI = values.indexOf(Math.max(...values)), minI = values.indexOf(Math.min(...values));
+  const bars = values.map((v,i)=>{
+    const cx = padL + slot*(i+0.5), top = y(v), h = y(0)-top;
+    const lab = (i===maxI||i===minI||i===n-1) ? `<text x="${cx}" y="${top-5}" text-anchor="middle" font-size="10" font-weight="700" fill="var(--ink)" font-family="Montserrat">${yFmt(v)}</text>` : '';
+    return `<g><title>${labels[i]}: ${yFmt(v)}</title><path d="M${cx-bw/2},${y(0)} v${-(h-4)} q0,-4 4,-4 h${bw-8} q4,0 4,4 v${h-4} z" fill="${color}"/>${lab}<text x="${cx}" y="${H-8}" text-anchor="middle" font-size="10" fill="var(--muted)">${labels[i]}</text></g>`;
+  }).join('');
+  return `<div class="chart"><svg viewBox="0 0 ${W} ${H}">${grid}${bars}</svg></div>`;
+}
+
+const tableTwin = html => `<details class="tbl"><summary>Table view</summary>${html}</details>`;
+
 function renderTrends(){
   const el = document.getElementById('trendsBody');
   if(!el) return;
@@ -1397,21 +1520,28 @@ function renderTrends(){
     return `<tr><td style="font-weight:600">${s.name}</td>${cells}<td class="r">${(a&&b)?deltaFn(a,b):''}</td></tr>`;
   }).join('');
 
+  /* series builders: one value per month key, null where a site has no snapshot */
+  const xl = T.keys.map(k=>T.shortLabel(k));
+  const ser = fn => T.sites.map(s=>({ name:s.name, color:SITE_COLOR[s.name]||'var(--navy2)', values:T.keys.map(k=>s.L.months[k]?fn(s.L.months[k]):null) }));
+  const kFmt = v => '$'+(v/1000).toFixed(0)+'k';
+
   const occCard = `
     <div class="card">
-      <h3><span class="dot"></span>Occupancy &amp; supply</h3>
-      <table>${head('Δ')}<tbody>
+      <h3><span class="dot"></span>Occupied units</h3>
+      ${lineChart('occ', ser(m=>m.occupied), xl, v=>Math.round(v))}
+      ${tableTwin(`<table>${head('Δ')}<tbody>
         ${rows(m=>`${m.occupied}<span style="color:var(--muted)">/${m.totalUnits}</span>`, (a,b)=>arrow(b.occupied-a.occupied,0))}
-      </tbody></table>
+      </tbody></table>`)}
       <div class="note">Occupied of total units. Every unit added in the period was at <b>Lears</b> — the other two sites have been at their physical ceiling throughout, so portfolio growth is a supply question, not a demand one.</div>
     </div>`;
 
   const rentCard = `
     <div class="card">
       <h3><span class="dot"></span>Monthly rent roll</h3>
-      <table>${head('Δ')}<tbody>
+      ${lineChart('rent', ser(m=>m.occRent), xl, kFmt)}
+      ${tableTwin(`<table>${head('Δ')}<tbody>
         ${rows(m=>bbdk(m.occRent), (a,b)=>arrow(pctChg(b.occRent,a.occRent),1,'%'))}
-      </tbody></table>
+      </tbody></table>`)}
       <div class="note">Economic occupancy on the latest pull is ${T.sites.map(s=>{
         const last = s.L.months[T.keys.filter(k=>s.L.months[k]).pop()];
         return `${s.name} ${last.econOcc.toFixed(1)}%`;
@@ -1439,7 +1569,8 @@ function renderTrends(){
   const tenureCard = `
     <div class="card">
       <h3><span class="dot"></span>Tenure drift &mdash; mean tenure, months</h3>
-      <table>${head('per mo')}<tbody>${driftRows}</tbody></table>
+      ${lineChart('los', ser(m=>m.losMean), xl, v=>v.toFixed(0)+' mo')}
+      ${tableTwin(`<table>${head('per mo')}<tbody>${driftRows}</tbody></table>`)}
       <div class="note"><b>Read the last column as churn.</b> It is how much mean tenure grew per calendar month between the two most recent pulls. <b>1.00</b> means the base simply aged — nobody left, nobody joined. Below that, move-ins are diluting it; <b>below zero the base is getting younger</b>. The three sites are on genuinely different tracks, and this is the cleanest single number that shows it.</div>
     </div>`;
 
@@ -1461,9 +1592,10 @@ function renderTrends(){
   const dqCard = `
     <div class="card">
       <h3><span class="dot"></span>Accounts 31+ days late</h3>
-      <table>${head('Δ')}<tbody>
+      ${lineChart('d31', ser(m=>T.d31(m)), xl, v=>Math.round(v), {zero:true})}
+      ${tableTwin(`<table>${head('Δ')}<tbody>
         ${rows(m=>T.d31(m), (a,b)=>arrow(T.d31(b)-T.d31(a),0))}
-      </tbody></table>
+      </tbody></table>`)}
       <div class="note"><b>31+ days is the comparable cut</b> across pulls taken on different days: it always means at least one full prior cycle unpaid, whereas the 1–30 bucket swings with the day of the month. On that basis arrears have ${dqSiteWord} since ${dqPrev?dqPrev.label:'the previous pull'}, taking the portfolio from <b>${dqPrev?dqPrev.d31:'—'}</b> to <b>${dqCur.d31}</b> accounts${dqMoM?` (${dqMoM>0?'+':''}${dqMoM})`:''}. Against the ${dqFirst?dqFirst.label:'first'} close the level is still ${dqBaseChg===null?'unchanged':(dqBaseChg>0?`<b>${Math.round(dqBaseChg)}% higher</b>`:`<b>${Math.round(-dqBaseChg)}% lower</b>`)} — so the level remains the thing to watch even where the latest month moved the right way.</div>
     </div>`;
 
@@ -1488,7 +1620,12 @@ function renderTrends(){
   const apCard = `
     <div class="card">
       <h3><span class="dot"></span>Autopay — enrolled vs actually collected (${PT.months[nPT-1]})</h3>
-      <table>
+      ${pairBars(T.sites.map(s=>{
+        const m = s.L.months[T.keys.filter(k=>s.L.months[k]).pop()];
+        const pt = PT.sites[s.name];
+        return { name:s.name, color:SITE_COLOR[s.name], a:T.apUnits(m), b:pt?pt.autopay[nPT-1]:0 };
+      }), ['Enrolled','Collected'], v=>v)}
+      ${tableTwin(`<table>
         <thead><tr><th>Site</th><th class="r">Enrolled</th><th class="r">Collected</th><th class="r">Gap</th><th class="r">Fail rate</th></tr></thead>
         <tbody>${apRows}</tbody>
         <tfoot><tr style="border-top:2px solid var(--line)">
@@ -1498,7 +1635,8 @@ function renderTrends(){
           <td class="r mono" style="font-weight:700;color:var(--accent)">−${totEnrolled-totCollected}</td>
           <td class="r mono" style="font-weight:700">${Math.round(100*(totEnrolled-totCollected)/totEnrolled)}%</td>
         </tr></tfoot>
-      </table>
+      </table>`)}
+      <div class="note">Portfolio: <b>${totEnrolled}</b> enrolled, <b>${totCollected}</b> collected, a fail rate of <b>${Math.round(100*(totEnrolled-totCollected)/totEnrolled)}%</b>.</div>
       <div class="note"><b>Enrolled</b> is units flagged for automatic billing on the rent roll; <b>collected</b> is units that actually produced a Plug &amp; Pay receipt. The gap is autopay that was set up but did not take — expired or declined cards being the usual cause. This is a recoverable number: it needs no new sign-ups, just a card-refresh chase.</div>
     </div>`;
 
@@ -1506,16 +1644,14 @@ function renderTrends(){
   const coll = PT.months.map((_,i)=>Object.values(PT.sites).reduce((t,s)=>t+s.collections[i],0));
   const cMax = Math.max(...coll), cMin = Math.min(...coll);
   const cAvg = coll.reduce((a,b)=>a+b,0)/coll.length;
-  const collBars = coll.map((v,i)=>`
-    <div class="trend-bar port" style="height:${Math.max(6,100*(v-cMin*0.94)/(cMax-cMin*0.94))}%">
-      <span class="tval">${(v/1000).toFixed(0)}k</span><span class="tmon">${PT.months[i]}</span>
-    </div>`).join('');
-
   const collCard = `
     <div class="card">
       <h3><span class="dot"></span>Portfolio collections &middot; ${PT.months[0]}–${PT.months[nPT-1]} 2026</h3>
-      <div class="trend-bars">${collBars}</div>
-      <div class="note" style="margin-top:22px">${nPT} months of receipts, range <b>${bbdk(cMin)}–${bbdk(cMax)}</b> against a <b>${bbdk(cAvg)}</b> average — a <b>${(100*(cMax-cMin)/cAvg).toFixed(0)}% band</b>. The high and low months are <b>${PT.months[coll.indexOf(cMax)]}</b> and <b>${PT.months[coll.indexOf(cMin)]}</b>, so month-to-month swing is still larger than any underlying direction; read the level, not the slope. Bars are scaled to the range, not to zero.</div>
+      ${colChart('coll', coll, PT.months, kFmt, 'var(--navy2)')}
+      ${tableTwin(`<table><thead><tr><th>Month</th>${Object.keys(PT.sites).map(s=>`<th class="r">${s}</th>`).join('')}<th class="r">Portfolio</th></tr></thead><tbody>
+        ${PT.months.map((mo,i)=>`<tr><td style="font-weight:600">${mo}</td>${Object.values(PT.sites).map(s=>`<td class="r mono">${bbdk(s.collections[i])}</td>`).join('')}<td class="r mono" style="font-weight:700">${bbdk(coll[i])}</td></tr>`).join('')}
+      </tbody></table>`)}
+      <div class="note">${nPT} months of receipts, range <b>${bbdk(cMin)}–${bbdk(cMax)}</b> against a <b>${bbdk(cAvg)}</b> average — a <b>${(100*(cMax-cMin)/cAvg).toFixed(0)}% band</b>. The high and low months are <b>${PT.months[coll.indexOf(cMax)]}</b> and <b>${PT.months[coll.indexOf(cMin)]}</b>, so month-to-month swing is still larger than any underlying direction; read the level, not the slope.</div>
     </div>`;
 
   /* ---------- written read ---------- */
