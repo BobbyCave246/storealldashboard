@@ -155,6 +155,20 @@ td.r,th.r{text-align:right}
 .site-ctl .mswitch{margin-left:4px;padding-left:10px;border-left:1px solid var(--line)}
 @media(max-width:760px){.site-ctl{margin-left:0}}
 .site-meta{display:flex;flex-wrap:wrap;gap:24px;margin-top:14px;background:var(--card);border:1px solid var(--line);border-radius:12px;padding:14px 16px;box-shadow:0 8px 24px -26px rgba(0,0,0,.30)}
+/* overview headline cards */
+.headline-grid{margin-bottom:16px;position:relative;z-index:3}
+.headline h3 .when{margin-left:auto;font-weight:600;letter-spacing:.02em;text-transform:none;color:var(--muted)}
+.hl-list{list-style:none;display:grid;gap:8px}
+.hl-list li{display:flex;align-items:flex-start;gap:10px;font-size:13.5px;line-height:1.45}
+.hl-list li .chg{margin:2px 0 0;flex:none;min-width:70px;text-align:center}
+.hl-list li a{color:var(--navy2);text-decoration:none;border-bottom:1px dotted var(--muted);cursor:pointer}
+.hl-list li a:hover{color:var(--accent);border-color:var(--accent)}
+.sev{flex:none;font-family:'Montserrat';font-weight:800;font-size:10px;text-transform:uppercase;letter-spacing:.06em;padding:3px 8px;border-radius:20px;margin-top:2px;min-width:52px;text-align:center}
+.sev.high{background:#fdeaea;color:var(--bad)}
+.sev.med{background:#fff5d6;color:var(--warn)}
+.sev.low{background:var(--paper2);color:var(--muted)}
+.hl-empty{font-size:13px;color:var(--muted);font-style:italic}
+.stat .d .chg{margin-left:0;margin-right:6px}
 /* rate management */
 .rate-grid{display:grid;grid-template-columns:repeat(4,1fr);gap:16px;margin-bottom:16px}
 .rate-ctl{display:grid;grid-template-columns:repeat(4,1fr);gap:14px;margin:6px 0 16px}
@@ -356,6 +370,10 @@ header:has(.csv-menu.open){overflow:visible}
   <!-- PANEL: OVERVIEW -->
   <div class="panel" data-section="overview">
   <section class="portfolio-overview">
+    <div class="grid g2 headline-grid">
+      <div class="card headline" id="whatChanged"></div>
+      <div class="card headline" id="attention"></div>
+    </div>
     <div class="hero portfolio-hero" id="portfolioHero"></div>
 
     <div class="sec-head portfolio-head"><div class="sec-num">00</div><h2>Portfolio Summary</h2>
@@ -1111,16 +1129,127 @@ function portfolioSummary(){
   };
 }
 
+/* Portfolio sums for one month key, over the sites that report it. */
+function portfolioAt(mk){
+  const ms = Object.values(LOCATIONS).map(L=>L.months[mk]).filter(Boolean);
+  const sum = f => ms.reduce((t,m)=>t+f(m),0);
+  const occupied = sum(m=>m.occupied), totalUnits = sum(m=>m.totalUnits);
+  const occRent = sum(m=>m.occRent), grossPot = sum(m=>m.grossPot);
+  return { occupied, totalUnits, occRent, grossPot, physOcc:100*occupied/totalUnits, econOcc:100*occRent/grossPot,
+           corpUnits:sum(m=>m.corpUnits), corpPct:100*sum(m=>m.corpUnits)/sum(m=>m.corpUnits+m.indivUnits) };
+}
+
+/* Jump to a view, and a site when the view is site-scoped. */
+function go(section, loc){
+  if(loc && LOCATIONS[loc]) setLoc(loc);
+  setSection(section);
+}
+
+/* ===== What changed — auto-written bullets from the last two comparable months ===== */
+function renderWhatChanged(T, cur, prv){
+  const el = document.getElementById('whatChanged'); if(!el) return;
+  if(!cur || !prv){
+    el.innerHTML = `<h3><span class="dot"></span>What changed</h3><div class="hl-empty">Two comparable months are needed before movement can be shown.</div>`;
+    return;
+  }
+  const items = [];
+  const link = (txt, sec, loc) => `<a onclick="go('${sec}'${loc?`,'${loc}'`:''})">${txt}</a>`;
+  const chip = (v,dp=0,unit='',invert=false) => {
+    if(Math.abs(v)<0.05) return `<span class="chg flat">flat</span>`;
+    const good = invert ? v<0 : v>0;
+    return `<span class="chg ${good?'up':'down'}">${v>0?'▲':'▼'} ${Math.abs(v).toFixed(dp)}${unit}</span>`;
+  };
+  const pct = (c,p)=> p?100*(c-p)/p:0;
+
+  /* units and rent */
+  const dUnits = cur.occupied - prv.occupied;
+  const dRent = pct(cur.rent, prv.rent);
+  items.push(`${chip(dUnits)} <span>Occupied units ${dUnits===0?'held at':'moved to'} <b>${cur.occupied}</b> (${cur.movedIn} in, ${cur.movedOut} out). ${link('Trends','trends')}</span>`);
+  items.push(`${chip(dRent,1,'%')} <span>Rent roll <b>${bbdk(cur.rent)}</b>/mo, ${dRent>=0?'up':'down'} ${bbd(Math.abs(cur.rent-prv.rent))} on ${prv.label}. ${link('Trends','trends')}</span>`);
+
+  /* arrears and autopay */
+  const d31 = cur.d31 - prv.d31;
+  items.push(`${chip(d31,0,'',true)} <span><b>${cur.d31}</b> accounts 31+ days late (${cur.d60} at 60+). ${link('Portfolio payments','portfolio-payments')}</span>`);
+  const dAp = cur.apUnits - prv.apUnits;
+  items.push(`${chip(dAp)} <span><b>${cur.apUnits}</b> on autopay, ${(100*cur.apUnits/cur.occupied).toFixed(1)}% of occupied. ${link('Portfolio payments','portfolio-payments')}</span>`);
+
+  /* biggest site mover on net units */
+  const movers = T.sites.map(s=>{
+    const c = s.L.months[cur.key], p = s.L.months[prv.key];
+    return c&&p ? {name:s.name, key:s.key, d:c.occupied-p.occupied, rent:pct(c.occRent,p.occRent)} : null;
+  }).filter(Boolean).sort((a,b)=>Math.abs(b.d)-Math.abs(a.d));
+  if(movers.length && movers[0].d!==0){
+    const m = movers[0];
+    items.push(`${chip(m.d)} <span><b>${m.name}</b> was the biggest mover: ${m.d>0?'+':''}${m.d} units, rent ${m.rent>=0?'+':''}${m.rent.toFixed(1)}%. ${link('Occupancy','occupancy',m.key)}</span>`);
+  }
+
+  /* basis caveat carried on the current month */
+  const note = T.sites.map(s=>s.L.months[cur.key]).find(m=>m&&m.agingNote);
+  if(note) items.push(`<span class="chg flat">basis</span> <span>The 1–30 day bucket is not comparable across pulls; read 31+ only. ${link('Why','portfolio-payments')}</span>`);
+
+  el.innerHTML = `<h3><span class="dot"></span>What changed <span class="when">${prv.label} → ${cur.label}</span></h3><ul class="hl-list">${items.map(i=>`<li>${i}</li>`).join('')}</ul>`;
+}
+
+/* ===== Needs attention — threshold checks over the latest data ===== */
+function renderAttention(P, T, cur){
+  const el = document.getElementById('attention'); if(!el) return;
+  const items = [];
+  const add = (sev, txt, sec, loc) => items.push({sev, txt, sec, loc});
+  const latestLabel = P.sites.map(s=>s.data.label).sort().pop();
+
+  P.sites.forEach(s => {
+    const d = s.data;
+    const d31 = T.d31(d), d60 = T.d60(d), late90 = d.aging['90+ days']||0;
+    if(d60 >= 8)      add('high', `<b>${s.name}</b>: ${d60} accounts 60+ days late (${late90} at 90+).`, 'payments', s.key);
+    else if(d31 >= 10) add('med',  `<b>${s.name}</b>: ${d31} accounts 31+ days late.`, 'payments', s.key);
+    if(d.autopayPct < 30) add('med', `<b>${s.name}</b>: autopay at ${d.autopayPct.toFixed(0)}%, under the 30% floor.`, 'payments', s.key);
+    if(d.unrentable >= 5) add('med', `<b>${s.name}</b>: ${d.unrentable} units out of service, ${bbdk(d.unrentable*d.avgRentUnit*12)}/yr of rent idle.`, 'occupancy', s.key);
+    else if(d.unrentable) add('low', `<b>${s.name}</b>: ${d.unrentable} unit${d.unrentable>1?'s':''} out of service.`, 'occupancy', s.key);
+    const soft = d.byType.filter(t=>t.pct<94 && t.units>=10);
+    if(soft.length) add('med', `<b>${s.name}</b>: ${soft.map(t=>`${t.t.replace(' Storage','')} at ${t.pct.toFixed(0)}%`).join(', ')}. Promote or reprice.`, 'rates', s.key);
+    if(d.movedOut > d.movedIn) add('low', `<b>${s.name}</b>: net ${d.net} units in ${d.label.split(' ')[0]} (${d.movedOut} out, ${d.movedIn} in).`, 'occupancy', s.key);
+  });
+
+  /* pricing: whole portfolio at list with near-full occupancy */
+  if(P.physOcc >= 97) add('med', `Portfolio ${P.physOcc.toFixed(1)}% full with in-place rent at list. Rate card review is due.`, 'rates', 'central');
+
+  /* stale panels */
+  if(typeof LEAD_FUNNEL!=='undefined' && !LEAD_FUNNEL.period.includes(latestLabel.split(' ')[0]))
+    add('low', `Lead funnel is on ${LEAD_FUNNEL.period}; rest of the dashboard is ${latestLabel}.`, 'lead-funnel');
+  if(typeof CUSTOMER_PROFILE!=='undefined' && CUSTOMER_PROFILE.period !== latestLabel)
+    add('low', `Customer profile is from ${CUSTOMER_PROFILE.period}; refresh from the SiteLink Marketing Summary.`, 'profile');
+
+  const order = {high:0, med:1, low:2};
+  items.sort((a,b)=>order[a.sev]-order[b.sev]);
+  const n = {high:items.filter(i=>i.sev==='high').length, med:items.filter(i=>i.sev==='med').length};
+  el.innerHTML = `<h3><span class="dot"></span>Needs attention <span class="when">${n.high} high · ${n.med} medium</span></h3>` +
+    (items.length
+      ? `<ul class="hl-list">${items.map(i=>`<li><span class="sev ${i.sev}">${i.sev}</span><span>${i.txt} <a onclick="go('${i.sec}'${i.loc?`,'${i.loc}'`:''})">Open</a></span></li>`).join('')}</ul>`
+      : `<div class="hl-empty">Nothing over threshold this month.</div>`);
+}
+
 function renderPortfolio(){
   const P = portfolioSummary();
   document.getElementById('portfolioHeaderPeriod').textContent = P.periods;
   document.getElementById('portfolioHeaderUnits').textContent = P.totalUnits.toLocaleString();
 
+  /* prior comparable month (every site present) for tile deltas */
+  const T = trendModel();
+  const cur = T.complete[T.complete.length-1], prv = T.complete[T.complete.length-2];
+  const Q = prv ? portfolioAt(prv.key) : null;
+  const vs = prv ? ` vs ${prv.label}` : '';
+  const pctChg = (c,p) => p ? 100*(c-p)/p : 0;
+  /* arrears: a rise is bad, so flip the colour */
+  const badDelta = (c,p) => delta(c,p,'',0).replace('chg up','chg _').replace('chg down','chg up').replace('chg _','chg down');
+
   document.getElementById('portfolioHero').innerHTML = `
-    <div class="stat"><div class="k">Portfolio occupancy</div><div class="v">${P.physOcc.toFixed(1)}<small>%</small></div><div class="d">${P.occupied} of ${P.totalUnits} units${P.unrentable?` · ${P.rentableOcc.toFixed(1)}% of rentable stock (${P.unrentable} out of service)`:' filled across 3 sites'}</div></div>
-    <div class="stat"><div class="k">Monthly rent roll</div><div class="v" style="font-size:31px">${bbdk(P.occRent)}</div><div class="d">${P.econOcc.toFixed(1)}% of ${bbdk(P.grossPot)} gross potential</div></div>
-    <div class="stat alt"><div class="k">Avg tenure</div><div class="v">${(P.weightedMeanTenure/12).toFixed(1)}<small>yr</small></div><div class="d">weighted avg · site-median blend ${(P.weightedMedianTenure/12).toFixed(1)} yr</div></div>
-    <div class="stat"><div class="k">Customer split</div><div class="v">${P.corpPct.toFixed(0)}<small>%</small></div><div class="d">corporate units · ${P.corpRentPct.toFixed(0)}% of revenue</div></div>`;
+    <div class="stat"><div class="k">Portfolio occupancy</div><div class="v">${P.physOcc.toFixed(1)}<small>%</small></div><div class="d">${Q?delta(P.physOcc,Q.physOcc,' pt'):''}${P.occupied} of ${P.totalUnits} units${P.unrentable?` · ${P.rentableOcc.toFixed(1)}% of rentable (${P.unrentable} out of service)`:''}</div></div>
+    <div class="stat"><div class="k">Monthly rent roll</div><div class="v" style="font-size:31px">${bbdk(P.occRent)}</div><div class="d">${Q?delta(pctChg(P.occRent,Q.occRent),0,'%'):''}${P.econOcc.toFixed(1)}% of ${bbdk(P.grossPot)} gross potential${vs}</div></div>
+    <div class="stat alt"><div class="k">31+ days late</div><div class="v">${cur?cur.d31:'—'}</div><div class="d">${(cur&&prv)?badDelta(cur.d31,prv.d31):''}accounts${vs} · ${cur?cur.d60:'—'} at 60+</div></div>
+    <div class="stat"><div class="k">On autopay</div><div class="v">${cur?(100*cur.apUnits/cur.occupied).toFixed(0):'—'}<small>%</small></div><div class="d">${(cur&&prv)?delta(cur.apUnits,prv.apUnits,'',0):''}${cur?cur.apUnits:'—'} accounts${vs}</div></div>`;
+
+  renderWhatChanged(T, cur, prv);
+  renderAttention(P, T, cur);
 
   document.getElementById('portfolioSiteRows').innerHTML = P.sites.map(s => {
     const d = s.data;
