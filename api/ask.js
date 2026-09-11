@@ -29,6 +29,7 @@ Portfolio-wide sections (scope: portfolio — shown across all three sites):
   lead-funnel         — Lead funnel / conversion
   profile             — Customer profile (SiteLink marketing summary)
 Per-site sections (scope: site — respect the chosen location):
+  rates               — Rate management: list vs in-place rent, tenure exposure, rent-increase scenario
   occupancy           — Occupancy by unit type, physical/economic occupancy
   tenure              — Length of stay: mean/median tenure, tenure bands
   segmentation        — Corporate vs individual split (units, rent, area, tenure)

@@ -139,12 +139,36 @@ td.r,th.r{text-align:right}
 .portfolio-table td:first-child{font-weight:700;color:var(--navy2)}
 .portfolio-table td.r{font-weight:700}
 .site-tabs-section{padding:8px 0 18px}
-.site-tabs-section .tabbar{margin-top:0;gap:8px}
-.site-tabs-section .tab{border-radius:12px;background:var(--card);border:1px solid var(--line);color:var(--navy2);margin-bottom:0;box-shadow:0 8px 22px -24px rgba(0,0,0,.30)}
-.site-tabs-section .tab:hover{border-color:var(--accent);background:#fff5f5;color:var(--accent)}
-.site-tabs-section .tab.active{background:var(--accent);border-color:var(--accent);color:#fff}
-.site-tabs-section .tab.active .loc-sub{color:#ffe3e3;opacity:.9}
+/* control bar: sub-nav pills on the left, site + month pickers on the right */
+.control-bar{display:flex;flex-wrap:wrap;align-items:center;gap:10px 18px;padding:14px 0 12px;border-bottom:1px solid var(--line);margin-bottom:4px}
+.sub-nav{display:flex;flex-wrap:wrap;gap:6px}
+.sub-nav .pill-nav{font-family:'Montserrat';font-weight:700;font-size:12px;padding:7px 14px;border-radius:20px;border:1px solid var(--line);background:var(--card);color:var(--muted);cursor:pointer;transition:all .15s}
+.sub-nav .pill-nav:hover{border-color:var(--navy2);color:var(--navy2)}
+.sub-nav .pill-nav.active{background:var(--navy2);border-color:var(--navy2);color:#fff}
+.site-ctl{margin-left:auto;display:flex;align-items:center;gap:10px;flex-wrap:wrap}
+.site-ctl[hidden]{display:none}
+.site-ctl .tabbar{margin-top:0;gap:6px}
+.site-ctl .tab{border-radius:9px;background:var(--card);border:1px solid var(--line);color:var(--navy2);margin-bottom:0;padding:7px 13px;font-size:12px}
+.site-ctl .tab .loc-sub{display:none}
+.site-ctl .tab:hover{border-color:var(--accent);background:#fff5f5;color:var(--accent)}
+.site-ctl .tab.active{background:var(--accent);border-color:var(--accent);color:#fff}
+.site-ctl .mswitch{margin-left:4px;padding-left:10px;border-left:1px solid var(--line)}
+@media(max-width:760px){.site-ctl{margin-left:0}}
 .site-meta{display:flex;flex-wrap:wrap;gap:24px;margin-top:14px;background:var(--card);border:1px solid var(--line);border-radius:12px;padding:14px 16px;box-shadow:0 8px 24px -26px rgba(0,0,0,.30)}
+/* rate management */
+.rate-grid{display:grid;grid-template-columns:repeat(4,1fr);gap:16px;margin-bottom:16px}
+.rate-ctl{display:grid;grid-template-columns:repeat(4,1fr);gap:14px;margin:6px 0 16px}
+.rate-ctl label{display:block;font-family:'Montserrat';font-weight:800;font-size:10.5px;text-transform:uppercase;letter-spacing:.1em;color:var(--muted);margin-bottom:6px}
+.rate-ctl input[type=range]{width:100%;accent-color:var(--accent)}
+.rate-ctl select{width:100%;font-family:'Source Sans 3',sans-serif;font-size:13px;padding:6px 8px;border:1px solid var(--line);border-radius:7px;background:var(--card);color:var(--ink)}
+.rate-ctl .val{font-family:'Montserrat';font-weight:800;font-size:15px;color:var(--navy2)}
+.rate-out{display:grid;grid-template-columns:repeat(3,1fr);gap:14px}
+.rate-out .stat .v{font-size:28px}
+.sig{display:inline-block;padding:2px 9px;border-radius:20px;font-size:10.5px;font-weight:800;font-family:'Montserrat'}
+.sig.raise{background:#e4f4ec;color:var(--good)}
+.sig.hold{background:#fff5d6;color:var(--warn)}
+.sig.promote{background:#fdeaea;color:var(--bad)}
+@media(max-width:900px){.rate-grid,.rate-ctl{grid-template-columns:1fr 1fr}.rate-out{grid-template-columns:1fr}}
 .site-meta div{font-size:12.5px;color:var(--muted)}
 .site-meta b{display:block;font-family:'Montserrat';font-size:15px;color:var(--navy2);font-weight:800;margin-top:2px}
 .site-hero{margin-top:0}
@@ -317,6 +341,15 @@ header:has(.csv-menu.open){overflow:visible}
 
 <div class="wrap">
 
+  <!-- CONTROL BAR: sub-views of the active group, plus site and month pickers for site views -->
+  <div class="control-bar" id="controlBar">
+    <nav class="sub-nav" id="subNav"></nav>
+    <div class="site-ctl" id="siteCtl" hidden>
+      <div class="tabbar" id="tabbar"></div>
+      <span class="mswitch" id="mswitch"></span>
+    </div>
+  </div>
+
   <!-- AI SEARCH RESULTS — replaces the active panel while a search is shown -->
   <div class="ai-results" id="aiResults" hidden></div>
 
@@ -387,17 +420,26 @@ header:has(.csv-menu.open){overflow:visible}
   </section>
   </div>
 
-  <!-- SITE CONTEXT BAND (shown only for per-site sections) -->
+  <!-- SITE CONTEXT BAND (shown only for per-site views) -->
   <div id="siteBand">
     <section class="site-tabs-section">
-      <div class="tabbar" id="tabbar"></div>
       <div class="site-meta">
-        <div>Selected period<b id="m-period">June 2026</b><span class="mswitch" id="mswitch"></span></div>
+        <div>Selected site<b id="m-site">Store All Central</b></div>
+        <div>Selected period<b id="m-period">June 2026</b></div>
         <div>Selected site units<b id="m-units">461</b></div>
         <div>Snapshot basis<b id="m-basis">As of 1 June 2026</b></div>
       </div>
     </section>
     <div class="hero site-hero" id="hero"></div>
+  </div>
+
+  <!-- PANEL: RATE MANAGEMENT -->
+  <div class="panel" data-section="rates">
+  <section>
+    <div class="sec-head"><div class="sec-num">$</div><h2>Rate Management &mdash; pricing headroom</h2>
+      <p>At near-full occupancy, price is the lever, not fill. List versus in-place rent, who sits on old rates, and what a measured increase is worth.</p></div>
+    <div id="ratesBody"></div>
+  </section>
   </div>
 
   <!-- PANEL: OCCUPANCY -->
@@ -1001,21 +1043,32 @@ const delta = (cur,prev,unit="",dp=1) => {
 
 /* ===== Section navigation. scope:'portfolio' hides the site bar; 'site' shows it. ===== */
 const SECTIONS = [
-  {id:'overview',           label:'Overview',          scope:'portfolio'},
+  {id:'overview',           label:'Summary',           scope:'portfolio'},
   {id:'trends',             label:'Trends',            scope:'portfolio'},
-  {id:'portfolio-payments', label:'Portfolio Payments',scope:'portfolio'},
+  {id:'portfolio-payments', label:'Portfolio payments',scope:'portfolio'},
+  {id:'rates',              label:'Rate management',   scope:'site'},
+  {id:'payments',           label:'Site payments',     scope:'site'},
   {id:'acquisition',        label:'Acquisition',       scope:'portfolio'},
-  {id:'lead-funnel',        label:'Lead Funnel',       scope:'portfolio'},
-  {id:'profile',            label:'Customer Profile',  scope:'portfolio'},
-  {id:'occupancy',          label:'Occupancy',         scope:'site'},
-  {id:'tenure',             label:'Tenure',            scope:'site'},
+  {id:'lead-funnel',        label:'Lead funnel',       scope:'portfolio'},
+  {id:'profile',            label:'Profile',           scope:'portfolio'},
   {id:'segmentation',       label:'Segmentation',      scope:'site'},
   {id:'geography',          label:'Geography',         scope:'site'},
   {id:'demographics',       label:'Demographics',      scope:'site'},
-  {id:'payments',           label:'Payments',          scope:'site'}
+  {id:'occupancy',          label:'Occupancy & pricing',scope:'site'},
+  {id:'tenure',             label:'Tenure',            scope:'site'}
 ];
 
-let STATE = { loc:"central", month:null, section:"overview" };
+/* Four top-level groups. Each holds a list of views (SECTIONS ids); the view decides
+   whether the site and month pickers show. */
+const GROUPS = [
+  {id:'overview',  label:'Overview',    views:['overview','trends']},
+  {id:'money',     label:'Money',       views:['portfolio-payments','rates','payments']},
+  {id:'customers', label:'Customers',   views:['acquisition','lead-funnel','profile','segmentation','geography','demographics']},
+  {id:'site',      label:'Site detail', views:['occupancy','tenure']}
+];
+const groupOf = id => GROUPS.find(g => g.views.includes(id)) || GROUPS[0];
+
+let STATE = { loc:"central", month:null, section:"overview", lastView:{} };
 
 function latestSnapshot(L){
   const keys = Object.keys(L.months).sort();
@@ -2075,17 +2128,19 @@ function render(){
   renderLeadFunnel();
   renderCustomerProfile();
 
-  /* section nav (docked to header) */
-  document.getElementById('sectionNav').innerHTML = SECTIONS.map((s,i)=>{
-    const sep = (i>0 && s.scope==='site' && SECTIONS[i-1].scope!=='site') ? ' scope-sep' : '';
-    return `<button class="tab${s.id===STATE.section?' active':''}${sep}" onclick="setSection('${s.id}')">${s.label}</button>`;
-  }).join('');
+  STATE.cur = CUR;
 
-  /* tabs */
+  /* group nav (docked to header) */
+  const curGroup = groupOf(STATE.section);
+  document.getElementById('sectionNav').innerHTML = GROUPS.map(g =>
+    `<button class="tab${g.id===curGroup.id?' active':''}" onclick="setGroup('${g.id}')">${g.label}</button>`).join('');
+
+  /* site picker (control bar) */
   document.getElementById('tabbar').innerHTML = Object.entries(LOCATIONS).map(([k,v])=>
-    `<button class="tab ${k===STATE.loc?'active':''}" onclick="setLoc('${k}')">${v.name}<span class="loc-sub">${v.sub}</span></button>`).join('');
+    `<button class="tab ${k===STATE.loc?'active':''}" onclick="setLoc('${k}')" title="${v.sub}">${v.name.replace('Store All ','')}<span class="loc-sub">${v.sub}</span></button>`).join('');
 
   /* metabar */
+  document.getElementById('m-site').textContent = L.name + ' · ' + L.sub;
   document.getElementById('m-period').textContent = CUR.label;
   document.getElementById('m-units').textContent = CUR.totalUnits;
   document.getElementById('m-basis').textContent = CUR.basis;
@@ -2187,6 +2242,9 @@ function render(){
 
   /* key accounts */
   renderKeyAccounts(CUR);
+
+  /* rate management */
+  renderRates(CUR);
 
   /* demographics */
   renderDemographics(CUR);
@@ -2298,6 +2356,122 @@ function renderKeyAccounts(CUR){
     </div>`;
 }
 
+/* ===== Rate management — pricing headroom at the selected site.
+   List rate per unit = gross potential / total units (SiteLink standard rates).
+   In-place rent per unit = occupied rent / occupied units. The gap is the discount to
+   list carried by the existing base. The scenario applies a % increase to tenants at or
+   beyond a tenure band, nets off assumed move-outs and the months to refill them.
+   Per-unit-type rates are not in the rent-roll export, so type rows show occupancy only. ===== */
+const RATE_SCENARIO = { pct:5, minBand:'1–2 yr', churn:5, refill:2 };
+const LOS_ORDER = ["<3 mo","3–12 mo","1–2 yr","2–5 yr","5 yr+"];
+
+function rateModel(CUR, S){
+  const listAvg = CUR.grossPot/CUR.totalUnits;
+  const inPlace = CUR.occRent/CUR.occupied;
+  const bands = LOS_ORDER.filter(b => b in CUR.losBands);
+  const idx = Math.max(0, bands.indexOf(S.minBand));
+  const targetUnits = bands.slice(idx).reduce((s,b)=>s+CUR.losBands[b],0);
+  const churnUnits = targetUnits*S.churn/100;
+  const stayUnits = targetUnits-churnUnits;
+  const uplift = stayUnits*inPlace*(S.pct/100)*12;
+  const lost = churnUnits*inPlace*S.refill;
+  return { listAvg, inPlace, gap:listAvg-inPlace, gapPct:100*(listAvg-inPlace)/listAvg,
+           bands, targetUnits, churnUnits, stayUnits, uplift, lost, net:uplift-lost };
+}
+
+function setRate(k, v){
+  RATE_SCENARIO[k] = (k==='minBand') ? v : Number(v);
+  if(STATE.cur) renderRates(STATE.cur);
+}
+
+function renderRates(CUR){
+  const el = document.getElementById('ratesBody'); if(!el) return;
+  const S = RATE_SCENARIO, M = rateModel(CUR, S);
+  const occ = CUR.physOcc;
+  const headroom = occ>=98 ? 'Strong. Above 98% full, a street-rate rise costs little occupancy.'
+                 : occ>=95 ? 'Good. Above 95% full, the market will bear a measured rise.'
+                 : 'Limited. Below 95% full, fill first, then price.';
+  const twoYr = (CUR.losBands['2–5 yr']||0)+(CUR.losBands['5 yr+']||0);
+  const twoYrPct = 100*twoYr/CUR.occupied;
+
+  /* tenure exposure: approximate rent by band at the site average rent */
+  const losMax = Math.max(...M.bands.map(b=>CUR.losBands[b]));
+  const bandRows = M.bands.map(b => {
+    const n = CUR.losBands[b];
+    const inTarget = M.bands.indexOf(b) >= M.bands.indexOf(S.minBand);
+    return `<div class="bar-row"><span class="lab">${b}${inTarget?' <span class="sig raise" title="in scenario">in</span>':''}</span><div class="track"><div class="fill${inTarget?'':' navy'}" style="width:${100*n/losMax}%"></div></div><span class="num">${n} · ${bbdk(n*M.inPlace)}</span></div>`;
+  }).join('');
+
+  /* unit-type signal from occupancy */
+  const sigFor = p => p>=98 ? ['raise','Raise'] : p>=94 ? ['hold','Hold'] : ['promote','Promote'];
+  const typeRows = CUR.byType.map(r => {
+    const [cls,lab] = sigFor(r.pct);
+    return `<tr><td>${r.t.replace(' Storage','')}</td><td class="r mono">${r.units}</td><td class="r mono">${r.units-r.occ}</td><td class="r mono">${r.pct.toFixed(1)}%</td><td class="r"><span class="sig ${cls}">${lab}</span></td></tr>`;
+  }).join('');
+
+  /* cross-site comparison on each site's latest snapshot */
+  const siteRows = Object.entries(LOCATIONS).map(([k,L]) => {
+    const d = latestSnapshot(L).data, m = rateModel(d, S);
+    return `<tr${k===STATE.loc?' style="background:var(--paper2)"':''}><td>${L.name.replace('Store All ','')}</td><td class="r mono">${d.physOcc.toFixed(1)}%</td><td class="r mono">$${d.revOccSqft.toFixed(2)}</td><td class="r mono">$${m.listAvg.toFixed(0)}</td><td class="r mono">$${m.inPlace.toFixed(0)}</td><td class="r mono">${m.gapPct.toFixed(1)}%</td><td class="r mono">${bbdk(m.net)}</td></tr>`;
+  }).join('');
+  const portNet = Object.values(LOCATIONS).reduce((s,L)=>s+rateModel(latestSnapshot(L).data,S).net,0);
+
+  const bandOpts = M.bands.map(b=>`<option value="${b}"${b===S.minBand?' selected':''}>${b} and longer</option>`).join('');
+
+  el.innerHTML = `
+    <div class="rate-grid">
+      <div class="stat"><div class="k">Physical occupancy</div><div class="v">${occ}<small>%</small></div><div class="d">Pricing headroom: <b>${occ>=95?'yes':'limited'}</b></div></div>
+      <div class="stat"><div class="k">Avg list rate / unit</div><div class="v" style="font-size:31px">$${M.listAvg.toFixed(0)}</div><div class="d">gross potential ÷ ${CUR.totalUnits} units</div></div>
+      <div class="stat"><div class="k">Avg in-place rent / unit</div><div class="v" style="font-size:31px">$${M.inPlace.toFixed(0)}</div><div class="d">rent roll ÷ ${CUR.occupied} occupied</div></div>
+      <div class="stat alt"><div class="k">Discount to list</div><div class="v">${M.gapPct.toFixed(1)}<small>%</small></div><div class="d">$${M.gap.toFixed(0)}/unit/mo · ${bbdk(M.gap*CUR.occupied*12)}/yr left on the table</div></div>
+    </div>
+
+    <div class="grid g2">
+      <div class="card">
+        <h3><span class="dot"></span>Who is on old rates — tenure exposure</h3>
+        ${bandRows}
+        <div class="note">Units · approx. monthly rent at the site average. <b>${twoYr} units (${twoYrPct.toFixed(0)}%)</b> have stayed 2 years or more and have likely never had a rate review. Bands marked <span class="sig raise">in</span> are in the scenario below.</div>
+      </div>
+      <div class="insight">
+        <h4>Read</h4>
+        <p><b>Headroom:</b> ${headroom}</p>
+        <p>Economic occupancy runs at <b>${CUR.econOcc}%</b> against <b>${occ}%</b> physical. ${M.gapPct < 2
+          ? `In-place rent sits within <b>${M.gapPct.toFixed(1)}%</b> of list, so nobody is discounted. That means the rate card itself has not moved with demand: raise street rates first, then pass the rise to existing tenants at their next review.`
+          : `The in-place base pays <b>${M.gapPct.toFixed(1)}%</b> under list, so the first lever is bringing existing tenants up to list, then moving street rates.`}</p>
+        <p>Standard practice in self-storage is a scheduled increase of 5 to 9% at 9 to 12 months of tenure, then yearly. Move-out response to a single-digit rise at full occupancy is typically low, and every unit lost refills fast when vacancy is this thin.</p>
+      </div>
+    </div>
+
+    <div style="border-top:1px solid var(--line);margin:24px 0 6px"></div>
+    <div style="font-family:'Montserrat';font-weight:800;text-transform:uppercase;letter-spacing:.1em;font-size:12px;color:var(--muted);margin:6px 0 12px">Scenario &mdash; existing-tenant increase</div>
+    <div class="rate-ctl">
+      <div><label>Increase</label><input type="range" min="1" max="15" step="1" value="${S.pct}" oninput="setRate('pct',this.value)"><div class="val">${S.pct}%</div></div>
+      <div><label>Apply to tenure</label><select onchange="setRate('minBand',this.value)">${bandOpts}</select></div>
+      <div><label>Assumed move-outs</label><input type="range" min="0" max="25" step="1" value="${S.churn}" oninput="setRate('churn',this.value)"><div class="val">${S.churn}% of targeted</div></div>
+      <div><label>Months to refill each</label><input type="range" min="0" max="6" step="0.5" value="${S.refill}" oninput="setRate('refill',this.value)"><div class="val">${S.refill} mo</div></div>
+    </div>
+    <div class="rate-out">
+      <div class="stat"><div class="k">Targeted units</div><div class="v">${M.targetUnits}</div><div class="d">${(100*M.targetUnits/CUR.occupied).toFixed(0)}% of occupied · ${S.minBand} and longer</div></div>
+      <div class="stat"><div class="k">Gross annual uplift</div><div class="v">${bbdk(M.uplift)}</div><div class="d">${Math.round(M.stayUnits)} staying units × $${(M.inPlace*S.pct/100).toFixed(0)}/mo × 12</div></div>
+      <div class="stat alt"><div class="k">Net annual uplift</div><div class="v">${bbdk(M.net)}</div><div class="d">after ${M.churnUnits.toFixed(0)} move-outs vacant ${S.refill} mo (${bbdk(M.lost)} lost)</div></div>
+    </div>
+    <div class="note">Same settings across all three sites: <b>${bbdk(portNet)}</b> net per year. Sensitivity: the increase pays for itself so long as move-outs stay under ${(100*12*S.pct/(12*S.pct+100*S.refill)).toFixed(0)}% of targeted tenants.</div>
+
+    <div style="height:16px"></div>
+    <div class="grid g2">
+      <div class="card">
+        <h3><span class="dot"></span>Street-rate signal by unit type</h3>
+        <table><thead><tr><th>Type</th><th class="r">Units</th><th class="r">Empty</th><th class="r">Occ.</th><th class="r">Signal</th></tr></thead><tbody>${typeRows}</tbody></table>
+        <div class="note">Raise at 98%+ full, hold at 94 to 98%, promote below 94%. Per-type rates are not in the rent-roll export; add SiteLink's Unit Type Rate report to price each row.</div>
+      </div>
+      <div class="card">
+        <h3><span class="dot"></span>Sites compared &mdash; latest snapshot</h3>
+        <table><thead><tr><th>Site</th><th class="r">Occ.</th><th class="r">$/occ sf</th><th class="r">List</th><th class="r">In place</th><th class="r">Gap</th><th class="r">Net/yr</th></tr></thead><tbody>${siteRows}</tbody></table>
+        <div class="note">List and in-place are per unit per month. Net/yr uses the scenario settings above.</div>
+      </div>
+    </div>`;
+}
+
 function renderDemographics(CUR){
   const a = CUR.age;
   if(!a){ return; }
@@ -2397,11 +2571,23 @@ function renderPaymentMethods(CUR){
 
 function applySection(){
   const cur = SECTIONS.find(s=>s.id===STATE.section) || SECTIONS[0];
+  const grp = groupOf(cur.id);
+  STATE.lastView[grp.id] = cur.id;
   document.querySelectorAll('.panel').forEach(p=>
     p.classList.toggle('active', p.getAttribute('data-section')===cur.id));
-  document.getElementById('siteBand').classList.toggle('show', cur.scope==='site');
+  const isSite = cur.scope==='site';
+  document.getElementById('siteBand').classList.toggle('show', isSite);
+  document.getElementById('siteCtl').hidden = !isSite;
   document.querySelectorAll('#sectionNav .tab').forEach((b,i)=>
-    b.classList.toggle('active', SECTIONS[i] && SECTIONS[i].id===cur.id));
+    b.classList.toggle('active', GROUPS[i] && GROUPS[i].id===grp.id));
+  document.getElementById('subNav').innerHTML = grp.views.map(id => {
+    const s = SECTIONS.find(x=>x.id===id);
+    return `<button class="pill-nav${id===cur.id?' active':''}" onclick="setSection('${id}')">${s.label}</button>`;
+  }).join('');
+}
+function setGroup(id){
+  const g = GROUPS.find(x=>x.id===id) || GROUPS[0];
+  setSection(STATE.lastView[g.id] || g.views[0]);
 }
 function setSection(id){ STATE.section=id; applySection(); window.scrollTo({top:0,behavior:'smooth'}); }
 function setLoc(k){ STATE.loc=k; STATE.month=null; render(); applySection(); }
