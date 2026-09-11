@@ -382,7 +382,7 @@ header:has(.csv-menu.open){overflow:visible}
   <div class="panel" data-section="profile">
   <section>
     <div class="sec-head"><div class="sec-num">◎</div><h2>Customer Profile — who rents and why</h2>
-      <p>Decision drivers, catchment, use-case and seasonality across the active base (SiteLink Marketing Summary &middot; July 2026, base of 986). <b>Not yet refreshed</b> — the current base is 1,002.</p></div>
+      <p>Decision drivers, catchment, use-case and seasonality across the active base (SiteLink Marketing Summary &middot; <span id="profilePeriod"></span>).</p></div>
     <div id="profileBody"></div>
   </section>
   </div>
@@ -691,6 +691,7 @@ const LOCATIONS = {
         agingNote:"<b>Basis:</b> this pull is 8 Sep, a week into the September cycle, so most September rent is billed <i>and</i> collected — the 1–30 bucket is far smaller than the 4 Aug pull, which was three days in. Compare <b>31+</b> across months, not 1–30.",
         age:{valid:290,pct:63,mean:48,median:52,min:20,max:87,bands:{"<25":38,"25–34":46,"35–44":29,"45–54":50,"55–64":71,"65+":56},female:262,male:186},
         acquisition:{channels:{Phone:280,"Walk-in":59,Email:26,Web:7,"Not recorded":87},recent:{n:86,Phone:50,"Walk-in":15,Email:10,Web:1,"Not recorded":10}},
+        marketing:{ "Internet":144,"Referral":124,"Previous Tenant":67,"Drive-by":27,"Yellow Pages":40,"Online Yellow Pages":1,"Brochure":5,"Facebook":2,"Other":50,"Unknown":1 },
         keyAccounts:{ tenants:407, multi:46, units:98, rent:28183, siteRent:118183, rentPct:23.8, avgMulti:613, avgSingle:249, tenureMulti:85.9, tenureSingle:36.1, arrMulti:2.2, arrSingle:4.4, apMultiPct:33.7, apSinglePct:35.7, apFull:13, apPart:3, apNone:30, email:45, emailBasis:"Email-on-file is read from the tenant contact record in the August export, where it is populated for effectively every account. Months to July 2026 read it from the rent-roll extract, which carried it for only a handful — the jump at August is the change of source, not a contact-capture drive.", newTen:4, newUnits:8, newRent:2451,
           top:[{u:4,r:1694,los:27,ap:3,com:0,d31:0,em:1},{u:3,r:1221,los:46,ap:0,com:1,d31:0,em:1},{u:3,r:1136,los:126,ap:0,com:1,d31:0,em:1},{u:2,r:911,los:38,ap:0,com:1,d31:0,em:1},{u:2,r:911,los:159,ap:0,com:1,d31:0,em:1},{u:2,r:911,los:9,ap:0,com:1,d31:0,em:1},{u:2,r:847,los:18,ap:0,com:1,d31:2,em:1},{u:2,r:847,los:40,ap:2,com:1,d31:0,em:1},{u:2,r:847,los:61,ap:0,com:0,d31:0,em:1},{u:2,r:783,los:127,ap:0,com:0,d31:0,em:1},{u:3,r:783,los:145,ap:3,com:0,d31:0,em:1},{u:2,r:783,los:81,ap:0,com:1,d31:0,em:1}] },
         corpBasis:"Corporate is flagged by a company name on the account. SiteLink's corporate flag is unset throughout the August export, so months to July 2026 use that flag and August uses the company name — the step up at August is the change of basis, not new corporate business.",
@@ -785,6 +786,7 @@ const LOCATIONS = {
         agingNote:"<b>Basis:</b> this pull is 8 Sep, a week into the September cycle, so most September rent is billed <i>and</i> collected — the 1–30 bucket is far smaller than the 4 Aug pull, which was three days in. Compare <b>31+</b> across months, not 1–30.",
         age:{valid:234,pct:89,mean:54,median:55,min:20,max:94,bands:{"<25":9,"25–34":13,"35–44":30,"45–54":55,"55–64":85,"65+":42},female:146,male:112},
         acquisition:{channels:{Phone:112,"Walk-in":85,Email:14,Web:6,"Not recorded":46},recent:{n:59,Phone:31,"Walk-in":14,Email:9,Web:0,"Not recorded":5}},
+        marketing:{ "Internet":79,"Referral":51,"Previous Tenant":46,"Drive-by":30,"Yellow Pages":7,"Online Yellow Pages":0,"Brochure":0,"Facebook":3,"Other":29,"Unknown":17 },
         keyAccounts:{ tenants:232, multi:19, units:50, rent:13551, siteRent:67788, rentPct:20.0, avgMulti:713, avgSingle:255, tenureMulti:43.0, tenureSingle:25.5, arrMulti:0.0, arrSingle:7.0, apMultiPct:16.0, apSinglePct:32.4, apFull:4, apPart:0, apNone:15, email:19, emailBasis:"Email-on-file is read from the tenant contact record in the August export, where it is populated for effectively every account. Months to July 2026 read it from the rent-roll extract, which carried it for only a handful — the jump at August is the change of source, not a contact-capture drive.", newTen:1, newUnits:2, newRent:647,
           top:[{u:6,r:2281,los:39,ap:0,com:1,d31:0,em:1},{u:4,r:1677,los:43,ap:0,com:0,d31:0,em:1},{u:6,r:1481,los:78,ap:0,com:1,d31:0,em:1},{u:2,r:783,los:16,ap:0,com:1,d31:0,em:1},{u:3,r:783,los:41,ap:0,com:1,d31:0,em:1},{u:3,r:745,los:57,ap:0,com:1,d31:0,em:1},{u:2,r:702,los:14,ap:2,com:0,d31:0,em:1},{u:2,r:655,los:60,ap:0,com:1,d31:0,em:1},{u:2,r:647,los:5,ap:0,com:0,d31:0,em:1},{u:2,r:557,los:24,ap:0,com:0,d31:0,em:1},{u:2,r:545,los:117,ap:0,com:0,d31:0,em:1},{u:2,r:500,los:76,ap:0,com:1,d31:0,em:1}] },
         corpBasis:"Corporate is flagged by a company name on the account. SiteLink's corporate flag is unset throughout the August export, so months to July 2026 use that flag and August uses the company name — the step up at August is the change of basis, not new corporate business.",
@@ -882,6 +884,7 @@ const LOCATIONS = {
         agingNote:"<b>Basis:</b> this pull is 8 Sep, a week into the September cycle, so most September rent is billed <i>and</i> collected — the 1–30 bucket is far smaller than the 4 Aug pull, which was three days in. Compare <b>31+</b> across months, not 1–30.",
         age:{valid:138,pct:49,mean:32,median:22,min:19,max:77,bands:{"<25":81,"25–34":10,"35–44":17,"45–54":9,"55–64":12,"65+":9},female:157,male:112},
         acquisition:{channels:{Phone:229,"Walk-in":8,Email:10,Web:4,"Not recorded":29},recent:{n:130,Phone:109,"Walk-in":7,Email:6,Web:0,"Not recorded":8}},
+        marketing:{ "Internet":108,"Referral":46,"Previous Tenant":54,"Drive-by":28,"Yellow Pages":10,"Online Yellow Pages":5,"Brochure":0,"Facebook":1,"Other":27,"Unknown":0 },
         keyAccounts:{ tenants:241, multi:30, units:69, rent:23311, siteRent:96034, rentPct:24.3, avgMulti:777, avgSingle:345, tenureMulti:23.1, tenureSingle:13.0, arrMulti:3.3, arrSingle:4.7, apMultiPct:30.4, apSinglePct:27.5, apFull:8, apPart:2, apNone:20, email:30, emailBasis:"Email-on-file is read from the tenant contact record in the August export, where it is populated for effectively every account. Months to July 2026 read it from the rent-roll extract, which carried it for only a handful — the jump at August is the change of source, not a contact-capture drive.", newTen:9, newUnits:22, newRent:7702,
           top:[{u:4,r:1821,los:2,ap:0,com:0,d31:0,em:1},{u:3,r:1736,los:42,ap:0,com:1,d31:0,em:1},{u:4,r:1566,los:3,ap:4,com:1,d31:0,em:1},{u:4,r:1319,los:61,ap:2,com:1,d31:0,em:1},{u:2,r:1281,los:19,ap:0,com:1,d31:0,em:1},{u:3,r:911,los:47,ap:0,com:1,d31:0,em:1},{u:2,r:911,los:27,ap:0,com:1,d31:0,em:1},{u:2,r:911,los:26,ap:2,com:0,d31:0,em:1},{u:2,r:911,los:22,ap:1,com:0,d31:0,em:1},{u:2,r:911,los:7,ap:0,com:0,d31:0,em:1},{u:2,r:783,los:53,ap:2,com:1,d31:0,em:1},{u:2,r:783,los:23,ap:2,com:1,d31:0,em:1}] },
         corpBasis:"Corporate is flagged by a company name on the account. SiteLink's corporate flag is unset throughout the August export, so months to July 2026 use that flag and August uses the company name — the step up at August is the change of basis, not new corporate business.",
@@ -948,19 +951,25 @@ const LEAD_FUNNEL = {
   ]
 };
 
-/* ===== Customer profile (SiteLink Marketing Summary, July 2026; current active base, all 3 sites) ===== */
+/* ===== Customer profile (SiteLink Marketing Summary, August 2026 pull; current active base,
+   all 3 sites). Categories are collapsed from the raw export: `why` Other = Gate Hours +
+   Cleanliness + Advertising + Security + Other; `distance` Overseas = Outside State +
+   Outside Country; `reason` Other = Other + Marriage/Divorce + Estate; `what` Other =
+   Other + Car. Unknown is excluded from each list, so the lists total less than `total`
+   and every share is of tenants with the field recorded. ===== */
 const CUSTOMER_PROFILE = {
-  period:"July 2026", total:986, resCom:{res:757,com:229},
-  why:[ {k:"Location",n:658}, {k:"Features",n:187}, {k:"Management",n:76}, {k:"Price",n:2}, {k:"Other",n:44} ],
-  distance:[ {k:"< 2 mi",n:28}, {k:"2–3 mi",n:170}, {k:"3–5 mi",n:217}, {k:"5–10 mi",n:371}, {k:"> 10 mi",n:53}, {k:"Overseas",n:129} ],
-  reason:[ {k:"Excess / declutter",n:343}, {k:"Moving",n:250}, {k:"Business needs",n:232}, {k:"Renovating",n:53}, {k:"Other",n:89} ],
-  what:[ {k:"Furniture / boxes",n:628}, {k:"Business inventory",n:159}, {k:"Business records",n:78}, {k:"Other",n:102} ],
-  season:[91,98,87,71,98,94,111,60,48,74,81,73],
+  period:"August 2026", total:1002, resCom:{res:771,com:231},
+  why:[ {k:"Location",n:670}, {k:"Features",n:190}, {k:"Management",n:76}, {k:"Price",n:2}, {k:"Other",n:45} ],
+  distance:[ {k:"< 2 mi",n:28}, {k:"2–3 mi",n:177}, {k:"3–5 mi",n:220}, {k:"5–10 mi",n:373}, {k:"> 10 mi",n:52}, {k:"Overseas",n:134} ],
+  reason:[ {k:"Excess / declutter",n:346}, {k:"Moving",n:257}, {k:"Business needs",n:236}, {k:"Renovating",n:56}, {k:"Other",n:88} ],
+  what:[ {k:"Furniture / boxes",n:640}, {k:"Business inventory",n:161}, {k:"Business records",n:79}, {k:"Other",n:103} ],
+  season:[90,98,85,70,97,93,109,89,51,72,78,70],
   sites:[
-    {name:"Central", res:353, com:106, locationPct:61},
-    {name:"South", res:204, com:57, locationPct:76},
-    {name:"Lears", res:200, com:66, locationPct:67}
-  ]
+    {name:"Central", res:353, com:108, locationPct:61},
+    {name:"South", res:204, com:58, locationPct:82},
+    {name:"Lears", res:214, com:65, locationPct:67}
+  ],
+  basis:"Base of 1,002 matches the 8 Sep rent-roll occupied count exactly. The per-site split does not: the Marketing Summary counts 461 / 262 / 279 ledgers at Central / South / Lears against 459 / 263 / 280 occupied units on the rent roll. The portfolio figures are sound; read the per-site rows as ±2 units."
 };
 
 /* ===== Delinquency watch — rolling 31+ days-past-due tracker (update on each rent-roll pull) ===== */
@@ -1690,7 +1699,16 @@ function renderAcquisition(){
         <tbody>${mBySite.map(s=>`<tr><td style="font-weight:600">${s.name}</td>${MKT_ORDER.map(k=>`<td class="r mono">${s.m[k]||0}</td>`).join('')}</tr>`).join('')}</tbody>
       </table>
       </div>
-      <div class="note"><b>How they found us</b> (SiteLink marketing category, <b>sMktCat</b>) — the true acquisition source, distinct from the <b>contact channel</b> below. Online discovery (Internet + Facebook) is <b>${mpct(foundOnline)}%</b>; word-of-mouth &amp; repeat (Referral + Previous Tenant) is <b>${mpct(wordOfMouth)}%</b>.</div>
+      <div class="note"><b>How they found us</b> (SiteLink marketing category, <b>sMktCat</b>) — the true acquisition source, distinct from the <b>contact channel</b> below. Online discovery (Internet + Facebook) is <b>${mpct(foundOnline)}%</b>; word-of-mouth &amp; repeat (Referral + Previous Tenant) is <b>${mpct(wordOfMouth)}%</b>.${(()=>{
+      /* The Marketing Summary counts ledgers, the rent roll counts occupied units. They can
+         agree in total and still differ site by site — say so where that is true. */
+      const diffs = mBySite.map(s=>{
+        const occ = (bySite.find(x=>x.name===s.name)||{}).total;
+        return (occ!=null && occ!==s.total) ? `${s.name} ${s.total} vs ${occ}` : null;
+      }).filter(Boolean);
+      if(!diffs.length) return '';
+      return ` <span style="color:#8a8a8a">The Marketing Summary counts ledgers, not occupied units: ${diffs.join(', ')}${mTotal===total?`, though both total ${mTotal}`:''} — the portfolio figures are sound, the per-site rows are ±2.</span>`;
+    })()}</div>
     </div>
 
     <div class="card" style="margin-bottom:16px">
@@ -1931,6 +1949,14 @@ function renderCustomerProfile(){
   const el = document.getElementById('profileBody'); if(!el) return;
   const P = CUSTOMER_PROFILE; if(!P) return;
   const TOT = P.total;
+  /* The subtitle carries the period and base so a refresh can't leave stale wording behind;
+     it also flags when this block is older than the newest rent-roll pull. */
+  const ph = document.getElementById('profilePeriod');
+  if(ph){
+    const latestLabel = latestSnapshot(LOCATIONS[Object.keys(LOCATIONS)[0]]).data.label;
+    ph.innerHTML = `${P.period}, base of ${TOT.toLocaleString()}`
+      + (P.period===latestLabel ? '' : ` &mdash; <b>one pull behind</b> the ${latestLabel} rent roll`);
+  }
   const sum = arr => arr.reduce((s,x)=>s+x.n,0);
   const pctT = n => Math.round(100*n/TOT);
   const within5 = P.distance.filter(x=>['< 2 mi','2–3 mi','3–5 mi'].includes(x.k)).reduce((s,x)=>s+x.n,0);
@@ -1948,6 +1974,9 @@ function renderCustomerProfile(){
   const MN=['Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec'];
   const smax=Math.max(...P.season); const peak=MN[P.season.indexOf(smax)];
   const smin=Math.min(...P.season); const trough=MN[P.season.indexOf(smin)];
+  /* How far into the year the busy run actually extends, rather than a hardcoded count. */
+  let runEnd=0; while(runEnd<P.season.length && P.season[runEnd] >= smin*1.25) runEnd++;
+  const runLabel = runEnd<=1 ? `${MN[0]}` : runEnd>=P.season.length ? 'every month' : `<b>${MN[0]}–${MN[runEnd-1]}</b>`;
   const seasonBars=P.season.map((v,i)=>`
     <div style="flex:1;display:flex;flex-direction:column;align-items:center;gap:5px">
       <div style="display:flex;flex-direction:column-reverse;height:96px;width:62%;min-width:14px;background:#fbfbfb;border:1px solid #ececec;border-radius:4px 4px 0 0" title="${MN[i]}: ${v}"><div style="height:${100*v/smax}%;background:${v===smax?'var(--accent)':'var(--navy2)'}"></div></div>
@@ -1994,6 +2023,7 @@ function renderCustomerProfile(){
             <thead><tr><th>Site</th><th class="r">Res / Com</th><th class="r">Chose for location</th></tr></thead>
             <tbody>${siteRows}</tbody>
           </table>
+          ${P.basis ? `<div class="note"><b>Basis.</b> ${P.basis}</div>` : ''}
         </div>
       </div>
     </div>
@@ -2001,7 +2031,7 @@ function renderCustomerProfile(){
     <div class="card" style="margin-top:16px">
       <h3><span class="dot"></span>Move-in seasonality — all sites (active base)</h3>
       <div style="display:flex;align-items:flex-end;gap:8px;padding:6px 2px 0">${seasonBars}</div>
-      <div class="note"><b>${peak}</b> is the busiest move-in month; the first seven months run well ahead of the <b>${trough}</b> trough (${Math.round(100*(smax/smin-1))}% higher at the peak) — useful for timing promotions and staffing. Reflects the move-in month of the current active base, so recent months are the least thinned by churn.</div>
+      <div class="note"><b>${peak}</b> is the busiest move-in month; ${runLabel} run well ahead of the <b>${trough}</b> trough (${Math.round(100*(smax/smin-1))}% higher at the peak) — useful for timing promotions and staffing. Reflects the move-in month of the current active base, so recent months are the least thinned by churn.</div>
     </div>`;
 }
 
