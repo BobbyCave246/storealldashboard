@@ -207,13 +207,6 @@ details.headline .hl-empty{padding:0 22px 20px}
 .stat .d .chg{margin-left:0;margin-right:6px}
 .missed-tbl td{padding:6px 4px;font-size:12.5px}
 .missed-tbl tr:first-child td{font-weight:700;color:var(--navy2)}
-details.stale{border:1px solid var(--line);border-radius:12px;margin:16px 0;background:var(--card)}
-details.stale>summary{list-style:none;cursor:pointer;padding:16px 22px;display:flex;align-items:center;gap:10px;font-family:'Montserrat';font-weight:800;font-size:11.5px;text-transform:uppercase;letter-spacing:.1em;color:var(--navy)}
-details.stale>summary::-webkit-details-marker{display:none}
-details.stale>summary::after{content:"▾";color:var(--accent);margin-left:auto}
-details.stale[open]>summary::after{content:"▴"}
-details.stale .stale-badge{font-size:10px;letter-spacing:.06em;padding:3px 9px;border-radius:20px;background:#fff5d6;color:var(--warn)}
-details.stale .stale-body{padding:0 22px 20px}
 /* rate management */
 .rate-grid{display:grid;grid-template-columns:repeat(4,1fr);gap:16px;margin-bottom:16px}
 .rate-ctl{display:grid;grid-template-columns:repeat(4,1fr);gap:14px;margin:6px 0 16px}
@@ -799,6 +792,8 @@ const LOCATIONS = {
         corpArea:80, indivArea:55, corpLos:66.2, indivLos:50.4, top10:8.6,
         geoIndiv:{"St. Michael":68,"Christ Church":63,"St. James":39,"St. Thomas":21,"St. Philip":17,"St. George":16,"Other Barbados":12,Overseas:53,Unknown:43}, indivN:332,
         balUnits:77, balPct:16.8, balTotal:44822, aging:{"Current / ahead":382,"1–30 days":59,"31–60 days":8,"61–90 days":6,"90+ days":4}, autopayPct:35.3,
+        collStatus:{ period:"August 2026", occupied:457, paidCurrent:353, prepaid:54, offCycle:35, behind:15, behindNone:8, severe:9, amt:18948,
+          basis:"Built from the 14 Sep rent roll joined to the 1–31 Aug receipts. A unit is behind when its paid-through date falls before 31 Aug, which is a ledger fact and does not move with the pull date. Occupied counts units that had moved in by 31 Aug; units that moved out between 1 and 14 Sep are not on the roll and so are outside the count." },
         agingNote:"<b>Basis:</b> this pull is 8 Sep, a week into the September cycle, so most September rent is billed <i>and</i> collected — the 1–30 bucket is far smaller than the 4 Aug pull, which was three days in. Compare <b>31+</b> across months, not 1–30.",
         age:{valid:290,pct:63,mean:48,median:52,min:20,max:87,bands:{"<25":38,"25–34":46,"35–44":29,"45–54":50,"55–64":71,"65+":56},female:262,male:186},
         acquisition:{channels:{Phone:280,"Walk-in":59,Email:26,Web:7,"Not recorded":87},recent:{n:86,Phone:50,"Walk-in":15,Email:10,Web:1,"Not recorded":10}},
@@ -894,6 +889,8 @@ const LOCATIONS = {
         corpArea:89, indivArea:56, corpLos:45.4, indivLos:38.6, top10:15.9,
         geoIndiv:{"St. Michael":24,"Christ Church":84,"St. James":9,"St. Thomas":2,"St. Philip":19,"St. George":3,"Other Barbados":7,Overseas:34,Unknown:9}, indivN:191,
         balUnits:58, balPct:22.1, balTotal:24654, aging:{"Current / ahead":205,"1–30 days":43,"31–60 days":7,"61–90 days":3,"90+ days":5}, autopayPct:29.3,
+        collStatus:{ period:"August 2026", occupied:261, paidCurrent:204, prepaid:30, offCycle:12, behind:15, behindNone:8, severe:8, amt:12752,
+          basis:"Built from the 14 Sep rent roll joined to the 1–31 Aug receipts. A unit is behind when its paid-through date falls before 31 Aug, which is a ledger fact and does not move with the pull date. Occupied counts units that had moved in by 31 Aug; units that moved out between 1 and 14 Sep are not on the roll and so are outside the count." },
         agingNote:"<b>Basis:</b> this pull is 8 Sep, a week into the September cycle, so most September rent is billed <i>and</i> collected — the 1–30 bucket is far smaller than the 4 Aug pull, which was three days in. Compare <b>31+</b> across months, not 1–30.",
         age:{valid:234,pct:89,mean:54,median:55,min:20,max:94,bands:{"<25":9,"25–34":13,"35–44":30,"45–54":55,"55–64":85,"65+":42},female:146,male:112},
         acquisition:{channels:{Phone:112,"Walk-in":85,Email:14,Web:6,"Not recorded":46},recent:{n:59,Phone:31,"Walk-in":14,Email:9,Web:0,"Not recorded":5}},
@@ -992,6 +989,8 @@ const LOCATIONS = {
         corpArea:125, indivArea:89, corpLos:21.3, indivLos:17.1, top10:12.8,
         geoIndiv:{"St. Michael":47,"Christ Church":21,"St. James":39,"St. Thomas":13,"St. Philip":12,"St. George":18,"Other Barbados":14,Overseas:26,Unknown:9}, indivN:199,
         balUnits:45, balPct:16.1, balTotal:24685, aging:{"Current / ahead":235,"1–30 days":33,"31–60 days":6,"61–90 days":6,"90+ days":0}, autopayPct:28.2,
+        collStatus:{ period:"August 2026", occupied:277, paidCurrent:231, prepaid:16, offCycle:19, behind:11, behindNone:6, severe:5, amt:10245,
+          basis:"Built from the 14 Sep rent roll joined to the 1–31 Aug receipts. A unit is behind when its paid-through date falls before 31 Aug, which is a ledger fact and does not move with the pull date. Occupied counts units that had moved in by 31 Aug; units that moved out between 1 and 14 Sep are not on the roll and so are outside the count." },
         agingNote:"<b>Basis:</b> this pull is 8 Sep, a week into the September cycle, so most September rent is billed <i>and</i> collected — the 1–30 bucket is far smaller than the 4 Aug pull, which was three days in. Compare <b>31+</b> across months, not 1–30.",
         age:{valid:138,pct:49,mean:32,median:22,min:19,max:77,bands:{"<25":81,"25–34":10,"35–44":17,"45–54":9,"55–64":12,"65+":9},female:157,male:112},
         acquisition:{channels:{Phone:229,"Walk-in":8,Email:10,Web:4,"Not recorded":29},recent:{n:130,Phone:109,"Walk-in":7,Email:6,Web:0,"Not recorded":8}},
@@ -1099,6 +1098,20 @@ const CUSTOMER_PROFILE = {
    billing cycle stay comparable. `severe` is paid-through before 31 Jul (August and July both
    unpaid = 60+ days). `amt` is the unit's whole balance including late and other fees, matching
    the basis of earlier pulls. ===== */
+/* ===== Current cycle — how far through this month's billing the base is, at the same pull as
+   the delinquency watch. Paid = rent paid through the end of this month or beyond; owes = paid
+   through last month end only; behind = paid through before last month end (the watch above).
+   Mid-month this is progress, not a problem; it is here so the arrears count is not read as the
+   whole picture. ===== */
+const CURRENT_CYCLE = {
+  period:"September 2026", asof:"14 Sep 2026", dayOfMonth:14,
+  sites:[
+    {name:"Central", paid:412, owes:34, behind:15},
+    {name:"South",   paid:218, owes:30, behind:15},
+    {name:"Lears",   paid:248, owes:20, behind:11}
+  ]
+};
+
 const DELINQUENCY = {
   asof:"rent-roll pull · 14 Sep 2026", prev:45, occupied:1003,
   note:"Unchanged from the 12 Sep pull: the last receipt on this export is dated Saturday 12 Sep, so no payment has landed since. Occupied counts distinct units — the 12 Sep export carried a second open ledger row for four units mid-transfer, which this one does not.",
@@ -1770,22 +1783,27 @@ function renderPortfolioPayments(){
 
   // Portfolio collections status — where every occupied unit stands in June
   let paidCurrent = 0, prepaid = 0, offCycle = 0, behind = 0, behindNone = 0, severeUnits = 0, overdueAmt = 0;
-  let collOccupied = 0, collPeriod = '';
+  let collOccupied = 0, collPeriod = '', collBasis = '';
   const collBySite = [];
   Object.entries(LOCATIONS).forEach(([key, L]) => {
     const cSnap = latestWith(L, 'collStatus');
     if(!cSnap) return;
     const d = cSnap.data;
     const cs = d.collStatus || {};
-    collOccupied += d.occupied; collPeriod = d.label;
     const ag = d.aging || {};
-    const beh = (d.balUnits != null) ? d.balUnits : 0;
-    const sev = (ag['61–90 days']||0) + (ag['90+ days']||0);
+    /* A close built from receipts joined to the rent roll carries its own buckets. Older
+       months only carry the three counts, so behind falls back to accounts with a balance —
+       right only where the roll was pulled at month end, which is why newer closes state
+       every bucket explicitly. */
+    const occU = cs.occupied != null ? cs.occupied : d.occupied;
+    const beh = cs.behind != null ? cs.behind : (d.balUnits || 0);
+    const sev = cs.severe != null ? cs.severe : (ag['61–90 days']||0) + (ag['90+ days']||0);
     const pc = cs.paidCurrent||0, pp = cs.prepaid||0, bn = cs.behindNone||0;
-    const oc = Math.max(0, d.occupied - pc - pp - beh); // current, no June payment, not prepaid
+    const oc = cs.offCycle != null ? cs.offCycle : Math.max(0, occU - pc - pp - beh);
+    collOccupied += occU; collPeriod = cs.period || d.label; collBasis = cs.basis || collBasis;
     paidCurrent += pc; prepaid += pp; offCycle += oc; behind += beh; behindNone += bn;
-    severeUnits += sev; overdueAmt += (d.balTotal||0);
-    collBySite.push({ name: L.name.replace('Store All ',''), occupied: d.occupied, paidCurrent: pc, prepaid: pp, offCycle: oc, behind: beh, severe: sev });
+    severeUnits += sev; overdueAmt += (cs.amt != null ? cs.amt : (d.balTotal||0));
+    collBySite.push({ name: L.name.replace('Store All ',''), occupied: occU, paidCurrent: pc, prepaid: pp, offCycle: oc, behind: beh, severe: sev });
   });
   const behindPartial = behind - behindNone;
   const paidInPeriod = paidCurrent + behindPartial; // distinct units that transacted in that month
@@ -1806,6 +1824,37 @@ function renderPortfolioPayments(){
     const s = latestSnapshot(L);
     if(s && s.data.autopayPct != null) enrolledAP += Math.round(s.data.autopayPct*s.data.occupied/100);
   });
+
+  /* current cycle — this month's billing progress at the same pull as the watch */
+  const CC = CURRENT_CYCLE;
+  const ccSum = f => CC.sites.reduce((t,x)=>t+f(x),0);
+  const ccOcc = ccSum(x=>x.paid+x.owes+x.behind);
+  const ccSeg = [
+    { label:`Paid ${CC.period.split(' ')[0]}`, units:ccSum(x=>x.paid),   color:'var(--good)' },
+    { label:'Not yet paid',                    units:ccSum(x=>x.owes),   color:'#c9c9c9' },
+    { label:'Behind from prior months',        units:ccSum(x=>x.behind), color:'var(--accent)' }
+  ];
+  const ccCard = `
+    <div class="card" style="margin:16px 0">
+      <h3><span class="dot"></span>Current cycle &mdash; ${CC.period} billing, day ${CC.dayOfMonth} &middot; ${CC.asof}</h3>
+      <div style="display:flex;height:30px;border-radius:8px;overflow:hidden;margin:6px 0 14px">
+        ${ccSeg.map(s=>`<div title="${s.label}: ${s.units}" style="width:${100*s.units/ccOcc}%;background:${s.color};min-width:2px"></div>`).join('')}
+      </div>
+      <div class="ppm-stat-row">
+        ${ccSeg.map(s=>`<div class="ppm-stat">
+          <div class="k"><span style="display:inline-block;width:9px;height:9px;border-radius:2px;background:${s.color};margin-right:6px;vertical-align:middle"></span>${s.label}</div>
+          <div class="v">${s.units}<small> · ${(100*s.units/ccOcc).toFixed(1)}%</small></div></div>`).join('')}
+        <div class="ppm-stat"><div class="k">Collected so far</div><div class="v">${(100*ccSeg[0].units/ccOcc).toFixed(0)}<small>%</small></div><div class="d">of ${ccOcc} occupied units</div></div>
+      </div>
+      <table style="margin-top:4px">
+        <thead><tr><th>Site</th><th class="r">Occupied</th><th class="r">Paid ${CC.period.split(' ')[0]}</th><th class="r">Not yet paid</th><th class="r">Behind</th></tr></thead>
+        <tbody>${CC.sites.map(x=>`<tr><td style="font-weight:600">${x.name}</td>
+          <td class="r mono">${x.paid+x.owes+x.behind}</td><td class="r mono">${x.paid}</td>
+          <td class="r mono">${x.owes}</td><td class="r mono">${x.behind}</td></tr>`).join('')}
+        </tbody>
+      </table>
+      <div class="note"><b>Not yet paid is not arrears.</b> These ${ccSum(x=>x.owes)} accounts are paid through last month end and owe the cycle that opened on the 1st — normal on day ${CC.dayOfMonth}, and most clear by month end. The ${ccSum(x=>x.behind)} behind are the delinquency watch below. Read this card for collection pace and that one for debt.</div>
+    </div>`;
 
   const DQ = DELINQUENCY;
   const dqTotal = DQ.sites.reduce((s,x)=>s+x.n,0);
@@ -1916,6 +1965,7 @@ function renderPortfolioPayments(){
         </details>
       </div>
     </div>
+    ${ccCard}
     <div class="card" style="margin:16px 0 0">
       <h3><span class="dot"></span>Delinquency watch — genuinely overdue (31+ days) &middot; ${DQ.asof}</h3>
       <div class="ppm-stat-row">
@@ -1931,10 +1981,8 @@ function renderPortfolioPayments(){
       <div class="note"><b>31+ days past due</b> excludes current-cycle rent, so it's comparable pull-to-pull regardless of the day of the month (the raw "any days late" count balloons early in the month). Updated from the latest rent-roll pull — a rolling tracker; the ${collPeriod} month-end close is kept below for reference.${DQ.note?` <b>This pull:</b> ${DQ.note}`:''}</div>
     </div>
 
-    <details class="stale">
-      <summary>Collections status &mdash; ${collPeriod} month-end <span class="stale-badge">not refreshed &middot; ${collPeriod}</span></summary>
-      <div class="stale-body">
-      <div class="note" style="margin:0 0 12px"><b>This card is still ${collPeriod}.</b> It needs receipts matched unit by unit against the rent roll (paid, prepaid, off-cycle, behind), which was last done for ${collPeriod}. The live arrears position is the delinquency watch above. To refresh: export the ${collPeriod.split(" ")[0]==="June"?"August":"latest"} receipts by unit and the month-end rent roll together.</div>
+    <div class="card" style="margin:16px 0">
+      <h3><span class="dot"></span>Collections status &mdash; where the ${collOccupied} units occupied in ${collPeriod} stood at month end</h3>
       <div style="display:flex;height:30px;border-radius:8px;overflow:hidden;margin:6px 0 14px">
         ${seg.map(s=>`<div title="${s.label}: ${s.units}" style="width:${100*s.units/collOccupied}%;background:${s.color};min-width:2px"></div>`).join('')}
       </div>
@@ -1956,7 +2004,7 @@ function renderPortfolioPayments(){
           <td class="r mono">${s.behind} (${s.severe})</td></tr>`).join('')}
         </tbody>
       </table>
-      <div class="note"><b>${paidInPeriod} units paid in ${collPeriod}</b> (${paidCurrent} now current + ${behindPartial} behind who paid partially). The <b>${prepaid+offCycle}</b> current units with no ${collPeriod.split(' ')[0]} payment aren't missing — <b>${prepaid}</b> are prepaid / paid ahead and <b>${offCycle}</b> are billed on another date that month. Only <b>${behind} are overdue</b> (${bbd(overdueAmt)}); of those <b>${severeUnits} are 60+ days late</b> and <b>${behindNone} paid nothing at all</b>. This card is the last full month-end close — the live arrears position is the delinquency watch below.</div>
+      <div class="note"><b>${paidInPeriod} units paid in ${collPeriod}</b> (${paidCurrent} now current + ${behindPartial} behind who paid partially). The <b>${prepaid+offCycle}</b> current units with no ${collPeriod.split(' ')[0]} payment aren't missing — <b>${prepaid}</b> were already paid past month end and <b>${offCycle}</b> are billed on another date. Only <b>${behind} are overdue</b> (${bbd(overdueAmt)}); of those <b>${severeUnits} are 60+ days late</b> and <b>${behindNone} paid nothing at all that month</b>. This is the month-end close; the live position is the delinquency watch above.${collBasis?`<br><b>Basis.</b> ${collBasis}`:''}</div>
     </div>
       </div>
     </details>
