@@ -1092,13 +1092,19 @@ const CUSTOMER_PROFILE = {
   basis:"Base of 1,002 matches the 8 Sep rent-roll occupied count exactly. The per-site split does not: the Marketing Summary counts 461 / 262 / 279 ledgers at Central / South / Lears against 459 / 263 / 280 occupied units on the rent roll. The portfolio figures are sound; read the per-site rows as ±2 units."
 };
 
-/* ===== Delinquency watch — rolling 31+ days-past-due tracker (update on each rent-roll pull) ===== */
+/* ===== Delinquency watch — rolling 31+ days-past-due tracker (update on each rent-roll pull).
+   Counted from dPaidThru on the unit detail, not from the aging buckets: a unit whose rent is
+   paid through a date before 31 Aug did not pay August, whatever day the roll was pulled. That
+   makes the count independent of the pull date, so pulls taken at different points in the
+   billing cycle stay comparable. `severe` is paid-through before 31 Jul (August and July both
+   unpaid = 60+ days). `amt` is the unit's whole balance including late and other fees, matching
+   the basis of earlier pulls. ===== */
 const DELINQUENCY = {
-  asof:"rent-roll pull · 8 Sep 2026", prev:58, occupied:1002,
+  asof:"rent-roll pull · 12 Sep 2026", prev:45, occupied:1007,
   sites:[
-    {name:"Central", n:18, severe:10, amt:22017},
-    {name:"South",   n:15, severe:8,  amt:13526},
-    {name:"Lears",   n:12, severe:6,  amt:11013}
+    {name:"Central", n:15, severe:9, amt:18948},
+    {name:"South",   n:15, severe:8, amt:12752},
+    {name:"Lears",   n:11, severe:5, amt:10245}
   ]
 };
 
@@ -1255,9 +1261,13 @@ function renderAttention(P, T, cur){
 
   P.sites.forEach(s => {
     const d = s.data;
-    const d31 = T.d31(d), d60 = T.d60(d), late90 = d.aging['90+ days']||0;
-    if(d60 >= 8)      add('high', `<b>${s.name}</b>: ${d60} accounts 60+ days late (${late90} at 90+).`, 'payments', s.key);
-    else if(d31 >= 10) add('med',  `<b>${s.name}</b>: ${d31} accounts 31+ days late.`, 'payments', s.key);
+    /* Arrears come from the rolling watch where it covers this site, so the overview can't
+       quote an older figure than the payments tab. Fall back to the snapshot's own aging. */
+    const dq = DELINQUENCY.sites.find(x=>x.name===s.name);
+    const d31 = dq ? dq.n : T.d31(d), d60 = dq ? dq.severe : T.d60(d);
+    const when = dq ? ` at the ${DELINQUENCY.asof.split('· ')[1]} pull` : '';
+    if(d60 >= 8)      add('high', `<b>${s.name}</b>: ${d60} accounts 60+ days late${when}.`, 'payments', s.key);
+    else if(d31 >= 10) add('med',  `<b>${s.name}</b>: ${d31} accounts 31+ days late${when}.`, 'payments', s.key);
     if(d.autopayPct < 30) add('med', `<b>${s.name}</b>: autopay at ${d.autopayPct.toFixed(0)}%, under the 30% floor.`, 'payments', s.key);
     if(d.unrentable >= 5) add('med', `<b>${s.name}</b>: ${d.unrentable} units out of service, ${bbdk(d.unrentable*d.avgRentUnit*12)}/yr of rent idle.`, 'occupancy', s.key);
     else if(d.unrentable) add('low', `<b>${s.name}</b>: ${d.unrentable} unit${d.unrentable>1?'s':''} out of service.`, 'occupancy', s.key);
