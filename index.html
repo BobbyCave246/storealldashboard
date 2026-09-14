@@ -1100,7 +1100,8 @@ const CUSTOMER_PROFILE = {
    unpaid = 60+ days). `amt` is the unit's whole balance including late and other fees, matching
    the basis of earlier pulls. ===== */
 const DELINQUENCY = {
-  asof:"rent-roll pull · 12 Sep 2026", prev:45, occupied:1007,
+  asof:"rent-roll pull · 14 Sep 2026", prev:45, occupied:1003,
+  note:"Unchanged from the 12 Sep pull: the last receipt on this export is dated Saturday 12 Sep, so no payment has landed since. Occupied counts distinct units — the 12 Sep export carried a second open ledger row for four units mid-transfer, which this one does not.",
   sites:[
     {name:"Central", n:15, severe:9, amt:18948},
     {name:"South",   n:15, severe:8, amt:12752},
@@ -1927,7 +1928,7 @@ function renderPortfolioPayments(){
         <thead><tr><th>Site</th><th class="r">31+ days</th><th class="r">60+ days</th><th class="r">Overdue $</th></tr></thead>
         <tbody>${dqRows}</tbody>
       </table>
-      <div class="note"><b>31+ days past due</b> excludes current-cycle rent, so it's comparable pull-to-pull regardless of the day of the month (the raw "any days late" count balloons early in the month). Updated from the latest rent-roll pull — a rolling tracker; the ${collPeriod} month-end close is kept below for reference.</div>
+      <div class="note"><b>31+ days past due</b> excludes current-cycle rent, so it's comparable pull-to-pull regardless of the day of the month (the raw "any days late" count balloons early in the month). Updated from the latest rent-roll pull — a rolling tracker; the ${collPeriod} month-end close is kept below for reference.${DQ.note?` <b>This pull:</b> ${DQ.note}`:''}</div>
     </div>
 
     <details class="stale">
