@@ -1403,8 +1403,14 @@ function trendModel(){
     for(const s of sites) if(s.L.months[mk]) return s.L.months[mk].label.split(' ')[0];
     return mk;
   };
-  const d31 = m => (m.aging['31–60 days']||0)+(m.aging['61–90 days']||0)+(m.aging['90+ days']||0);
-  const d60 = m => (m.aging['61–90 days']||0)+(m.aging['90+ days']||0);
+  /* Where a month carries a close built from receipts joined to the rent roll, its stated
+     behind count wins over the aging buckets. The buckets are a snapshot of the day the roll
+     was pulled; the close counts who had not paid that month by the time it was measured, so
+     late payers are reflected. Months without a close fall back to the buckets. */
+  const d31 = m => (m.collStatus && m.collStatus.behind != null) ? m.collStatus.behind
+    : (m.aging['31–60 days']||0)+(m.aging['61–90 days']||0)+(m.aging['90+ days']||0);
+  const d60 = m => (m.collStatus && m.collStatus.severe != null) ? m.collStatus.severe
+    : (m.aging['61–90 days']||0)+(m.aging['90+ days']||0);
   const apUnits = m => Math.round(m.autopayPct*m.occupied/100);
 
   // portfolio roll-up per month; only months every site reports are comparable
@@ -1720,7 +1726,7 @@ function renderTrends(){
 
   el.innerHTML = `
     ${strip}
-    <div class="note" style="margin:2px 2px 14px"><b>Basis.</b> Central has four snapshots (May, June, July, August); South and Lears have three. Portfolio totals and the movement strip use only months every site reports, so they compare <b>July to August</b>. The pulls are not evenly spaced — 1 May, 30 June, 4 August and 8 September — which is why tenure drift is expressed per calendar month rather than per snapshot. The August pull sits a week into the September billing cycle, so its 1–30 arrears bucket is not comparable with July's; 31+ is.</div>
+    <div class="note" style="margin:2px 2px 14px"><b>Basis.</b> Central has four snapshots (May, June, July, August); South and Lears have three. Portfolio totals and the movement strip use only months every site reports, so they compare <b>July to August</b>. The pulls are not evenly spaced — 1 May, 30 June, 4 August and 8 September — which is why tenure drift is expressed per calendar month rather than per snapshot. <b>Arrears.</b> August's 31+ count is the close built from the 14 Sep roll joined to the August receipts, so it counts who still owed August a fortnight after month end. July's comes from the 4 Aug pull, three days after month end. Measuring later catches late payers, so part of the fall from July is timing rather than collection: on the same 8 Sep basis as the rest of the August snapshot the count was 45, and four of those cleared by 14 Sep.</div>
     <div class="grid g2">${occCard}${rentCard}</div>
     <div style="height:16px"></div>
     <div class="grid g2">${tenureCard}${dqCard}</div>
