@@ -205,6 +205,15 @@ details.headline .hl-empty{padding:0 22px 20px}
 .sev.low{background:var(--paper2);color:var(--muted)}
 .hl-empty{font-size:13px;color:var(--muted);font-style:italic}
 .stat .d .chg{margin-left:0;margin-right:6px}
+.missed-tbl td{padding:6px 4px;font-size:12.5px}
+.missed-tbl tr:first-child td{font-weight:700;color:var(--navy2)}
+details.stale{border:1px solid var(--line);border-radius:12px;margin:16px 0;background:var(--card)}
+details.stale>summary{list-style:none;cursor:pointer;padding:16px 22px;display:flex;align-items:center;gap:10px;font-family:'Montserrat';font-weight:800;font-size:11.5px;text-transform:uppercase;letter-spacing:.1em;color:var(--navy)}
+details.stale>summary::-webkit-details-marker{display:none}
+details.stale>summary::after{content:"▾";color:var(--accent);margin-left:auto}
+details.stale[open]>summary::after{content:"▴"}
+details.stale .stale-badge{font-size:10px;letter-spacing:.06em;padding:3px 9px;border-radius:20px;background:#fff5d6;color:var(--warn)}
+details.stale .stale-body{padding:0 22px 20px}
 /* rate management */
 .rate-grid{display:grid;grid-template-columns:repeat(4,1fr);gap:16px;margin-bottom:16px}
 .rate-ctl{display:grid;grid-template-columns:repeat(4,1fr);gap:14px;margin:6px 0 16px}
@@ -650,10 +659,16 @@ header:has(.csv-menu.open){overflow:visible}
       <p>"How many don't pay" — balances carried versus genuine delinquency.</p></div>
     <div class="grid g3">
       <div class="card">
-        <h3><span class="dot"></span>Accounts carrying a balance</h3>
+        <h3><span class="dot"></span><span id="missedTitle">Missed last month's rent</span></h3>
         <div class="bignum" id="balunits"></div>
-        <div class="cap">units with a rent balance &middot; <span id="baltot"></span> total</div>
-        <div class="note">Most are current-cycle billing rather than true arrears — see aging.</div>
+        <div class="cap" id="missedCap"></div>
+        <div style="height:10px"></div>
+        <table class="missed-tbl">
+          <tr><td>Missed last month (31+ days)</td><td class="r mono" id="missedN"></td><td class="r mono" id="missedAmt"></td></tr>
+          <tr><td>Of which 60+ days</td><td class="r mono" id="missed60"></td><td class="r mono"></td></tr>
+          <tr><td style="color:var(--muted)">Any balance, incl. current cycle</td><td class="r mono" style="color:var(--muted)" id="balAny"></td><td class="r mono" style="color:var(--muted)" id="baltot"></td></tr>
+        </table>
+        <div class="note" id="missedNote"></div>
       </div>
       <div class="card">
         <h3><span class="dot"></span>Aging — genuine delinquency</h3>
@@ -1890,8 +1905,25 @@ function renderPortfolioPayments(){
         </details>
       </div>
     </div>
-    <div class="card" style="margin:16px 0">
-      <h3><span class="dot"></span>Collections status — where the ${collOccupied} occupied units stood (${collPeriod} month-end)</h3>
+    <div class="card" style="margin:16px 0 0">
+      <h3><span class="dot"></span>Delinquency watch — genuinely overdue (31+ days) &middot; ${DQ.asof}</h3>
+      <div class="ppm-stat-row">
+        <div class="ppm-stat"><div class="k">Accounts 31+ days late</div><div class="v">${dqTotal}<small> of ${DQ.occupied}</small></div><div class="d">${dqDelta===0?'no change vs':(dqDelta>0?'▲ '+dqDelta+' vs':'▼ '+Math.abs(dqDelta)+' vs')} previous check (${DQ.prev})</div></div>
+        <div class="ppm-stat"><div class="k">Seriously late (60+ days)</div><div class="v">${dqSevere}</div><div class="d">${(100*dqSevere/DQ.occupied).toFixed(1)}% of occupied — genuine delinquency</div></div>
+        <div class="ppm-stat"><div class="k">Overdue balance</div><div class="v" style="font-size:20px">${bbd(dqAmt)}</div><div class="d">rent 31+ days past due</div></div>
+        <div class="ppm-stat"><div class="k">Share of occupied</div><div class="v">${(100*dqTotal/DQ.occupied).toFixed(1)}<small>%</small></div><div class="d">${dqTotal} of ${DQ.occupied} units</div></div>
+      </div>
+      <table style="margin-top:4px">
+        <thead><tr><th>Site</th><th class="r">31+ days</th><th class="r">60+ days</th><th class="r">Overdue $</th></tr></thead>
+        <tbody>${dqRows}</tbody>
+      </table>
+      <div class="note"><b>31+ days past due</b> excludes current-cycle rent, so it's comparable pull-to-pull regardless of the day of the month (the raw "any days late" count balloons early in the month). Updated from the latest rent-roll pull — a rolling tracker; the ${collPeriod} month-end close is kept below for reference.</div>
+    </div>
+
+    <details class="stale">
+      <summary>Collections status &mdash; ${collPeriod} month-end <span class="stale-badge">not refreshed &middot; ${collPeriod}</span></summary>
+      <div class="stale-body">
+      <div class="note" style="margin:0 0 12px"><b>This card is still ${collPeriod}.</b> It needs receipts matched unit by unit against the rent roll (paid, prepaid, off-cycle, behind), which was last done for ${collPeriod}. The live arrears position is the delinquency watch above. To refresh: export the ${collPeriod.split(" ")[0]==="June"?"August":"latest"} receipts by unit and the month-end rent roll together.</div>
       <div style="display:flex;height:30px;border-radius:8px;overflow:hidden;margin:6px 0 14px">
         ${seg.map(s=>`<div title="${s.label}: ${s.units}" style="width:${100*s.units/collOccupied}%;background:${s.color};min-width:2px"></div>`).join('')}
       </div>
@@ -1915,21 +1947,8 @@ function renderPortfolioPayments(){
       </table>
       <div class="note"><b>${paidInPeriod} units paid in ${collPeriod}</b> (${paidCurrent} now current + ${behindPartial} behind who paid partially). The <b>${prepaid+offCycle}</b> current units with no ${collPeriod.split(' ')[0]} payment aren't missing — <b>${prepaid}</b> are prepaid / paid ahead and <b>${offCycle}</b> are billed on another date that month. Only <b>${behind} are overdue</b> (${bbd(overdueAmt)}); of those <b>${severeUnits} are 60+ days late</b> and <b>${behindNone} paid nothing at all</b>. This card is the last full month-end close — the live arrears position is the delinquency watch below.</div>
     </div>
-
-    <div class="card" style="margin-bottom:0">
-      <h3><span class="dot"></span>Delinquency watch — genuinely overdue (31+ days) &middot; ${DQ.asof}</h3>
-      <div class="ppm-stat-row">
-        <div class="ppm-stat"><div class="k">Accounts 31+ days late</div><div class="v">${dqTotal}<small> of ${DQ.occupied}</small></div><div class="d">${dqDelta===0?'no change vs':(dqDelta>0?'▲ '+dqDelta+' vs':'▼ '+Math.abs(dqDelta)+' vs')} previous check (${DQ.prev})</div></div>
-        <div class="ppm-stat"><div class="k">Seriously late (60+ days)</div><div class="v">${dqSevere}</div><div class="d">${(100*dqSevere/DQ.occupied).toFixed(1)}% of occupied — genuine delinquency</div></div>
-        <div class="ppm-stat"><div class="k">Overdue balance</div><div class="v" style="font-size:20px">${bbd(dqAmt)}</div><div class="d">rent 31+ days past due</div></div>
-        <div class="ppm-stat"><div class="k">Share of occupied</div><div class="v">${(100*dqTotal/DQ.occupied).toFixed(1)}<small>%</small></div><div class="d">${dqTotal} of ${DQ.occupied} units</div></div>
       </div>
-      <table style="margin-top:4px">
-        <thead><tr><th>Site</th><th class="r">31+ days</th><th class="r">60+ days</th><th class="r">Overdue $</th></tr></thead>
-        <tbody>${dqRows}</tbody>
-      </table>
-      <div class="note"><b>31+ days past due</b> excludes current-cycle rent, so it's comparable pull-to-pull regardless of the day of the month (the raw "any days late" count balloons early in the month). Updated from the latest rent-roll pull — a rolling tracker, separate from the ${collPeriod} month-end snapshot above.</div>
-    </div>
+    </details>
 
     ${renderPaymentTrend()}`;
 }
@@ -2534,9 +2553,26 @@ function render(){
   /* demographics */
   renderDemographics(CUR);
 
-  /* payments */
-  document.getElementById('balunits').innerHTML = CUR.balUnits+'<small> / '+CUR.totalUnits+'</small>';
+  /* payments — headline is the 31+ day count: on a pull taken after month end that is
+     exactly the accounts that did not pay the month just closed. The 1–30 bucket is the
+     new cycle's billing and is shown only as context. */
+  const a31 = (CUR.aging['31–60 days']||0)+(CUR.aging['61–90 days']||0)+(CUR.aging['90+ days']||0);
+  const a60 = (CUR.aging['61–90 days']||0)+(CUR.aging['90+ days']||0);
+  const a130 = CUR.aging['1–30 days']||0;
+  const monthName = CUR.label.split(' ')[0];
+  const isLatest = latestSnapshot(L).key === STATE.month;
+  const dqSite = isLatest ? DELINQUENCY.sites.find(s=>s.name===L.name.replace('Store All ','')) : null;
+  document.getElementById('missedTitle').textContent = `Missed ${monthName} rent`;
+  document.getElementById('balunits').innerHTML = a31+'<small> of '+CUR.occupied+'</small>';
+  document.getElementById('missedCap').innerHTML = `accounts 31+ days past due at the ${new Date(CUR.asof+'T00:00:00').toLocaleDateString('en-GB',{day:'numeric',month:'short'})} pull &middot; ${(100*a31/CUR.occupied).toFixed(1)}% of occupied`;
+  document.getElementById('missedN').textContent = a31;
+  document.getElementById('missedAmt').textContent = dqSite ? bbd(dqSite.amt) : '—';
+  document.getElementById('missed60').textContent = a60;
+  document.getElementById('balAny').textContent = CUR.balUnits;
   document.getElementById('baltot').textContent = bbd(CUR.balTotal);
+  document.getElementById('missedNote').innerHTML = (dqSite ? '' : 'Amount owed at 31+ is only held for the latest pull. ')
+    + `${a130} of the ${CUR.balUnits} accounts with any balance are in the 1–30 bucket: rent billed at the start of the new cycle and not yet paid, not arrears.`
+    + ` This count assumes rent bills on the 1st; tenants billed on another date who skipped ${monthName} may still sit in 1–30.`;
   const ageMax = Math.max(...Object.values(CUR.aging));
   document.getElementById('agebars').innerHTML = Object.entries(CUR.aging).map(([k,v])=>{
     const late = k.includes('90+')||k.includes('61');
