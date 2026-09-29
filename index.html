@@ -449,6 +449,15 @@ header:has(.csv-menu.open){overflow:visible}
   </section>
   </div>
 
+  <!-- PANEL: OVERLOCKS & BONUS -->
+  <div class="panel" data-section="bonus">
+  <section>
+    <div class="sec-head"><div class="sec-num">%</div><h2>Overlocks &amp; Manager Bonus</h2>
+      <p>Units in overlock, live 30+ day arrears as a share of rent, and what each facility manager would earn under the draft and suggested bonus schemes.</p></div>
+    <div id="bonusPanel"></div>
+  </section>
+  </div>
+
   <!-- PANEL: ACQUISITION -->
   <div class="panel" data-section="acquisition">
   <section>
@@ -1122,6 +1131,50 @@ const DELINQUENCY = {
   ]
 };
 
+/* SiteLink Unit Status (overlocked units) + Tenant Balances Due, pulled 29 Sep 2026.
+   Full net balance counts (rent, fees, tax, insurance, merchandise). 30+ days = paid
+   through a date more than 30 days before the pull. Every 30+ tenant was overlocked. */
+const OVERLOCK = {
+  asof:"29 Sep 2026",
+  sites:[
+    {name:"Central", siteId:58805, units:461, occupied:459, rent:118183, owingN:28, owing:17200.59, gateOk:true, list:[
+      {u:"C063",co:"",bal:2707.70,days:181},{u:"A58",co:"Barbados Water Authority",bal:1302.12,days:90},
+      {u:"A42",co:"",bal:1176.01,days:90},{u:"A01",co:"Reggae Flava Restaurant Inc.",bal:1095.00,days:59},
+      {u:"B177",co:"",bal:1060.00,days:120},{u:"B124",co:"",bal:885.54,days:59},{u:"C005",co:"",bal:771.93,days:59},
+      {u:"A38",co:"",bal:621.59,days:28},{u:"C085",co:"",bal:588.30,days:28},{u:"A57",co:"Bank of Nova Scotia",bal:535.00,days:28},
+      {u:"B011",co:"",bal:518.44,days:90},{u:"C062",co:"",bal:442.54,days:28},{u:"C127",co:"",bal:420.30,days:28},
+      {u:"C044",co:"",bal:385.54,days:28},{u:"A20",co:"",bal:312.55,days:28},{u:"B135",co:"",bal:312.55,days:28},
+      {u:"C126A",co:"",bal:312.55,days:28},{u:"C057A",co:"",bal:290.85,days:28},{u:"C072",co:"",bal:290.85,days:28},
+      {u:"B165",co:"Astrape Finance Inc",bal:212.09,days:28},{u:"C077",co:"",bal:171.95,days:28},{u:"B112",co:"",bal:152.96,days:28},
+      {u:"B020",co:"",bal:142.30,days:28},{u:"C109",co:"",bal:63.50,days:28}]},
+    {name:"South", siteId:58806, units:265, occupied:263, rent:67788, owingN:38, owing:15318.18, gateOk:true, list:[
+      {u:"033",co:"",bal:2097.15,days:151},{u:"065",co:"",bal:1007.35,days:59,never:1},
+      {u:"102",co:"Carrington & Sealy",bal:979.89,days:120},{u:"151",co:"",bal:913.83,days:59},{u:"113",co:"",bal:906.80,days:90},
+      {u:"073",co:"",bal:827.63,days:59},{u:"132",co:"Esper Holdings Limited",bal:746.59,days:59},{u:"039",co:"",bal:707.88,days:90,never:1},
+      {u:"217",co:"Arc Angel Productions LLC",bal:594.52,days:120},{u:"218",co:"",bal:503.43,days:90},{u:"198",co:"",bal:415.32,days:90},
+      {u:"105",co:"",bal:403.40,days:59},{u:"048",co:"",bal:366.87,days:59},{u:"194A",co:"",bal:353.84,days:59},
+      {u:"089",co:"",bal:192.02,days:28},{u:"182C",co:"",bal:56.95,days:28}]},
+    {name:"Lears", siteId:58807, units:292, occupied:280, rent:96034, owingN:20, owing:10957.40, gateOk:true,
+     gateNote:"95.9% physical, but the vacant units are new and exempt for their first 30 days", list:[
+      {u:"111",co:"",bal:1505.45,days:90},{u:"285",co:"",bal:1328.31,days:90},{u:"289",co:"",bal:1261.06,days:59},
+      {u:"148",co:"",bal:987.71,days:59},{u:"105",co:"",bal:867.16,days:90},{u:"255",co:"",bal:690.00,days:59},
+      {u:"087",co:"",bal:630.58,days:59},{u:"088",co:"",bal:630.58,days:59},{u:"260",co:"",bal:591.59,days:28},
+      {u:"282",co:"",bal:495.00,days:59},{u:"272",co:"",bal:467.77,days:28},{u:"058",co:"",bal:420.28,days:28},
+      {u:"116",co:"",bal:293.40,days:28},{u:"132",co:"",bal:290.85,days:28},{u:"008",co:"",bal:242.77,days:28}]}
+  ]
+};
+
+/* Arrears tiers: [max % (inclusive), payout]. Draft = the scheme as first written
+   (3–5% was undefined; read here as $1,750). Suggested = re-based on Sep 2026 data. */
+const BONUS_SCHEMES = {
+  draft:     { label:'Draft scheme',     tiers:[[1.25,2250],[3,1750],[5,1750],[Infinity,1225]] },
+  suggested: { label:'Suggested scheme', tiers:[[3,2250],[6,1750],[9,1225],[Infinity,600]] }
+};
+const bonusPay = (sch, pct, gateOk) => {
+  const t = BONUS_SCHEMES[sch].tiers.find(t => pct <= t[0]);
+  return gateOk ? t[1] : t[1]/2;
+};
+
 const bbd = n => "$"+Math.round(n).toLocaleString();
 const bbdk = n => "$"+(n/1000).toFixed(0)+"k";
 const delta = (cur,prev,unit="",dp=1) => {
@@ -1137,6 +1190,7 @@ const SECTIONS = [
   {id:'portfolio-payments', label:'Portfolio payments',scope:'portfolio'},
   {id:'rates',              label:'Rate management',   scope:'site'},
   {id:'payments',           label:'Site payments',     scope:'site'},
+  {id:'bonus',              label:'Overlocks & bonus', scope:'portfolio'},
   {id:'acquisition',        label:'Acquisition',       scope:'portfolio'},
   {id:'lead-funnel',        label:'Lead funnel',       scope:'portfolio'},
   {id:'profile',            label:'Profile',           scope:'portfolio'},
@@ -1151,7 +1205,7 @@ const SECTIONS = [
    whether the site and month pickers show. */
 const GROUPS = [
   {id:'overview',  label:'Overview',    views:['overview','trends']},
-  {id:'money',     label:'Money',       views:['portfolio-payments','rates','payments']},
+  {id:'money',     label:'Money',       views:['portfolio-payments','rates','payments','bonus']},
   {id:'customers', label:'Customers',   views:['acquisition','lead-funnel','profile','segmentation','geography','demographics']},
   {id:'site',      label:'Site detail', views:['occupancy','tenure']}
 ];
@@ -2018,6 +2072,80 @@ function renderPortfolioPayments(){
     ${renderPaymentTrend()}`;
 }
 
+function renderBonus(){
+  const el = document.getElementById('bonusPanel');
+  if(!el) return;
+  const O = OVERLOCK;
+  const rows = O.sites.map(s => {
+    const late = s.list.filter(x => x.days > 30);
+    const lateAmt = late.reduce((t,x)=>t+x.bal,0);
+    const pct = 100*lateAmt/s.rent;
+    const next = BONUS_SCHEMES.suggested.tiers.slice().reverse().find(t => t[0] < pct);
+    const toNext = next ? lateAmt - s.rent*next[0]/100 : 0;
+    return { ...s, late, lateAmt, pct, toNext, nextPay: next ? next[1] : null,
+      occPct: 100*s.occupied/s.units, olAmt: s.list.reduce((t,x)=>t+x.bal,0),
+      draft: bonusPay('draft', pct, s.gateOk), sugg: bonusPay('suggested', pct, s.gateOk) };
+  });
+  const sum = f => rows.reduce((t,r)=>t+f(r),0);
+  const olN = sum(r=>r.list.length), lateN = sum(r=>r.late.length);
+  const lateAmt = sum(r=>r.lateAmt), rent = sum(r=>r.rent);
+  const tierTxt = sch => BONUS_SCHEMES[sch].tiers.map((t,i,a)=>{
+    const lo = i ? a[i-1][0] : null;
+    const rng = t[0]===Infinity ? `Over ${lo}%` : lo==null ? `${t[0]}% or lower` : `${lo}% to ${t[0]}%`;
+    return `<tr><td>${rng}</td><td class="r mono">${bbd(t[1])}</td></tr>`;
+  }).join('');
+  const days = d => d > 90 ? '90+' : d > 60 ? '61–90' : d > 30 ? '31–60' : '0–30';
+
+  el.innerHTML = `
+    <div class="card" style="margin-bottom:16px">
+      <h3><span class="dot"></span>Overlock position &middot; ${O.asof}</h3>
+      <div class="ppm-stat-row">
+        <div class="ppm-stat"><div class="k">Units overlocked</div><div class="v">${olN}</div><div class="d">${(100*olN/sum(r=>r.occupied)).toFixed(1)}% of occupied units</div></div>
+        <div class="ppm-stat"><div class="k">30+ days late</div><div class="v">${lateN}</div><div class="d">all of them overlocked</div></div>
+        <div class="ppm-stat"><div class="k">30+ owed</div><div class="v">${bbd(lateAmt)}</div><div class="d">${(100*lateAmt/rent).toFixed(1)}% of monthly rent</div></div>
+        <div class="ppm-stat"><div class="k">Locked under 30 days</div><div class="v">${olN-lateN}</div><div class="d">${bbd(sum(r=>r.olAmt)-lateAmt)} owed, not yet in the bonus measure</div></div>
+      </div>
+    </div>
+
+    <div class="card" style="margin-bottom:16px">
+      <h3><span class="dot"></span>Bonus by site &middot; six-month payout at today's position</h3>
+      <div style="overflow-x:auto"><table>
+        <thead><tr><th>Site</th><th class="r">Occupancy</th><th class="r">Overlocked</th><th class="r">30+ units</th><th class="r">30+ owed</th>
+          <th class="r">Monthly rent</th><th class="r">30+ arrears</th><th class="r">Draft</th><th class="r">Suggested</th><th class="r">Collect to move up</th></tr></thead>
+        <tbody>${rows.map(r=>`<tr><td style="font-weight:600">${r.name}</td>
+          <td class="r mono" title="${r.gateNote||''}">${r.occPct.toFixed(1)}%${r.gateNote?' *':''}</td>
+          <td class="r mono">${r.list.length}</td><td class="r mono">${r.late.length}</td><td class="r mono">${bbd(r.lateAmt)}</td>
+          <td class="r mono">${bbd(r.rent)}</td><td class="r mono"><b>${r.pct.toFixed(1)}%</b></td>
+          <td class="r mono">${bbd(r.draft)}</td><td class="r mono"><b>${bbd(r.sugg)}</b></td>
+          <td class="r mono">${r.nextPay ? `${bbd(r.toNext)} → ${bbd(r.nextPay)}` : 'top tier'}</td></tr>`).join('')}
+          <tr><td style="font-weight:800">Total</td><td></td><td class="r mono">${olN}</td><td class="r mono">${lateN}</td><td class="r mono">${bbd(lateAmt)}</td>
+          <td class="r mono">${bbd(rent)}</td><td class="r mono"><b>${(100*lateAmt/rent).toFixed(1)}%</b></td>
+          <td class="r mono">${bbd(sum(r=>r.draft))}</td><td class="r mono"><b>${bbd(sum(r=>r.sugg))}</b></td><td></td></tr>
+        </tbody>
+      </table></div>
+      <div class="note">All three sites meet the 98% gate. * ${rows.filter(r=>r.gateNote).map(r=>`${r.name}: ${r.gateNote}`).join('; ')}.
+        "Collect to move up" is how much 30+ debt must be cleared to reach the next suggested tier.</div>
+    </div>
+
+    <div class="grid g2" style="margin-bottom:16px">
+      <div class="card"><h3><span class="dot"></span>Draft scheme</h3>
+        <table><thead><tr><th>Live 30+ arrears</th><th class="r">Payout</th></tr></thead><tbody>${tierTxt('draft')}</tbody></table>
+        <div class="note">As first written, 3% to 5% had no tier (shown here as $1,750). Every site sits at the $1,225 floor, so the scheme pays the same whatever a manager does.</div></div>
+      <div class="card"><h3><span class="dot"></span>Suggested scheme</h3>
+        <table><thead><tr><th>Live 30+ arrears</th><th class="r">Payout</th></tr></thead><tbody>${tierTxt('suggested')}</tbody></table>
+        <div class="note">Gate unchanged: 98% average physical occupancy, new units exempt for 30 days, 50% of the payout below it. Tiers re-based so Central and Lears are one tier from $1,750 and South has a real reason to collect.</div></div>
+    </div>
+
+    <div class="card">
+      <h3><span class="dot"></span>Overlocked units</h3>
+      ${rows.map(r=>`<details class="tbl"><summary>${r.name} &middot; ${r.list.length} units &middot; ${bbd(r.olAmt)}</summary>
+        <table><thead><tr><th>Unit</th><th>Company</th><th class="r">Days late</th><th class="r">Balance</th></tr></thead>
+        <tbody>${r.list.map(x=>`<tr><td class="mono">${x.u}${x.never?' <span class="pill near">never-lock flag</span>':''}</td><td>${x.co||'—'}</td>
+          <td class="r mono">${days(x.days)}</td><td class="r mono">${bbd(x.bal)}</td></tr>`).join('')}</tbody></table></details>`).join('')}
+      <div class="note">South units 039 and 065 are flagged "never lock" in SiteLink but are overlocked. Fix one or the other.</div>
+    </div>`;
+}
+
 function renderAcquisition(){
   const el = document.getElementById('acquisitionBody');
   if(!el) return;
@@ -2496,6 +2624,7 @@ function render(){
   renderAcquisition();
   renderLeadFunnel();
   renderCustomerProfile();
+  renderBonus();
 
   STATE.cur = CUR;
 

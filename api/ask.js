@@ -25,6 +25,7 @@ Portfolio-wide sections (scope: portfolio — shown across all three sites):
   overview            — Portfolio summary: occupancy, rent, tenure, corp mix across all sites
   trends              — Month-over-month movement across every snapshot: occupancy, rent roll, tenure drift, 31+ arrears, autopay enrolled vs collected, collections series
   portfolio-payments  — Payment methods, autopay trend, collections status & delinquency watch (31+ days)
+  bonus               — Overlocked units, live 30+ day arrears % of rent, and facility manager bonus payouts (draft vs suggested scheme)
   acquisition         — How tenants were acquired: marketing source & contact channel
   lead-funnel         — Lead funnel / conversion
   profile             — Customer profile (SiteLink marketing summary)
