@@ -515,7 +515,7 @@ header:has(.csv-menu.open){overflow:visible}
         <div class="bignum" id="phys"></div><div class="cap">Physical occupancy — units filled</div>
         <div style="height:14px"></div>
         <div class="bignum" id="econ"></div><div class="cap">Economic occupancy — rent vs gross potential</div>
-        <div class="note">Near-identical figures mean almost no discounting; rent collected is close to full list price.</div>
+        <div class="note" id="econNote"></div>
         <div class="note" id="unrentableNote" style="display:none"></div>
         <div class="note" id="reconcileNote" style="display:none"></div>
       </div>
@@ -809,6 +809,58 @@ const LOCATIONS = {
             {label:"Plug & Pay",units:146,amount:43735.27,type:"autopay"},{label:"CIBC (bank transfer)",units:100,amount:43703.35,type:"online"},{label:"Website (Pay Now)",units:48,amount:15979.68,type:"online"},{label:"Cash",units:28,amount:11472.66,type:"manual"},{label:"Visa",units:28,amount:9840.79,type:"card"},{label:"Cheque",units:17,amount:7925.53,type:"manual"},{label:"Master Card",units:6,amount:2964.10,type:"card"},{label:"Republic (bank transfer)",units:3,amount:1750.00,type:"online"}
           ]
         }
+      },
+      "2026-09":{
+        asof:"2026-10-01",
+        label:"September 2026",
+        basis:"September close · rent roll pulled 1 Oct 2026",
+        totalUnits:461,
+        occupied:459,
+        vacant:0,
+        unrentable:2,
+        physOcc:99.6,
+        econOcc:95.1,
+        grossPot:124537,
+        occRent:118431,
+        totalArea:28627,
+        occArea:28507,
+        revpaf:4.14,
+        revOccSqft:4.15,
+        avgRentUnit:258.02,
+        movedIn:6,
+        movedOut:6,
+        net:0,
+        transfers:0,
+        byType:[{"t":"Indoor Storage","units":199,"occ":198,"pct":99.5},{"t":"Drive-Up Storage","units":189,"occ":188,"pct":99.5},{"t":"Climate Controlled","units":56,"occ":56,"pct":100.0},{"t":"Mailbox","units":16,"occ":16,"pct":100.0},{"t":"Mobile Storage","units":1,"occ":1,"pct":100.0}],
+        losMean:55.3,
+        losMedian:41.2,
+        losBands:{"<3 mo":21, "3–12 mo":66, "1–2 yr":65, "2–5 yr":130, "5 yr+":177},
+        corpUnits:126,
+        indivUnits:333,
+        corpPct:27.5,
+        corpRent:38375,
+        indivRent:80056,
+        corpRentPct:32.4,
+        corpArea:80,
+        indivArea:55,
+        corpLos:67.4,
+        indivLos:50.7,
+        top10:8.6,
+        geoIndiv:{"St. Michael":76, "Christ Church":74, "St. James":42, "St. Thomas":21, "St. Philip":21, "St. George":18, "Other Barbados":11, Overseas:50, Unknown:20},
+        indivN:333,
+        balUnits:26,
+        balPct:5.7,
+        balTotal:16597,
+        aging:{"Current / ahead":437, "1–30 days":14, "31–60 days":3, "61–90 days":0, "90+ days":5},
+        autopayPct:35.5,
+        collStatus:{period:"September 2026", occupied:459, paidCurrent:358, prepaid:79, offCycle:0, behind:22, behindNone:9, severe:8, amt:14169, basis:"Built from the 1 Oct rent roll joined to the 1–30 Sep receipts. A unit is behind when its paid-through date falls before 30 Sep, which is a ledger fact and does not move with the pull date. This close is measured one day after month end, where August's was measured a fortnight after, so some September payers who settle in the first days of October are still counted behind here."},
+        agingNote:"<b>Basis:</b> this pull is 1 Oct, the first day of the October cycle, so October rent is billed but almost none of it is collected yet — the 1–30 bucket reflects that, not new arrears. Compare <b>31+</b> across months, not 1–30.",
+        age:{valid:292, pct:64, mean:49, median:53, min:20, max:87, bands:{"<25":36, "25–34":49, "35–44":29, "45–54":48, "55–64":73, "65+":57}, female:260, male:188},
+        acquisition:{channels:{Phone:280, "Walk-in":59, Email:26, Web:7, "Not recorded":87}, recent:{n:87, Phone:52, "Walk-in":14, Email:10, Web:1, "Not recorded":10}},
+        marketing:{Internet:143, Referral:126, "Previous Tenant":67, "Drive-by":26, "Yellow Pages":40, "Online Yellow Pages":1, Brochure:5, Facebook:2, Other:48, Unknown:1},
+        keyAccounts:{tenants:409, multi:44, units:94, rent:26919, siteRent:118431, rentPct:22.7, avgMulti:612, avgSingle:251, tenureMulti:91.6, tenureSingle:36.6, arrMulti:0.0, arrSingle:2.2, apMultiPct:35.1, apSinglePct:35.6, apFull:13, apPart:3, apNone:28, email:44, emailBasis:"Email-on-file is not in the September rent-roll extract. August's contact-record export had an address for effectively every account, so this count assumes full reach; re-check it against the next contact export.", newTen:4, newUnits:8, newRent:2451, top:[{"u":4,"r":1694,"los":28,"ap":3,"com":0,"d31":0,"em":1},{"u":3,"r":1221,"los":46,"ap":0,"com":1,"d31":0,"em":1},{"u":3,"r":1136,"los":126,"ap":0,"com":1,"d31":0,"em":1},{"u":2,"r":911,"los":38,"ap":0,"com":1,"d31":0,"em":1},{"u":2,"r":911,"los":160,"ap":0,"com":1,"d31":0,"em":1},{"u":2,"r":911,"los":10,"ap":0,"com":1,"d31":0,"em":1},{"u":2,"r":847,"los":41,"ap":2,"com":1,"d31":0,"em":1},{"u":2,"r":847,"los":62,"ap":0,"com":0,"d31":0,"em":1},{"u":2,"r":783,"los":127,"ap":0,"com":0,"d31":0,"em":1},{"u":3,"r":783,"los":145,"ap":3,"com":0,"d31":0,"em":1},{"u":2,"r":783,"los":81,"ap":0,"com":1,"d31":0,"em":1},{"u":2,"r":774,"los":110,"ap":0,"com":1,"d31":0,"em":1}]},
+        paymentMethods:{period:"September 2026", note:"Tender types follow the June convention: SiteLink <b>Money Order</b> is the bank-app transfer bucket (CIBC), <b>Bank Transfer</b> (system-posted) is the website's Pay Now, and <b>Internet</b> is Republic. Account credits and applied refunds are excluded — they are not money collected.", methods:[{"label":"CIBC (bank transfer)","units":108,"amount":54126.91,"type":"online"},{"label":"Plug & Pay","units":153,"amount":46645.3,"type":"autopay"},{"label":"Website (Pay Now)","units":45,"amount":13384.59,"type":"online"},{"label":"Visa","units":23,"amount":10587.31,"type":"card"},{"label":"Cash","units":23,"amount":7263.23,"type":"manual"},{"label":"Cheque","units":16,"amount":7039.9,"type":"manual"},{"label":"Master Card","units":9,"amount":3194.81,"type":"card"},{"label":"Republic (bank transfer)","units":5,"amount":2375.0,"type":"online"}]},
+        reconcileNote:"<b>Rate change.</b> Standard rates rose by roughly $10 in September for new customers only; the rise for customers here more than a year is due from October. Gross potential moves to the new list at once while in-place rent does not, so economic occupancy steps down from August — that is the rate change, not lost rent."
       }
     }
   },
@@ -906,6 +958,58 @@ const LOCATIONS = {
             {label:"CIBC (bank transfer)",units:79,amount:31751.85,type:"online"},{label:"Website (Pay Now)",units:40,amount:18023.46,type:"online"},{label:"Plug & Pay",units:62,amount:16199.64,type:"autopay"},{label:"Cheque",units:13,amount:5483.55,type:"manual"},{label:"Cash",units:12,amount:4791.20,type:"manual"},{label:"Visa",units:6,amount:1712.38,type:"card"},{label:"Master Card",units:3,amount:1338.83,type:"card"}
           ]
         }
+      },
+      "2026-09":{
+        asof:"2026-10-01",
+        label:"September 2026",
+        basis:"September close · rent roll pulled 1 Oct 2026",
+        totalUnits:265,
+        occupied:263,
+        vacant:0,
+        unrentable:2,
+        physOcc:99.2,
+        econOcc:93.6,
+        grossPot:72058,
+        occRent:67443,
+        totalArea:17165,
+        occArea:16985,
+        revpaf:3.93,
+        revOccSqft:3.97,
+        avgRentUnit:256.44,
+        movedIn:4,
+        movedOut:3,
+        net:1,
+        transfers:0,
+        byType:[{"t":"Drive-Up Storage","units":188,"occ":186,"pct":98.9},{"t":"Indoor Storage","units":75,"occ":75,"pct":100.0},{"t":"Box Storage","units":2,"occ":2,"pct":100.0}],
+        losMean:41.1,
+        losMedian:28.7,
+        losBands:{"<3 mo":12, "3–12 mo":43, "1–2 yr":58, "2–5 yr":101, "5 yr+":49},
+        corpUnits:72,
+        indivUnits:191,
+        corpPct:27.4,
+        corpRent:22756,
+        indivRent:44687,
+        corpRentPct:33.7,
+        corpArea:89,
+        indivArea:55,
+        corpLos:46.1,
+        indivLos:39.3,
+        top10:16.0,
+        geoIndiv:{"St. Michael":24, "Christ Church":81, "St. James":8, "St. Thomas":2, "St. Philip":18, "St. George":4, "Other Barbados":8, Overseas:40, Unknown:6},
+        indivN:191,
+        balUnits:33,
+        balPct:12.5,
+        balTotal:13137,
+        aging:{"Current / ahead":240, "1–30 days":10, "31–60 days":6, "61–90 days":0, "90+ days":7},
+        autopayPct:29.3,
+        collStatus:{period:"September 2026", occupied:263, paidCurrent:198, prepaid:42, offCycle:0, behind:23, behindNone:12, severe:13, amt:12766, basis:"Built from the 1 Oct rent roll joined to the 1–30 Sep receipts. A unit is behind when its paid-through date falls before 30 Sep, which is a ledger fact and does not move with the pull date. This close is measured one day after month end, where August's was measured a fortnight after, so some September payers who settle in the first days of October are still counted behind here."},
+        agingNote:"<b>Basis:</b> this pull is 1 Oct, the first day of the October cycle, so October rent is billed but almost none of it is collected yet — the 1–30 bucket reflects that, not new arrears. Compare <b>31+</b> across months, not 1–30.",
+        age:{valid:234, pct:89, mean:55, median:55, min:20, max:94, bands:{"<25":9, "25–34":13, "35–44":29, "45–54":55, "55–64":85, "65+":43}, female:147, male:111},
+        acquisition:{channels:{Phone:112, "Walk-in":85, Email:14, Web:6, "Not recorded":46}, recent:{n:55, Phone:28, "Walk-in":14, Email:9, Web:0, "Not recorded":4}},
+        marketing:{Internet:79, Referral:52, "Previous Tenant":46, "Drive-by":30, "Yellow Pages":7, "Online Yellow Pages":0, Brochure:0, Facebook:3, Other:29, Unknown:17},
+        keyAccounts:{tenants:232, multi:19, units:50, rent:13551, siteRent:67443, rentPct:20.1, avgMulti:713, avgSingle:253, tenureMulti:43.7, tenureSingle:26.2, arrMulti:0.0, arrSingle:6.1, apMultiPct:16.0, apSinglePct:32.4, apFull:4, apPart:0, apNone:15, email:19, emailBasis:"Email-on-file is not in the September rent-roll extract. August's contact-record export had an address for effectively every account, so this count assumes full reach; re-check it against the next contact export.", newTen:1, newUnits:2, newRent:647, top:[{"u":6,"r":2281,"los":39,"ap":0,"com":1,"d31":0,"em":1},{"u":4,"r":1677,"los":43,"ap":0,"com":0,"d31":0,"em":1},{"u":6,"r":1481,"los":79,"ap":0,"com":1,"d31":0,"em":1},{"u":2,"r":783,"los":16,"ap":0,"com":1,"d31":0,"em":1},{"u":3,"r":783,"los":42,"ap":0,"com":1,"d31":0,"em":1},{"u":3,"r":745,"los":57,"ap":0,"com":1,"d31":0,"em":1},{"u":2,"r":702,"los":14,"ap":2,"com":0,"d31":0,"em":1},{"u":2,"r":655,"los":61,"ap":0,"com":1,"d31":0,"em":1},{"u":2,"r":647,"los":5,"ap":0,"com":0,"d31":0,"em":1},{"u":2,"r":557,"los":25,"ap":0,"com":0,"d31":0,"em":1},{"u":2,"r":545,"los":117,"ap":0,"com":0,"d31":0,"em":1},{"u":2,"r":500,"los":76,"ap":0,"com":1,"d31":0,"em":1}]},
+        paymentMethods:{period:"September 2026", note:"Tender types follow the June convention: SiteLink <b>Money Order</b> is the bank-app transfer bucket (CIBC), <b>Bank Transfer</b> (system-posted) is the website's Pay Now, and <b>Internet</b> is Republic. Account credits and applied refunds are excluded — they are not money collected.", methods:[{"label":"CIBC (bank transfer)","units":75,"amount":30557.4,"type":"online"},{"label":"Plug & Pay","units":60,"amount":15754.64,"type":"autopay"},{"label":"Website (Pay Now)","units":35,"amount":13235.76,"type":"online"},{"label":"Cash","units":18,"amount":6844.0,"type":"manual"},{"label":"Cheque","units":11,"amount":5382.09,"type":"manual"},{"label":"Visa","units":14,"amount":4323.54,"type":"card"},{"label":"Master Card","units":6,"amount":1764.39,"type":"card"}]},
+        reconcileNote:"<b>Rate change.</b> Standard rates rose by roughly $10 in September for new customers only; the rise for customers here more than a year is due from October. Gross potential moves to the new list at once while in-place rent does not, so economic occupancy steps down from August — that is the rate change, not lost rent."
       }
     }
   },
@@ -1006,36 +1110,88 @@ const LOCATIONS = {
             {label:"CIBC (bank transfer)",units:87,amount:52485.01,type:"online"},{label:"Plug & Pay",units:71,amount:29796.81,type:"autopay"},{label:"Website (Pay Now)",units:28,amount:14580.14,type:"online"},{label:"Visa",units:19,amount:12194.16,type:"card"},{label:"Cash",units:18,amount:9263.76,type:"manual"},{label:"Master Card",units:14,amount:7635.46,type:"card"},{label:"Cheque",units:8,amount:6533.17,type:"manual"},{label:"Republic (bank transfer)",units:4,amount:1822.77,type:"online"}
           ]
         }
+      },
+      "2026-09":{
+        asof:"2026-10-01",
+        label:"September 2026",
+        basis:"September close · rent roll pulled 1 Oct 2026",
+        totalUnits:293,
+        occupied:289,
+        vacant:1,
+        unrentable:3,
+        physOcc:98.6,
+        econOcc:94.6,
+        grossPot:105119,
+        occRent:99409,
+        totalArea:29048,
+        occArea:28768,
+        revpaf:3.42,
+        revOccSqft:3.46,
+        avgRentUnit:343.97,
+        movedIn:17,
+        movedOut:7,
+        net:10,
+        transfers:18,
+        byType:[{"t":"10x8","units":137,"occ":134,"pct":97.8},{"t":"20x8","units":82,"occ":82,"pct":100.0},{"t":"5x8","units":49,"occ":48,"pct":98.0},{"t":"8x8","units":8,"occ":8,"pct":100.0},{"t":"40x8","units":6,"occ":6,"pct":100.0},{"t":"Other","units":5,"occ":5,"pct":100.0},{"t":"8x10","units":4,"occ":4,"pct":100.0},{"t":"8x16","units":2,"occ":2,"pct":100.0}],
+        losMean:18.3,
+        losMedian:13.8,
+        losBands:{"<3 mo":53, "3–12 mo":85, "1–2 yr":62, "2–5 yr":85, "5 yr+":4},
+        corpUnits:86,
+        indivUnits:203,
+        corpPct:29.8,
+        corpRent:33928,
+        indivRent:65481,
+        corpRentPct:34.1,
+        corpArea:125,
+        indivArea:89,
+        corpLos:20.8,
+        indivLos:17.2,
+        top10:12.3,
+        geoIndiv:{"St. Michael":49, "Christ Church":25, "St. James":39, "St. Thomas":13, "St. Philip":12, "St. George":19, "Other Barbados":14, Overseas:21, Unknown:11},
+        indivN:203,
+        balUnits:20,
+        balPct:6.9,
+        balTotal:10457,
+        aging:{"Current / ahead":273, "1–30 days":8, "31–60 days":5, "61–90 days":0, "90+ days":3},
+        autopayPct:29.4,
+        collStatus:{period:"September 2026", occupied:289, paidCurrent:239, prepaid:34, offCycle:0, behind:16, behindNone:10, severe:8, amt:10351, basis:"Built from the 1 Oct rent roll joined to the 1–30 Sep receipts. A unit is behind when its paid-through date falls before 30 Sep, which is a ledger fact and does not move with the pull date. This close is measured one day after month end, where August's was measured a fortnight after, so some September payers who settle in the first days of October are still counted behind here."},
+        agingNote:"<b>Basis:</b> this pull is 1 Oct, the first day of the October cycle, so October rent is billed but almost none of it is collected yet — the 1–30 bucket reflects that, not new arrears. Compare <b>31+</b> across months, not 1–30.",
+        age:{valid:140, pct:48, mean:33, median:22, min:19, max:77, bands:{"<25":83, "25–34":10, "35–44":16, "45–54":10, "55–64":12, "65+":9}, female:161, male:118},
+        acquisition:{channels:{Phone:237, "Walk-in":8, Email:9, Web:4, "Not recorded":31}, recent:{n:138, Phone:115, "Walk-in":7, Email:6, Web:0, "Not recorded":10}},
+        marketing:{Internet:111, Referral:49, "Previous Tenant":56, "Drive-by":29, "Yellow Pages":11, "Online Yellow Pages":5, Brochure:0, Facebook:1, Other:27, Unknown:0},
+        keyAccounts:{tenants:248, multi:32, units:73, rent:24638, siteRent:99409, rentPct:24.8, avgMulti:770, avgSingle:346, tenureMulti:23.1, tenureSingle:12.4, arrMulti:3.1, arrSingle:2.8, apMultiPct:34.2, apSinglePct:27.8, apFull:10, apPart:2, apNone:20, email:32, emailBasis:"Email-on-file is not in the September rent-roll extract. August's contact-record export had an address for effectively every account, so this count assumes full reach; re-check it against the next contact export.", newTen:11, newUnits:26, newRent:9030, top:[{"u":4,"r":1821,"los":2,"ap":0,"com":0,"d31":0,"em":1},{"u":3,"r":1736,"los":42,"ap":0,"com":1,"d31":0,"em":1},{"u":4,"r":1566,"los":3,"ap":4,"com":1,"d31":0,"em":1},{"u":4,"r":1319,"los":61,"ap":2,"com":1,"d31":0,"em":1},{"u":2,"r":1281,"los":19,"ap":0,"com":1,"d31":0,"em":1},{"u":3,"r":911,"los":47,"ap":0,"com":1,"d31":0,"em":1},{"u":2,"r":911,"los":28,"ap":0,"com":1,"d31":0,"em":1},{"u":2,"r":911,"los":26,"ap":2,"com":0,"d31":0,"em":1},{"u":2,"r":911,"los":22,"ap":1,"com":0,"d31":0,"em":1},{"u":2,"r":911,"los":7,"ap":0,"com":0,"d31":0,"em":1},{"u":2,"r":783,"los":53,"ap":2,"com":1,"d31":0,"em":1},{"u":2,"r":783,"los":24,"ap":2,"com":1,"d31":0,"em":1}]},
+        paymentMethods:{period:"September 2026", note:"Tender types follow the June convention: SiteLink <b>Money Order</b> is the bank-app transfer bucket (CIBC), <b>Bank Transfer</b> (system-posted) is the website's Pay Now, and <b>Internet</b> is Republic. Account credits and applied refunds are excluded — they are not money collected.", methods:[{"label":"CIBC (bank transfer)","units":84,"amount":39291.97,"type":"online"},{"label":"Plug & Pay","units":73,"amount":30316.4,"type":"autopay"},{"label":"Website (Pay Now)","units":31,"amount":14294.26,"type":"online"},{"label":"Visa","units":25,"amount":13973.74,"type":"card"},{"label":"Cash","units":18,"amount":8917.43,"type":"manual"},{"label":"Master Card","units":17,"amount":7068.06,"type":"card"},{"label":"Cheque","units":9,"amount":6061.06,"type":"manual"},{"label":"Republic (bank transfer)","units":4,"amount":2135.0,"type":"online"}]},
+        reconcileNote:"<b>Rate change.</b> Standard rates rose by roughly $10 in September for new customers only; the rise for customers here more than a year is due from October. Gross potential moves to the new list at once while in-place rent does not, so economic occupancy steps down from August — that is the rate change, not lost rent. <b>Unit 250</b> is flagged out of service but carries a paying tenant ($446.81/mo); it is counted occupied here, as the rental activity report counts it."
       }
     }
   }
 };
 
-/* ===== Payment trend (from SiteLink receipts, Jan–Aug 2026 — complete months for all sites).
-   Occupied is the current (8 Sep) base, used as a fixed denominator across the series. ===== */
+/* ===== Payment trend (from SiteLink receipts, Jan–Sep 2026 — complete months for all sites).
+   Occupied is the current (1 Oct) base, used as a fixed denominator across the series. ===== */
 const PAYMENT_TREND = {
   year: 2026,
-  months: ["Jan","Feb","Mar","Apr","May","Jun","Jul","Aug"],
+  months: ["Jan","Feb","Mar","Apr","May","Jun","Jul","Aug","Sep"],
   sites: {
-    "Central": { occupied:459, autopay:[148,152,153,156,151,148,151,146], collections:[151228,155737,141049,150283,147142,146896,147819,137371] },
-    "South":   { occupied:263, autopay:[66,64,66,66,67,63,63,62],         collections:[80042,86055,89961,94520,86368,83348,84466,79301] },
-    "Lears":   { occupied:280, autopay:[54,55,58,58,61,63,65,71],         collections:[102215,96141,102042,88140,111669,108174,112273,134311] }
+    "Central":   { occupied:459, autopay:[148,152,153,156,151,148,151,146,153], collections:[151228,155737,141049,150283,147142,146896,147819,137371,144617] },
+    "South":     { occupied:263, autopay:[66,64,66,66,67,63,63,62,60],         collections:[80042,86055,89961,94520,86368,83348,84466,79301,77862] },
+    "Lears":     { occupied:289, autopay:[54,55,58,58,61,63,65,71,73],         collections:[102215,96141,102042,88140,111669,108174,112273,134311,122058] }
   }
 };
 
-/* ===== Acquisition channel × move-in year (portfolio occupied base at the 8 Sep pull;
-   2026 = Jan–Aug) ===== */
+/* ===== Acquisition channel × move-in year (portfolio occupied base at the 1 Oct pull;
+   2026 = Jan–Sep) ===== */
 const ACQ_COHORTS = {
   years:["≤2019","2020","2021","2022","2023","2024","2025","2026"],
-  partYear:"Jan–Aug",
+  partYear:"Jan–Sep",
   byChannel:{
-    "Phone":       [40,32,33,59,88,98,130,141],
-    "Walk-in":     [26,11,6,6,25,15,34,29],
-    "Email":       [3,4,1,1,3,5,13,20],
-    "Web":         [5,0,0,1,4,5,1,1],
-    "Not recorded":[71,3,5,15,10,22,22,14]
+    "Phone":        [40,32,33,58,88,97,128,153],
+    "Walk-in":      [26,11,6,6,25,15,34,29],
+    "Email":        [3,4,1,1,2,5,13,20],
+    "Web":          [5,0,0,1,4,5,1,1],
+    "Not recorded": [71,3,5,15,10,22,22,16]
   },
-  medianTenure:{ "Phone":2.0,"Walk-in":2.6,"Email":1.0,"Web":3.5,"Not recorded":4.6 }
+  medianTenure:{ "Phone":2.0,"Walk-in":2.7,"Email":1.0,"Web":3.6,"Not recorded":4.6 }
 };
 
 /* ===== Lead funnel (SiteLink Mgmt_InquiryTracking export, one workbook per site).
@@ -1070,25 +1226,25 @@ const LEAD_FUNNEL = {
   basis:"Leads placed 1 Jun – 31 Aug 2026, counted at the 8 Sep pull. Conversion is a closed-cohort rate: the same leads form both the numerator and the denominator. The August cohort is young but substantially mature — the median lead converts the same day it is placed, 88% of conversions land within 14 days and 94% within 30 — so it is not materially understated. The previous panel covered Jan–Jun on a different window, so treat the two as separate cohorts rather than a trend."
 };
 
-/* ===== Customer profile (SiteLink Marketing Summary, August 2026 pull; current active base,
+/* ===== Customer profile (SiteLink Marketing Summary, September 2026 pull; current active base,
    all 3 sites). Categories are collapsed from the raw export: `why` Other = Gate Hours +
    Cleanliness + Advertising + Security + Other; `distance` Overseas = Outside State +
    Outside Country; `reason` Other = Other + Marriage/Divorce + Estate; `what` Other =
    Other + Car. Unknown is excluded from each list, so the lists total less than `total`
    and every share is of tenants with the field recorded. ===== */
 const CUSTOMER_PROFILE = {
-  period:"August 2026", total:1002, resCom:{res:771,com:231},
-  why:[ {k:"Location",n:670}, {k:"Features",n:190}, {k:"Management",n:76}, {k:"Price",n:2}, {k:"Other",n:45} ],
-  distance:[ {k:"< 2 mi",n:28}, {k:"2–3 mi",n:177}, {k:"3–5 mi",n:220}, {k:"5–10 mi",n:373}, {k:"> 10 mi",n:52}, {k:"Overseas",n:134} ],
-  reason:[ {k:"Excess / declutter",n:346}, {k:"Moving",n:257}, {k:"Business needs",n:236}, {k:"Renovating",n:56}, {k:"Other",n:88} ],
-  what:[ {k:"Furniture / boxes",n:640}, {k:"Business inventory",n:161}, {k:"Business records",n:79}, {k:"Other",n:103} ],
-  season:[90,98,85,70,97,93,109,89,51,72,78,70],
+  period:"September 2026", total:1011, resCom:{res:777,com:234},
+  why:[ {k:"Location",n:669}, {k:"Features",n:199}, {k:"Management",n:76}, {k:"Price",n:2}, {k:"Other",n:46} ],
+  distance:[ {k:"< 2 mi",n:28}, {k:"2–3 mi",n:176}, {k:"3–5 mi",n:222}, {k:"5–10 mi",n:383}, {k:"> 10 mi",n:52}, {k:"Overseas",n:132} ],
+  reason:[ {k:"Excess / declutter",n:347}, {k:"Moving",n:261}, {k:"Business needs",n:240}, {k:"Renovating",n:55}, {k:"Other",n:89} ],
+  what:[ {k:"Furniture / boxes",n:645}, {k:"Business inventory",n:163}, {k:"Business records",n:80}, {k:"Other",n:104} ],
+  season:[90,96,82,70,96,92,106,86,75,71,78,69],
   sites:[
-    {name:"Central", res:353, com:108, locationPct:61},
-    {name:"South", res:204, com:58, locationPct:82},
-    {name:"Lears", res:214, com:65, locationPct:67}
+    {name:"Central", res:351, com:108, locationPct:61},
+    {name:"South", res:205, com:58, locationPct:77},
+    {name:"Lears", res:221, com:68, locationPct:65}
   ],
-  basis:"Base of 1,002 matches the 8 Sep rent-roll occupied count exactly. The per-site split does not: the Marketing Summary counts 461 / 262 / 279 ledgers at Central / South / Lears against 459 / 263 / 280 occupied units on the rent roll. The portfolio figures are sound; read the per-site rows as ±2 units."
+  basis:"Base of 1,011 matches the 1 Oct occupied count exactly, and so does the per-site split: the Marketing Summary counts 459 / 263 / 289 ledgers at Central / South / Lears, the same as the rental activity report."
 };
 
 /* ===== Delinquency watch — rolling 31+ days-past-due tracker (update on each rent-roll pull).
@@ -1104,21 +1260,21 @@ const CUSTOMER_PROFILE = {
    Mid-month this is progress, not a problem; it is here so the arrears count is not read as the
    whole picture. ===== */
 const CURRENT_CYCLE = {
-  period:"September 2026", asof:"14 Sep 2026", dayOfMonth:14,
+  period:"October 2026", asof:"1 Oct 2026", dayOfMonth:1,
   sites:[
-    {name:"Central", paid:412, owes:34, behind:15},
-    {name:"South",   paid:218, owes:30, behind:15},
-    {name:"Lears",   paid:248, owes:20, behind:11}
+    {name:"Central", paid:199, owes:238, behind:22},
+    {name:"South",   paid:89, owes:151, behind:23},
+    {name:"Lears",   paid:104, owes:169, behind:16}
   ]
 };
 
 const DELINQUENCY = {
-  asof:"rent-roll pull · 14 Sep 2026", prev:45, occupied:1003,
-  note:"Unchanged from the 12 Sep pull: the last receipt on this export is dated Saturday 12 Sep, so no payment has landed since. Occupied counts distinct units — the 12 Sep export carried a second open ledger row for four units mid-transfer, which this one does not.",
+  asof:"rent-roll pull · 1 Oct 2026", prev:41, occupied:1011,
+  note:"Same basis as the 14 Sep pull: a unit counts when its rent is paid through a date before 31 Aug, so it has missed at least August. Lears unit 250 is counted occupied although flagged out of service, as it carries a paying tenant.",
   sites:[
-    {name:"Central", n:15, severe:9, amt:18948},
-    {name:"South",   n:15, severe:8, amt:12752},
-    {name:"Lears",   n:11, severe:5, amt:10245}
+    {name:"Central", n:8, severe:5, amt:9517},
+    {name:"South",   n:13, severe:7, amt:10021},
+    {name:"Lears",   n:8, severe:3, amt:7408}
   ]
 };
 
@@ -1726,7 +1882,7 @@ function renderTrends(){
 
   el.innerHTML = `
     ${strip}
-    <div class="note" style="margin:2px 2px 14px"><b>Basis.</b> Central has four snapshots (May, June, July, August); South and Lears have three. Portfolio totals and the movement strip use only months every site reports, so they compare <b>July to August</b>. The pulls are not evenly spaced — 1 May, 30 June, 4 August and 8 September — which is why tenure drift is expressed per calendar month rather than per snapshot. <b>Arrears.</b> August's 31+ count is the close built from the 14 Sep roll joined to the August receipts, so it counts who still owed August a fortnight after month end. July's comes from the 4 Aug pull, three days after month end. Measuring later catches late payers, so part of the fall from July is timing rather than collection: on the same 8 Sep basis as the rest of the August snapshot the count was 45, and four of those cleared by 14 Sep.</div>
+    <div class="note" style="margin:2px 2px 14px"><b>Basis.</b> Central has five snapshots (May to September); South and Lears have four. Portfolio totals and the movement strip use only months every site reports, so they compare <b>August to September</b>. The pulls are not evenly spaced — 1 May, 30 June, 4 August, 8 September and 1 October — which is why tenure drift is expressed per calendar month rather than per snapshot. <b>Arrears.</b> September's 31+ count is the close built from the 1 Oct roll joined to the September receipts, one day after month end. August's was built from the 14 Sep roll, a fortnight after, so it had already caught late payers; part of the rise to September is timing rather than collection. <b>Rates.</b> Standard rates rose in September for new customers, which lifts gross potential and so lowers economic occupancy without any rent being lost.</div>
     <div class="grid g2">${occCard}${rentCard}</div>
     <div style="height:16px"></div>
     <div class="grid g2">${tenureCard}${dqCard}</div>
@@ -2526,6 +2682,10 @@ function render(){
   /* occupancy */
   document.getElementById('phys').innerHTML = CUR.physOcc+'<small>%</small>';
   document.getElementById('econ').innerHTML = CUR.econOcc+'<small>%</small>';
+  const gap = CUR.physOcc - CUR.econOcc;
+  document.getElementById('econNote').innerHTML = gap < 1.5
+    ? 'Near-identical figures mean almost no discounting; rent collected is close to full list price.'
+    : `A ${gap.toFixed(1)}-point gap: in-place rent sits below the current list rates on filled units.`;
   const unNote = document.getElementById('unrentableNote');
   if (CUR.unrentable) {
     const rentable = CUR.totalUnits - CUR.unrentable;
