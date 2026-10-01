@@ -1484,7 +1484,7 @@ function renderPortfolio(){
 
   document.getElementById('portfolioHero').innerHTML = `
     <div class="stat"><div class="k">Portfolio occupancy</div><div class="v">${P.physOcc.toFixed(1)}<small>%</small></div><div class="d">${Q?delta(P.physOcc,Q.physOcc,' pt'):''}${P.occupied} of ${P.totalUnits} units${P.unrentable?` · ${P.rentableOcc.toFixed(1)}% of rentable (${P.unrentable} out of service)`:''}</div></div>
-    <div class="stat"><div class="k">Monthly rent roll</div><div class="v" style="font-size:31px">${bbdk(P.occRent)}</div><div class="d">${Q?delta(pctChg(P.occRent,Q.occRent),0,'%'):''}${P.econOcc.toFixed(1)}% of ${bbdk(P.grossPot)} gross potential${vs}</div></div>
+    <div class="stat"><div class="k">Monthly rent roll</div><div class="v" style="font-size:31px">${bbdk(P.occRent)}</div><div class="d">${Q?delta(pctChg(P.occRent,Q.occRent),0,'%'):''}${bbd(P.occRent/P.occupied)} avg per unit${vs}</div></div>
     <div class="stat alt"><div class="k">31+ days late</div><div class="v">${cur?cur.d31:'—'}</div><div class="d">${(cur&&prv)?badDelta(cur.d31,prv.d31):''}accounts${vs} · ${cur?cur.d60:'—'} at 60+</div></div>
     <div class="stat"><div class="k">On autopay</div><div class="v">${cur?(100*cur.apUnits/cur.occupied).toFixed(0):'—'}<small>%</small></div><div class="d">${(cur&&prv)?delta(cur.apUnits,prv.apUnits,'',0):''}${cur?cur.apUnits:'—'} accounts${vs}</div></div>`;
 
@@ -1502,7 +1502,7 @@ function renderPortfolio(){
   const mostFull = [...P.sites].sort((a,b)=>b.data.physOcc-a.data.physOcc)[0];
   document.getElementById('portfolioRead').innerHTML = `
     <h4>Portfolio read</h4>
-    <p>The portfolio is effectively full at <b>${P.rentableOcc.toFixed(1)}% of rentable stock</b> (${P.physOcc.toFixed(1)}% of all units — ${P.unrentable||0} are out of service${P.unrentable?': '+P.sites.filter(s=>s.data.unrentable).map(s=>`${s.data.unrentable} at ${s.name}`).join(', '):''}), with <b>${bbd(P.occRent)}/mo</b> in current rent roll and <b>${P.econOcc.toFixed(1)}%</b> economic occupancy.</p>
+    <p>The portfolio is effectively full at <b>${P.rentableOcc.toFixed(1)}% of rentable stock</b> (${P.physOcc.toFixed(1)}% of all units — ${P.unrentable||0} are out of service${P.unrentable?': '+P.sites.filter(s=>s.data.unrentable).map(s=>`${s.data.unrentable} at ${s.name}`).join(', '):''}), with <b>${bbd(P.occRent)}/mo</b> in current rent roll.</p>
     <p><b>${mostFull.name}</b> is the most capacity-constrained site; <b>${topRent.name}</b> contributes the largest rent roll; <b>${youngest.name}</b> has the youngest tenant base and the clearest room to mature.</p>
     <p>The split is still mostly individual-led: <b>${P.indivUnits}</b> individual units versus <b>${P.corpUnits}</b> corporate units, while corporate customers contribute a higher share of rent than units.</p>`;
 
@@ -1743,10 +1743,7 @@ function renderTrends(){
       ${tableTwin(`<table>${head('Δ')}<tbody>
         ${rows(m=>bbdk(m.occRent), (a,b)=>arrow(pctChg(b.occRent,a.occRent),1,'%'))}
       </tbody></table>`)}
-      <div class="note">Economic occupancy on the latest pull is ${T.sites.map(s=>{
-        const last = s.L.months[T.keys.filter(k=>s.L.months[k]).pop()];
-        return `${s.name} ${last.econOcc.toFixed(1)}%`;
-      }).join(', ')} — every site is collecting close to full list price, so rent-roll movement is coming from <b>unit count</b>, not from pricing or discounting.</div>
+      <div class="note">Rent-roll movement follows occupied units and in-place rent. Potential rent and the gap to list rates sit on the Occupancy and Rate management pages.</div>
     </div>`;
 
   /* ---------- tenure drift: months of tenure added per calendar month ---------- */
@@ -2675,7 +2672,7 @@ function render(){
   /* hero */
   document.getElementById('hero').innerHTML = `
     <div class="stat"><div class="k">Physical occupancy</div><div class="v">${CUR.physOcc}<small>%</small></div><div class="d">${CUR.occupied} of ${CUR.totalUnits} units filled</div></div>
-    <div class="stat"><div class="k">Monthly rent roll</div><div class="v" style="font-size:31px">${bbdk(CUR.occRent)}</div><div class="d">${(CUR.econOcc).toFixed(0)}% of gross potential</div></div>
+    <div class="stat"><div class="k">Monthly rent roll</div><div class="v" style="font-size:31px">${bbdk(CUR.occRent)}</div><div class="d">${bbd(CUR.avgRentUnit)} avg per unit</div></div>
     <div class="stat alt"><div class="k">Median tenure</div><div class="v">${(CUR.losMedian/12).toFixed(1)}<small>yr</small></div><div class="d">mean ${(CUR.losMean/12).toFixed(1)} yr</div></div>
     <div class="stat"><div class="k">Corporate share</div><div class="v">${CUR.corpPct.toFixed(0)}<small>%</small></div><div class="d">of units &middot; ${CUR.corpRentPct.toFixed(0)}% of revenue</div></div>`;
 
