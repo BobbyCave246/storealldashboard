@@ -2810,7 +2810,7 @@ function render(){
 
   /* financial */
   document.getElementById('finrow').innerHTML = `
-    <div class="card"><h3><span class="dot"></span>RevPAF</h3><div class="bignum">$${CUR.revpaf.toFixed(2)}<small> /sf</small></div><div class="cap">Revenue per available sq ft — the blended performance metric</div></div>
+    <div class="card"><h3><span class="dot"></span>RevPAF</h3><div class="bignum">$${CUR.revpaf.toFixed(2)}<small> /sf/mo</small></div><div class="cap"><b>$${(CUR.revpaf*12).toFixed(2)} /sf/yr</b> &middot; revenue per available sq ft, the blended performance metric</div></div>
     <div class="card"><h3><span class="dot"></span>Revenue / occupied sq ft</h3><div class="bignum">$${CUR.revOccSqft.toFixed(2)}<small> /sf</small></div><div class="cap">Pricing power, stripping out occupancy</div></div>
     <div class="card"><h3><span class="dot"></span>Avg rent / occupied unit</h3><div class="bignum">$${CUR.avgRentUnit.toFixed(0)}</div><div class="cap">Across ${CUR.occupied} occupied units &middot; ${bbd(CUR.occRent)}/mo total</div></div>`;
 }
