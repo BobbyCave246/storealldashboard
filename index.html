@@ -431,6 +431,15 @@ header:has(.csv-menu.open){overflow:visible}
   </section>
   </div>
 
+  <!-- PANEL: GROWTH -->
+  <div class="panel" data-section="growth">
+  <section>
+    <div class="sec-head"><div class="sec-num">+</div><h2>Growth &mdash; the three core numbers</h2>
+      <p>What each sq ft earns, what it keeps, and what it costs to add new revenue.</p></div>
+    <div id="growthBody"></div>
+  </section>
+  </div>
+
   <!-- PANEL: TRENDS -->
   <div class="panel" data-section="trends">
   <section>
@@ -1290,6 +1299,7 @@ const delta = (cur,prev,unit="",dp=1) => {
 const SECTIONS = [
   {id:'overview',           label:'Summary',           scope:'portfolio'},
   {id:'trends',             label:'Trends',            scope:'portfolio'},
+  {id:'growth',             label:'Growth',            scope:'portfolio'},
   {id:'portfolio-payments', label:'Portfolio payments',scope:'portfolio'},
   {id:'rates',              label:'Rate management',   scope:'site'},
   {id:'payments',           label:'Site payments',     scope:'site'},
@@ -1306,7 +1316,7 @@ const SECTIONS = [
 /* Four top-level groups. Each holds a list of views (SECTIONS ids); the view decides
    whether the site and month pickers show. */
 const GROUPS = [
-  {id:'overview',  label:'Overview',    views:['overview','trends']},
+  {id:'overview',  label:'Overview',    views:['overview','trends','growth']},
   {id:'money',     label:'Money',       views:['portfolio-payments','rates','payments']},
   {id:'customers', label:'Customers',   views:['acquisition','lead-funnel','profile','segmentation','geography','demographics']},
   {id:'site',      label:'Site detail', views:['occupancy','tenure']}
@@ -1507,6 +1517,7 @@ function renderPortfolio(){
     <p>The split is still mostly individual-led: <b>${P.indivUnits}</b> individual units versus <b>${P.corpUnits}</b> corporate units, while corporate customers contribute a higher share of rent than units.</p>`;
 
   renderPortfolioPayments();
+  renderGrowth();
 }
 
 function renderPaymentTrend(){
@@ -1887,6 +1898,48 @@ function renderTrends(){
     <div class="grid g2">${apCard}${collCard}</div>
     <div style="height:16px"></div>
     ${analysis}`;
+}
+
+/* ===== Growth — Revenue / sq ft, EBITDA / sq ft, capital cost per $1 of new annual revenue.
+   Expenses are a placeholder until real P&L figures land: one business-wide monthly total,
+   split across sites by share of total area. Capital projects go in CAPEX as they happen. ===== */
+const OPEX_MONTHLY = 150000;   // BBD, whole business, placeholder
+const CAPEX = [];              // {name, date, cost, annualRevenue} per expansion or upgrade
+
+function renderGrowth(){
+  const el = document.getElementById('growthBody'); if(!el) return;
+  const P = portfolioSummary();
+  const yr = v => '$'+v.toFixed(2);
+  const rev = P.occRent*12/P.totalArea, ebitda = (P.occRent-OPEX_MONTHLY)*12/P.totalArea;
+  const margin = 100*(P.occRent-OPEX_MONTHLY)/P.occRent;
+  const capCost = CAPEX.reduce((t,c)=>t+c.cost,0), capRev = CAPEX.reduce((t,c)=>t+c.annualRevenue,0);
+  const capCard = capRev
+    ? `<div class="bignum">$${(capCost/capRev).toFixed(2)}</div><div class="cap">Capital spent per $1 of annual revenue added, across ${CAPEX.length} project${CAPEX.length===1?'':'s'}</div>`
+    : `<div class="bignum">&mdash;</div><div class="cap">Capital spent per $1 of annual revenue added. No projects logged yet: add each expansion's cost and the annual rent it brings in.</div>`;
+  const rows = P.sites.map(s=>{
+    const d=s.data, opex=OPEX_MONTHLY*d.totalArea/P.totalArea;
+    return `<tr><td>${s.name}</td><td class="r mono">${d.totalArea.toLocaleString()}</td><td class="r mono">${yr(d.occRent*12/d.totalArea)}</td><td class="r mono">${yr((d.occRent-opex)*12/d.totalArea)}</td><td class="r mono">${(100*(d.occRent-opex)/d.occRent).toFixed(0)}%</td></tr>`;
+  }).join('');
+  const months = [...new Set(Object.values(LOCATIONS).flatMap(L=>Object.keys(L.months)))].sort()
+    .filter(mk=>Object.values(LOCATIONS).every(L=>L.months[mk]));
+  const trend = months.map(mk=>{
+    const ms = Object.values(LOCATIONS).map(L=>L.months[mk]);
+    const r = ms.reduce((t,m)=>t+m.occRent,0), a = ms.reduce((t,m)=>t+m.totalArea,0);
+    return `<tr><td>${ms[0].label}</td><td class="r mono">${a.toLocaleString()}</td><td class="r mono">${yr(r*12/a)}</td><td class="r mono">${yr((r-OPEX_MONTHLY)*12/a)}</td></tr>`;
+  }).join('');
+  el.innerHTML = `
+    <div class="grid g3">
+      <div class="card"><h3><span class="dot"></span>Revenue / sq ft / yr</h3><div class="bignum">${yr(rev)}</div><div class="cap">${bbd(P.occRent)}/mo rent roll &times; 12 over ${P.totalArea.toLocaleString()} sq ft</div></div>
+      <div class="card"><h3><span class="dot"></span>EBITDA / sq ft / yr</h3><div class="bignum">${yr(ebitda)}</div><div class="cap">${margin.toFixed(0)}% margin after ${bbd(OPEX_MONTHLY)}/mo operating costs (placeholder)</div></div>
+      <div class="card"><h3><span class="dot"></span>Capital cost / $1 new revenue</h3>${capCard}</div>
+    </div>
+    <div class="grid g2" style="margin-top:16px">
+      <div class="card"><h3><span class="dot"></span>By site &middot; latest month</h3>
+        <table><thead><tr><th>Site</th><th class="r">Sq ft</th><th class="r">Rev /sf/yr</th><th class="r">EBITDA /sf/yr</th><th class="r">Margin</th></tr></thead><tbody>${rows}</tbody></table></div>
+      <div class="card"><h3><span class="dot"></span>Portfolio by month</h3>
+        <table><thead><tr><th>Month</th><th class="r">Sq ft</th><th class="r">Rev /sf/yr</th><th class="r">EBITDA /sf/yr</th></tr></thead><tbody>${trend}</tbody></table></div>
+    </div>
+    <div class="note">Sq ft is total area: out-of-service area isn't tracked yet, so true rentable figures run slightly higher. Operating costs are a placeholder of ${bbd(OPEX_MONTHLY)}/mo for the whole business, split across sites by area, until real P&amp;L figures are added.</div>`;
 }
 
 function renderPortfolioPayments(){
