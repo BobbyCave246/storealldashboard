@@ -212,6 +212,10 @@ details.headline .hl-empty{padding:0 22px 20px}
 .rate-ctl{display:grid;grid-template-columns:repeat(4,1fr);gap:14px;margin:6px 0 16px}
 .rate-ctl label{display:block;font-family:'Montserrat';font-weight:800;font-size:10.5px;text-transform:uppercase;letter-spacing:.1em;color:var(--muted);margin-bottom:6px}
 .rate-ctl input[type=range]{width:100%;accent-color:var(--accent)}
+.dev-ins{display:grid;grid-template-columns:repeat(auto-fit,minmax(150px,1fr));gap:12px;margin-bottom:14px}
+.dev-ins label{font-size:12px;color:var(--muted);display:flex;flex-direction:column;gap:4px}
+.dev-ins input{font:inherit;font-size:15px;color:var(--ink);background:var(--paper2);border:1px solid var(--line);border-radius:6px;padding:6px 8px;width:100%;box-sizing:border-box}
+.dev-stats{display:grid;grid-template-columns:repeat(auto-fit,minmax(170px,1fr));gap:12px}
 .rate-ctl select{width:100%;font-family:'Source Sans 3',sans-serif;font-size:13px;padding:6px 8px;border:1px solid var(--line);border-radius:7px;background:var(--card);color:var(--ink)}
 .rate-ctl .val{font-family:'Montserrat';font-weight:800;font-size:15px;color:var(--navy2)}
 .rate-out{display:grid;grid-template-columns:repeat(3,1fr);gap:14px}
@@ -1939,7 +1943,46 @@ function renderGrowth(){
       <div class="card"><h3><span class="dot"></span>Portfolio by month</h3>
         <table><thead><tr><th>Month</th><th class="r">Sq ft</th><th class="r">Rev /sf/yr</th><th class="r">EBITDA /sf/yr</th></tr></thead><tbody>${trend}</tbody></table></div>
     </div>
-    <div class="note">Sq ft is total area: out-of-service area isn't tracked yet, so true rentable figures run slightly higher. Operating costs are a placeholder of ${bbd(OPEX_MONTHLY)}/mo for the whole business, split across sites by area, until real P&amp;L figures are added.</div>`;
+    <div class="note">Sq ft is total area: out-of-service area isn't tracked yet, so true rentable figures run slightly higher. Operating costs are a placeholder of ${bbd(OPEX_MONTHLY)}/mo for the whole business, split across sites by area, until real P&amp;L figures are added.</div>
+    <div style="border-top:1px solid var(--line);margin:24px 0 6px"></div>
+    <div style="font-family:'Montserrat';font-weight:800;text-transform:uppercase;letter-spacing:.1em;font-size:12px;color:var(--muted);margin:6px 0 12px">Planned: new Lears building &middot; return on capital</div>
+    <div class="card"><div class="dev-ins">
+      ${[['sqft','Rentable sq ft',500],['cost','Project cost (BBD)',100000],['rate','Rent /sf/mo',0.01],['margin','EBITDA margin %',1]].map(([k,l,st])=>
+        `<label>${l}<input type="number" step="${st}" value="${DEV[k]}" oninput="DEV.${k}=+this.value||0;renderDev()"></label>`).join('')}
+    </div><div id="devOut"></div></div>`;
+  renderDev();
+}
+
+/* Development calculator. Rentable sq ft is a guess until the plans confirm it. */
+const DEV = { sqft:20000, cost:6000000, rate:5.82, margin:65 };
+const TARGET_MONTHLY = 1000000;
+
+function renderDev(){
+  const el = document.getElementById('devOut'); if(!el) return;
+  const {sqft, cost, rate, margin} = DEV, m = margin/100;
+  const revYr = sqft*rate*12, ebitda = revYr*m, ebitdaSf = rate*12*m;
+  const yld = cost ? 100*ebitda/cost : 0;
+  const grade = yld>=15 ? 'very strong' : yld>=12 ? 'attractive' : yld>=10 ? 'decent' : 'below 10%';
+  const now = portfolioSummary().occRent, after = now + sqft*rate;
+  const x = v => isFinite(v) ? v.toFixed(1)+'&times;' : '&mdash;';
+  const tiles = [
+    ['Annual revenue', bbd(revYr), `${bbd(sqft*rate)}/mo at $${rate.toFixed(2)}/sf/mo`],
+    ['Stabilised EBITDA', bbd(ebitda), `$${ebitdaSf.toFixed(2)}/sf/yr at ${margin}% margin`],
+    ['Development yield', yld.toFixed(1)+'%', `EBITDA &divide; cost &middot; ${grade}`],
+    ['Cost / $1 revenue', x(cost/revYr), `$${(cost/sqft).toFixed(0)} per rentable sq ft`],
+    ['Cost / $1 EBITDA', x(cost/ebitda), `Payback about ${(cost/ebitda).toFixed(1)} years`],
+    ['Toward $1M/month', (100*after/TARGET_MONTHLY).toFixed(0)+'%', `${bbd(now)} today &rarr; ${bbd(after)}/mo once full`]
+  ].map(([k,v,d])=>`<div class="stat"><div class="k">${k}</div><div class="v">${v}</div><div class="d">${d}</div></div>`).join('');
+  const need = [10,12,15,20].map(t=>`<tr><td>${t}% yield</td><td class="r mono">${Math.ceil(cost*t/100/ebitdaSf).toLocaleString()} sq ft</td></tr>`).join('');
+  const sizes = [10000,15000,20000,25000,30000].map(a=>{const r=a*rate*12;
+    return `<tr${a===sqft?' style="background:var(--paper2)"':''}><td class="mono">${a.toLocaleString()}</td><td class="r mono">${bbd(r)}</td><td class="r mono">$${(cost/a).toFixed(0)}</td><td class="r mono">${(100*r/cost).toFixed(1)}%</td><td class="r mono">${(100*r*m/cost).toFixed(1)}%</td></tr>`;}).join('');
+  el.innerHTML = `<div class="dev-stats">${tiles}</div>
+    <div class="grid g2" style="margin-top:14px">
+      <div><table><thead><tr><th>Rentable sq ft</th><th class="r">Annual rev</th><th class="r">Cost /sf</th><th class="r">Rev yield</th><th class="r">EBITDA yield</th></tr></thead><tbody>${sizes}</tbody></table></div>
+      <div><table><thead><tr><th>To reach</th><th class="r">Rentable sq ft needed</th></tr></thead><tbody>${need}</tbody></table>
+      <div class="note">Rough guide: 10% decent, 12&ndash;15% attractive, 15%+ very strong. If built EBITDA costs less than the multiple a finished storage site sells for, building creates value.</div></div>
+    </div>
+    <div class="note">Sq ft defaults to 20,000 as an example: enter the real rentable area once the plans confirm it. Figures assume a full, stabilised building. Today's portfolio margin on the placeholder costs is lower than 65%.</div>`;
 }
 
 function renderPortfolioPayments(){
